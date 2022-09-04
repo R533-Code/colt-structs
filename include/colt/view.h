@@ -10,6 +10,8 @@ namespace colt {
   /// @tparam T The type of the objects
   class ContiguousView
   {
+    static_assert(!is_tag_v<T>, "Cannot use tag struct as typename!");
+
     /// @brief Pointer to the beginning of the view
     const T* begin_ptr;
     /// @brief Count of items in the view
@@ -41,11 +43,11 @@ namespace colt {
     /// @brief Default trivial copy-assignment operator
     /// @param  ContiguousView to copy
     /// @return Self
-    constexpr const ContiguousView& operator=(ContiguousView&&) noexcept = default;
+    constexpr ContiguousView& operator=(ContiguousView&&) noexcept = default;
     /// @brief Default trivial move-assignment operator
     /// @param  ContiguousView to move
     /// @return Self
-    constexpr const ContiguousView& operator=(const ContiguousView&) noexcept = default;
+    constexpr ContiguousView& operator=(const ContiguousView&) noexcept = default;
 
     /*********************************
     *           METHODS
