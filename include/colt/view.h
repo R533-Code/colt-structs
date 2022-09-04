@@ -183,7 +183,7 @@ namespace colt {
   {
     size_t begin = range.getBeginOffset();
     size_t end = range.getEndOffset();
-    end = (end == RangeEnd::value ? size : end);
+    end = (end == RangeEndT::value ? size : end);
     
     assert(end < size && "End of range should be smaller than size of view!");
 

@@ -86,25 +86,25 @@ namespace colt {
 	*********************************/
 
 	/// @brief Tag structure for a Range with no beginning offset
-	struct RangeBegin { static constexpr size_t value = 0; };
+	struct RangeBeginT { static constexpr size_t value = 0; };
 	/// @brief Tag structure for a Range with no end offset
-	struct RangeEnd { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
+	struct RangeEndT { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
 
 	/// @brief Tag object for a Range with no beginning offset
-	constexpr const RangeBegin Begin;
+	constexpr const RangeBeginT Begin;
 	/// @brief Tag object for a Range with no end offset
-	constexpr const RangeEnd End;
+	constexpr const RangeEndT End;
 
 	/// @brief Symbolizes a range used for splicing views.
 	/// A Range contains 2 fields: the offset to the beginning of the view,
 	/// and the offset to the end of the view.
 	/// As we would like a range to be able to represent the whole view without
 	/// having to store the exact size of the view, a special value of the end offset
-	/// (RangeEnd::value) is used to represents that end.
+	/// (RangeEndT::value) is used to represents that end.
 	class Range
 	{
-		size_t begin = RangeBegin::value;
-		size_t end = RangeEnd::value;
+		size_t begin = RangeBeginT::value;
+		size_t end = RangeEndT::value;
 
 	public:
 
@@ -120,18 +120,18 @@ namespace colt {
 			: begin(0), end(0) {}
 
 		/// @brief Constructs a Range that represents a whole Range.
-		/// Same as Range(RangeBegin).
-		/// @param  RangeBegin
-		/// @param  RangeEnd
-		constexpr Range(RangeBegin, RangeEnd) noexcept {}
+		/// Same as Range(RangeBeginT).
+		/// @param  RangeBeginT
+		/// @param  RangeEndT
+		constexpr Range(RangeBeginT, RangeEndT) noexcept {}
 		
 		/// @brief Constructs a Range that represents a whole Range.
-		/// Same as Range(RangeBegin, RangeEnd).
-		/// @param  RangeBegin
-		constexpr Range(RangeBegin) noexcept {}
+		/// Same as Range(RangeBeginT, RangeEndT).
+		/// @param  RangeBeginT
+		constexpr Range(RangeBeginT) noexcept {}
 
 		/// @brief Constructs a Range from begin, till end of Range.
-		/// Same as Range(size_t, RangeEnd).
+		/// Same as Range(size_t, RangeEndT).
 		/// @param begin The index to the beginning of the Range
 		constexpr Range(size_t begin) noexcept
 			: begin(begin) {}
@@ -139,14 +139,14 @@ namespace colt {
 		/// @brief Constructs a Range from begin, till end of Range.
 		/// Same as Range(size_t).
 		/// @param begin The index to the beginning of the Range
-		/// @param  RangeEnd
-		constexpr Range(size_t begin, RangeEnd) noexcept
+		/// @param  RangeEndT
+		constexpr Range(size_t begin, RangeEndT) noexcept
 			: begin(begin) {}
 
 		/// @brief Constructs a Range from the beginning to 'end'
-		/// @param  RangeBegin
+		/// @param  RangeBeginT
 		/// @param end The end of the Range
-		constexpr Range(RangeBegin, size_t end) noexcept
+		constexpr Range(RangeBeginT, size_t end) noexcept
 			: end(end) {}
 
 		/// @brief Check if the Range represents an empty view
@@ -155,7 +155,7 @@ namespace colt {
 		
 		/// @brief Check if the Range represents the whole view
 		/// @return True if the Range represents the whole view
-		constexpr bool isAll() const noexcept { return begin == RangeBegin::value && end == RangeEnd::value; }
+		constexpr bool isAll() const noexcept { return begin == RangeBeginT::value && end == RangeEndT::value; }
 
 		/// @brief Get the size of the Range
 		/// @return Size of the Range
@@ -166,7 +166,7 @@ namespace colt {
 		constexpr size_t getBeginOffset() const noexcept { return begin; }
 
 		/// @brief Get the offset to the beginning of the range
-		/// @return The offset to the end or RangeEnd::value for end of view
+		/// @return The offset to the end or RangeEndT::value for end of view
 		constexpr size_t getEndOffset() const noexcept { return end; }
 
 		/// @brief Returns an empty Range.
