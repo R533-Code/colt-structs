@@ -2,8 +2,11 @@
 #define HG_COLT_COMMON
 
 #include <cassert>
+#include <cstring>
+
 #include <type_traits>
 #include <limits>
+#include <memory>
 
 /// @brief Contains all colt provided utilities
 namespace colt {	
@@ -183,15 +186,65 @@ namespace colt {
 	* COMMON TRAITS AND HELPERS
 	*********************************/
 
+	/// @brief Tag for constructing in place
+	struct InPlaceT {};
+	/// @brief Tag object for constructing in place
+	constexpr const InPlaceT InPlace;
+
+	/// @brief Tag for empty Optional
+	struct NoneT {};
+	/// @brief Tag object for empty Optional
+	constexpr const NoneT None;
+
 	template<typename T>
 	/// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
 	/// @tparam T The type to copy
-	struct copy_if_trivial { using type = std::conditional_t<std::is_trivial<T>, T, const T&>; };
+	struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, T, const T&>; };
 
 	template<typename T>
 	/// @brief Short hand for copy_if_trivial::type
 	/// @tparam T The type to copy
-	using copy_if_trivial_t = copy_if_trivial<T>::type;
+	using copy_if_trivial_t = typename copy_if_trivial<T>::type;
+
+	template<typename T>
+	struct is_tag { static constexpr bool value = false; };
+
+	template<>
+	struct is_tag<InPlaceT> { static constexpr bool value = true; };
+
+	template<>
+	struct is_tag<RangeBeginT> { static constexpr bool value = true; };
+
+	template<>
+	struct is_tag<RangeEndT> { static constexpr bool value = true; };
+
+	template<>
+	struct is_tag<NoneT> { static constexpr bool value = true; };
+
+	template<typename T>
+	static constexpr bool is_tag_v = is_tag<T>::value;
+
+	/*********************************
+	* HELPER FUNCTIONS
+	*********************************/
+
+	template<typename To, typename From>
+	/// @brief Bit casts a value from 'From' to 'To'
+	/// @tparam To The type to cast to
+	/// @tparam From The type to cast from
+	/// @param from The value to bit cast from
+	/// @return The bit casted value
+	To bit_cast(const From& from) noexcept
+	{
+		static_assert(sizeof(To) == sizeof(From),
+			"sizeof(To) should be equal to sizeof(From)!");
+		static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
+			"Both types should be trivially copyable!");
+
+		To to_ret;
+		std::memcpy(&to_ret, &from, sizeof(To));
+		return to_ret;
+	}
 }
 
 #endif //!HG_COLT_COMMON
