@@ -12,3 +12,7 @@ add_executable(colt_test
 	${ColtHeaders}
 	"testing/main.cpp"
 )
+
+target_include_directories(colt_test PUBLIC
+	"include"
+)
