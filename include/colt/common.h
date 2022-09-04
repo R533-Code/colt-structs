@@ -2,10 +2,16 @@
 #define HG_COLT_COMMON
 
 #include <cassert>
+#include <type_traits>
+#include <limits>
 
 /// @brief Contains all colt provided utilities
 namespace colt {	
 	
+	/*********************************
+	* BYTE SIZES AND LITERALS
+	*********************************/
+
 	/// @brief Represents a size in bytes
 	struct ByteSize
 	{
@@ -74,6 +80,118 @@ namespace colt {
 	/// @param size The size to convert
 	/// @return GigaByteSize of size 'size'
 	constexpr ByteSize operator"" _GB(size_t size) noexcept { return { size }; }
+
+	/*********************************
+	* RANGES TYPES FOR SPLICING
+	*********************************/
+
+	/// @brief Tag structure for a Range with no beginning offset
+	struct RangeBegin { static constexpr size_t value = 0; };
+	/// @brief Tag structure for a Range with no end offset
+	struct RangeEnd { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
+
+	/// @brief Tag object for a Range with no beginning offset
+	constexpr const RangeBegin Begin;
+	/// @brief Tag object for a Range with no end offset
+	constexpr const RangeEnd End;
+
+	/// @brief Symbolizes a range used for splicing views.
+	/// A Range contains 2 fields: the offset to the beginning of the view,
+	/// and the offset to the end of the view.
+	/// As we would like a range to be able to represent the whole view without
+	/// having to store the exact size of the view, a special value of the end offset
+	/// (RangeEnd::value) is used to represents that end.
+	class Range
+	{
+		size_t begin = RangeBegin::value;
+		size_t end = RangeEnd::value;
+
+	public:
+
+		/// @brief Constructs a Range.
+		/// Precondition: begin <= end
+		/// @param begin The index to the beginning of the Range
+		/// @param end The index to the end of the Range
+		constexpr Range(size_t begin, size_t end) noexcept
+			: begin(begin), end(end) { assert(begin <= end && "Invalid Range!"); }
+		
+		/// @brief Constructs a Range that represents an empty Range
+		constexpr Range() noexcept
+			: begin(0), end(0) {}
+
+		/// @brief Constructs a Range that represents a whole Range.
+		/// Same as Range(RangeBegin).
+		/// @param  RangeBegin
+		/// @param  RangeEnd
+		constexpr Range(RangeBegin, RangeEnd) noexcept {}
+		
+		/// @brief Constructs a Range that represents a whole Range.
+		/// Same as Range(RangeBegin, RangeEnd).
+		/// @param  RangeBegin
+		constexpr Range(RangeBegin) noexcept {}
+
+		/// @brief Constructs a Range from begin, till end of Range.
+		/// Same as Range(size_t, RangeEnd).
+		/// @param begin The index to the beginning of the Range
+		constexpr Range(size_t begin) noexcept
+			: begin(begin) {}
+
+		/// @brief Constructs a Range from begin, till end of Range.
+		/// Same as Range(size_t).
+		/// @param begin The index to the beginning of the Range
+		/// @param  RangeEnd
+		constexpr Range(size_t begin, RangeEnd) noexcept
+			: begin(begin) {}
+
+		/// @brief Constructs a Range from the beginning to 'end'
+		/// @param  RangeBegin
+		/// @param end The end of the Range
+		constexpr Range(RangeBegin, size_t end) noexcept
+			: end(end) {}
+
+		/// @brief Check if the Range represents an empty view
+		/// @return True if the Range is empty
+		constexpr bool isNone() const noexcept { return begin == end; }
+		
+		/// @brief Check if the Range represents the whole view
+		/// @return True if the Range represents the whole view
+		constexpr bool isAll() const noexcept { return begin == RangeBegin::value && end == RangeEnd::value; }
+
+		/// @brief Get the size of the Range
+		/// @return Size of the Range
+		constexpr size_t getSize() const noexcept { return end - begin; }
+
+		/// @brief Get the offset to the beginning of the range
+		/// @return The offset to the beginning
+		constexpr size_t getBeginOffset() const noexcept { return begin; }
+
+		/// @brief Get the offset to the beginning of the range
+		/// @return The offset to the end or RangeEnd::value for end of view
+		constexpr size_t getEndOffset() const noexcept { return end; }
+
+		/// @brief Returns an empty Range.
+		/// Same as Range{}.
+		/// @return Empty Range
+		constexpr static Range getEmptyRange() noexcept { return Range{}; }
+		/// @brief Returns a Range over the whole view.
+		/// Same as Range{ Begin, End }.
+		/// @return Whole Range
+		constexpr static Range getWholeRange() noexcept { return Range{ Begin, End }; }
+	};
+
+	/*********************************
+	* COMMON TRAITS AND HELPERS
+	*********************************/
+
+	template<typename T>
+	/// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
+	/// @tparam T The type to copy
+	struct copy_if_trivial { using type = std::conditional_t<std::is_trivial<T>, T, const T&>; };
+
+	template<typename T>
+	/// @brief Short hand for copy_if_trivial::type
+	/// @tparam T The type to copy
+	using copy_if_trivial_t = copy_if_trivial<T>::type;
 }
 
 #endif //!HG_COLT_COMMON
