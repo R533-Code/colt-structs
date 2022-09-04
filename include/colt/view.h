@@ -6,8 +6,16 @@
 namespace colt {
   
   template<typename T>
-  struct ContiguousView
+  /// @brief Represents a contiguous view over a range of objects
+  /// @tparam T The type of the objects
+  class ContiguousView
   {
+    /// @brief Pointer to the beginning of the view
+    const T* begin_ptr;
+    /// @brief Count of items in the view
+    size_t size;
+
+  public:
     /*********************************
     *         CONSTRUCTORS
     *********************************/
@@ -49,6 +57,10 @@ namespace colt {
     /// @brief Returns an iterator past the end of the view
     /// @return Iterator to the end of the view
     constexpr const T* end() const noexcept { return begin_ptr + size; }
+
+    /// @brief Returns a pointer to the beginning of the view
+    /// @return Pointer to the beginning of the view
+    constexpr const T* getData() const noexcept { return begin_ptr; }
 
     /// @brief Returns the count of object the view spans on
     /// @return The count of objects
@@ -99,13 +111,7 @@ namespace colt {
     /// @brief Splices a view using a range
     /// @param range The range to use for splicing
     /// @return Spliced view
-    constexpr ContiguousView<T> spliceRange(Range range) const noexcept;
-
-  private:
-    /// @brief Pointer to the beginning of the view
-    const T* begin_ptr;
-    /// @brief Count of items in the view
-    size_t size;
+    constexpr ContiguousView<T> spliceRange(Range range) const noexcept;  
   };
   
   template<typename T>
