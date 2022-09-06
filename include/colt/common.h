@@ -27,92 +27,101 @@
 /// @brief Contains all colt provided utilities
 namespace colt {	
 	
-	/*********************************
-	* BYTE SIZES AND LITERALS
-	*********************************/
+  /// @brief Contains size types
+  namespace sizes
+  {
 
-	/// @brief Represents a size in bytes
-	struct ByteSize
-	{
-		/// @brief The byte size
-		size_t size;
-	};
+    /*********************************
+    * BYTE SIZES AND LITERALS
+    *********************************/
 
-	/// @brief User defined literal to convert a value to a ByteSize
-	/// @param size The size to convert
-	/// @return ByteSize of size 'size'
-	constexpr ByteSize operator"" _B(size_t size) noexcept { return { size }; }
+    /// @brief Represents a size in bytes
+    struct ByteSize
+    {
+      /// @brief The byte size
+      size_t size;
+    };
 
-	/// @brief Represents a size in kilo-bytes
-	struct KiloByteSize
-	{
-		/// @brief The kilo-byte size
-		size_t size;
+    /// @brief User defined literal to convert a value to a ByteSize
+    /// @param size The size to convert
+    /// @return ByteSize of size 'size'
+    constexpr ByteSize operator"" _B(size_t size) noexcept { return { size }; }
 
-		/// @brief Conversion operator to ByteSize
-		/// @return ByteSize
-		constexpr operator ByteSize() const noexcept { return { size * 1024 }; }
-	};
+    /// @brief Represents a size in kilo-bytes
+    struct KiloByteSize
+    {
+      /// @brief The kilo-byte size
+      size_t size;
 
-	/// @brief User defined literal to convert a value to a KiloByteSize
-	/// @param size The size to convert
-	/// @return KiloByteSize of size 'size'
-	constexpr KiloByteSize operator"" _KB(size_t size) noexcept { return { size }; }
+      /// @brief Conversion operator to ByteSize
+      /// @return ByteSize
+      constexpr operator ByteSize() const noexcept { return { size * 1024 }; }
+    };
 
-	/// @brief Represents a size in mega-bytes
-	struct MegaByteSize
-	{
-		/// @brief The mega-byte size
-		size_t size;
-		
-		/// @brief Conversion operator to KiloByteSize
-		/// @return KiloByteSize
-		constexpr operator KiloByteSize() const noexcept { return { size * 1024 }; }
-		/// @brief Conversion operator to ByteSize
-		/// @return ByteSize
-		constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 }; }
-	};
+    /// @brief User defined literal to convert a value to a KiloByteSize
+    /// @param size The size to convert
+    /// @return KiloByteSize of size 'size'
+    constexpr KiloByteSize operator"" _KB(size_t size) noexcept { return { size }; }
 
-	/// @brief User defined literal to convert a value to a MegaByteSize
-	/// @param size The size to convert
-	/// @return MegaByteSize of size 'size'
-	constexpr MegaByteSize operator"" _MB(size_t size) noexcept { return { size }; }
+    /// @brief Represents a size in mega-bytes
+    struct MegaByteSize
+    {
+      /// @brief The mega-byte size
+      size_t size;
 
-	/// @brief Represents a size in giga-bytes
-	struct GigaByteSize
-	{
-		/// @brief The giga-byte size
-		size_t size;
+      /// @brief Conversion operator to KiloByteSize
+      /// @return KiloByteSize
+      constexpr operator KiloByteSize() const noexcept { return { size * 1024 }; }
+      /// @brief Conversion operator to ByteSize
+      /// @return ByteSize
+      constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 }; }
+    };
 
-		/// @brief Conversion operator to MegaByteSize
-		/// @return MegaByteSize
-		explicit constexpr operator MegaByteSize() const noexcept { return { size * 1024 }; }
-		/// @brief Conversion operator to KiloByteSize
-		/// @return KiloByteSize
-		explicit constexpr operator KiloByteSize() const noexcept { return { size * 1024 * 1024 }; }
-		/// @brief Conversion operator to ByteSize
-		/// @return ByteSize
-		explicit constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 * 1024 }; }
-	};
-	
-	/// @brief User defined literal to convert a value to a GigaByteSize
-	/// @param size The size to convert
-	/// @return GigaByteSize of size 'size'
-	constexpr ByteSize operator"" _GB(size_t size) noexcept { return { size }; }
+    /// @brief User defined literal to convert a value to a MegaByteSize
+    /// @param size The size to convert
+    /// @return MegaByteSize of size 'size'
+    constexpr MegaByteSize operator"" _MB(size_t size) noexcept { return { size }; }
+
+    /// @brief Represents a size in giga-bytes
+    struct GigaByteSize
+    {
+      /// @brief The giga-byte size
+      size_t size;
+
+      /// @brief Conversion operator to MegaByteSize
+      /// @return MegaByteSize
+      explicit constexpr operator MegaByteSize() const noexcept { return { size * 1024 }; }
+      /// @brief Conversion operator to KiloByteSize
+      /// @return KiloByteSize
+      explicit constexpr operator KiloByteSize() const noexcept { return { size * 1024 * 1024 }; }
+      /// @brief Conversion operator to ByteSize
+      /// @return ByteSize
+      explicit constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 * 1024 }; }
+    };
+
+    /// @brief User defined literal to convert a value to a GigaByteSize
+    /// @param size The size to convert
+    /// @return GigaByteSize of size 'size'
+    constexpr ByteSize operator"" _GB(size_t size) noexcept { return { size }; }
+  }
 
 	/*********************************
 	* RANGES TYPES FOR SPLICING
 	*********************************/
 
-	/// @brief Tag structure for a Range with no beginning offset
-	struct RangeBeginT { static constexpr size_t value = 0; };
-	/// @brief Tag structure for a Range with no end offset
-	struct RangeEndT { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
+	/// @brief Contains type traits and tag types
+	namespace traits
+	{
+		/// @brief Tag structure for a Range with no beginning offset
+		struct RangeBeginT { static constexpr size_t value = 0; };
+		/// @brief Tag structure for a Range with no end offset
+		struct RangeEndT { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
+	}
 
 	/// @brief Tag object for a Range with no beginning offset
-	constexpr const RangeBeginT Begin;
+	constexpr const traits::RangeBeginT Begin;
 	/// @brief Tag object for a Range with no end offset
-	constexpr const RangeEndT End;
+	constexpr const traits::RangeEndT End;
 
 	/// @brief Symbolizes a range used for splicing views.
 	/// A Range contains 2 fields: the offset to the beginning of the view,
@@ -122,8 +131,8 @@ namespace colt {
 	/// (RangeEndT::value) is used to represents that end.
 	class Range
 	{
-		size_t begin = RangeBeginT::value;
-		size_t end = RangeEndT::value;
+		size_t begin = traits::RangeBeginT::value;
+		size_t end = traits::RangeEndT::value;
 
 	public:
 
@@ -142,12 +151,12 @@ namespace colt {
 		/// Same as Range(RangeBeginT).
 		/// @param  RangeBeginT
 		/// @param  RangeEndT
-		constexpr Range(RangeBeginT, RangeEndT) noexcept {}
+		constexpr Range(traits::RangeBeginT, traits::RangeEndT) noexcept {}
 		
 		/// @brief Constructs a Range that represents a whole Range.
 		/// Same as Range(RangeBeginT, RangeEndT).
 		/// @param  RangeBeginT
-		constexpr Range(RangeBeginT) noexcept {}
+		constexpr Range(traits::RangeBeginT) noexcept {}
 
 		/// @brief Constructs a Range from begin, till end of Range.
 		/// Same as Range(size_t, RangeEndT).
@@ -159,13 +168,13 @@ namespace colt {
 		/// Same as Range(size_t).
 		/// @param begin The index to the beginning of the Range
 		/// @param  RangeEndT
-		constexpr Range(size_t begin, RangeEndT) noexcept
+		constexpr Range(size_t begin, traits::RangeEndT) noexcept
 			: begin(begin) {}
 
 		/// @brief Constructs a Range from the beginning to 'end'
 		/// @param  RangeBeginT
 		/// @param end The end of the Range
-		constexpr Range(RangeBeginT, size_t end) noexcept
+		constexpr Range(traits::RangeBeginT, size_t end) noexcept
 			: end(end) {}
 
 		/// @brief Check if the Range represents an empty view
@@ -174,7 +183,7 @@ namespace colt {
 		
 		/// @brief Check if the Range represents the whole view
 		/// @return True if the Range represents the whole view
-		constexpr bool isAll() const noexcept { return begin == RangeBeginT::value && end == RangeEndT::value; }
+		constexpr bool isAll() const noexcept { return begin == traits::RangeBeginT::value && end == traits::RangeEndT::value; }
 
 		/// @brief Get the size of the Range
 		/// @return Size of the Range
@@ -202,128 +211,112 @@ namespace colt {
 	* COMMON TRAITS AND HELPERS
 	*********************************/	
 
-	/********** HAS_MEMBER **********/
+  namespace traits
+  {
 
-	COLT_HAS_MEMBER(getByteSize);
-	COLT_HAS_MEMBER(getData);
-	COLT_HAS_MEMBER(getSize);
-	COLT_HAS_MEMBER(isEmpty);
-	COLT_HAS_MEMBER(end);
-	COLT_HAS_MEMBER(begin);
+    /********** HAS_MEMBER **********/
 
-	/********** ITERATORS **********/
+    COLT_HAS_MEMBER(getByteSize);
+    COLT_HAS_MEMBER(getData);
+    COLT_HAS_MEMBER(getSize);
+    COLT_HAS_MEMBER(isEmpty);
+    COLT_HAS_MEMBER(end);
+    COLT_HAS_MEMBER(begin);
 
-	template<typename T>
-	/// @brief Check if a type provides a 'begin' and 'end' method
-	/// @tparam T The type to check
-	struct is_iterable
-	{
-		static constexpr bool value = has_begin_v<T> && has_end_v<T>;
-	};
+    /********** ITERATORS **********/
 
-	template<typename T>
-	/// @brief Short hand for is_iterable<T>::value
-	/// @tparam T The type to check
-	static constexpr bool is_iterable_v = is_iterable<T>::value;
+    template<typename T>
+    /// @brief Check if a type provides a 'begin' and 'end' method
+    /// @tparam T The type to check
+    struct is_iterable
+    {
+      static constexpr bool value = has_begin_v<T> && has_end_v<T>;
+    };
 
-	/********** BY VALUE **********/
+    template<typename T>
+    /// @brief Short hand for is_iterable<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_iterable_v = is_iterable<T>::value;
 
-	template<typename T>
-	/// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
-	/// @tparam T The type to copy
-	struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, T, const T&>; };
+    /********** BY VALUE **********/
 
-	template<typename T>
-	/// @brief Short hand for copy_if_trivial::type
-	/// @tparam T The type to copy
-	using copy_if_trivial_t = typename copy_if_trivial<T>::type;
+    template<typename T>
+    /// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
+    /// @tparam T The type to copy
+    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, T, const T&>; };
 
-	/********** TAGS **********/
+    template<typename T>
+    /// @brief Short hand for copy_if_trivial::type
+    /// @tparam T The type to copy
+    using copy_if_trivial_t = typename copy_if_trivial<T>::type;
 
-	/// @brief Tag for constructing in place
-	struct InPlaceT {};
+    /********** TAGS **********/
+
+    /// @brief Tag for constructing in place
+    struct InPlaceT {};    
+
+    /// @brief Tag for empty Optional
+    struct NoneT {};
+
+    /// @brief Represents O(1)
+    struct ConstantComplexityT {};
+    /// @brief Represents amortized O(1)
+    struct AmortizedConstantComplexityT {};
+    /// @brief Represents O(log(n))
+    struct LogarithmicComplexityT {};
+    /// @brief Represents O(n)
+    struct LinearComplexityT {};
+    /// @brief Represents O(n^2)
+    struct QuadraticComplexityT {};
+
+    template<typename T>
+    /// @brief Check if a type is a tag (type used to differentiate overloads)
+    /// @tparam T The type to check
+    struct is_tag { static constexpr bool value = false; };
+
+    template<>
+    /// @brief InPlaceT is a tag
+    struct is_tag<InPlaceT> { static constexpr bool value = true; };
+
+    template<>
+    /// @brief RangeBeginT is a tag
+    struct is_tag<RangeBeginT> { static constexpr bool value = true; };
+
+    template<>
+    /// @brief RangeEndT is a tag
+    struct is_tag<RangeEndT> { static constexpr bool value = true; };
+
+    template<>
+    /// @brief NoneT is a tag
+    struct is_tag<NoneT> { static constexpr bool value = true; };
+
+    template<>
+    /// @brief ConstantComplexityT is a tag
+    struct is_tag<ConstantComplexityT> { static constexpr bool value = true; };
+    template<>
+    /// @brief AmortizedConstantComplexityT is a tag
+    struct is_tag<AmortizedConstantComplexityT> { static constexpr bool value = true; };
+    template<>
+    /// @brief LogarithmicComplexityT is a tag
+    struct is_tag<LogarithmicComplexityT> { static constexpr bool value = true; };
+    template<>
+    /// @brief LinearComplexityT is a tag
+    struct is_tag<LinearComplexityT> { static constexpr bool value = true; };
+    template<>
+    /// @brief QuadraticComplexityT is a tag
+    struct is_tag<QuadraticComplexityT> { static constexpr bool value = true; };
+
+    template<typename T>
+    /// @brief Short hand for is_tag<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_tag_v = is_tag<T>::value;
+  }
+
 	/// @brief Tag object for constructing in place
-	constexpr const InPlaceT InPlace;
+	constexpr const traits::InPlaceT InPlace;
 
-	/// @brief Tag for empty Optional
-	struct NoneT {};
 	/// @brief Tag object for empty Optional
-	constexpr const NoneT None;
-
-	/// @brief Represents O(1)
-	struct ConstantComplexityT {};
-	/// @brief Represents amortized O(1)
-	struct AmortizedConstantComplexityT {};
-	/// @brief Represents O(log(n))
-	struct LogarithmicComplexityT {};
-	/// @brief Represents O(n)
-	struct LinearComplexityT {};
-	/// @brief Represents O(n^2)
-	struct QuadraticComplexityT {};
-
-	template<typename T>
-	/// @brief Check if a type is a tag (type used to differentiate overloads)
-	/// @tparam T The type to check
-	struct is_tag { static constexpr bool value = false; };
-
-	template<>
-	/// @brief InPlaceT is a tag
-	struct is_tag<InPlaceT> { static constexpr bool value = true; };
-
-	template<>
-	/// @brief RangeBeginT is a tag
-	struct is_tag<RangeBeginT> { static constexpr bool value = true; };
-
-	template<>
-	/// @brief RangeEndT is a tag
-	struct is_tag<RangeEndT> { static constexpr bool value = true; };
-
-	template<>
-	/// @brief NoneT is a tag
-	struct is_tag<NoneT> { static constexpr bool value = true; };
-
-	template<>
-	/// @brief ConstantComplexityT is a tag
-	struct is_tag<ConstantComplexityT> { static constexpr bool value = true; };
-	template<>
-	/// @brief AmortizedConstantComplexityT is a tag
-	struct is_tag<AmortizedConstantComplexityT> { static constexpr bool value = true; };
-	template<>
-	/// @brief LogarithmicComplexityT is a tag
-	struct is_tag<LogarithmicComplexityT> { static constexpr bool value = true; };
-	template<>
-	/// @brief LinearComplexityT is a tag
-	struct is_tag<LinearComplexityT> { static constexpr bool value = true; };
-	template<>
-	/// @brief QuadraticComplexityT is a tag
-	struct is_tag<QuadraticComplexityT> { static constexpr bool value = true; };
-
-	template<typename T>
-	/// @brief Short hand for is_tag<T>::value
-	/// @tparam T The type to check
-	static constexpr bool is_tag_v = is_tag<T>::value;		
-
-	/*********************************
-	* HELPER FUNCTIONS
-	*********************************/
-
-	template<typename To, typename From>
-	/// @brief Bit casts a value from 'From' to 'To'
-	/// @tparam To The type to cast to
-	/// @tparam From The type to cast from
-	/// @param from The value to bit cast from
-	/// @return The bit casted value
-	To bit_cast(const From& from) noexcept
-	{
-		static_assert(sizeof(To) == sizeof(From),
-			"sizeof(To) should be equal to sizeof(From)!");
-		static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
-			"Both types should be trivially copyable!");
-
-		To to_ret;
-		std::memcpy(&to_ret, &from, sizeof(To));
-		return to_ret;
-	}
+	constexpr const traits::NoneT None;
 }
 
 #endif //!HG_COLT_COMMON

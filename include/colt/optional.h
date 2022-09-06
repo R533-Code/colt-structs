@@ -10,7 +10,7 @@ namespace colt {
   /// @tparam T The optional type to hold
   class Optional
   {
-    static_assert(!is_tag_v<T>, "Cannot use tag struct as typename!");
+    static_assert(!traits::is_tag_v<T>, "Cannot use tag struct as typename!");
 
     /// @brief Buffer for the optional object
     alignas(T) char opt_buffer[sizeof(T)];
@@ -27,7 +27,7 @@ namespace colt {
     /// Complexity: O(1).
     /// Same as Optional().
     /// @param  NoneT: use None
-    Optional(NoneT) noexcept
+    Optional(traits::NoneT) noexcept
       : is_none(true) {}
 
     /// @brief Copy constructs an object into the Optional.
@@ -56,7 +56,7 @@ namespace colt {
     /// @tparam ...Args The parameter pack
     /// @param  InPlaceT, use InPlace
     /// @param ...args The argument pack
-    Optional(InPlaceT, Args&&... args)
+    Optional(traits::InPlaceT, Args&&... args)
       noexcept(std::is_nothrow_constructible_v<T, Args...>)
       : is_none(false)
     {
@@ -113,7 +113,7 @@ namespace colt {
     /// Complexity: O(1).
     /// Precondition: hasValue().
     /// @return The value contained
-    copy_if_trivial_t<T> getValue() const noexcept;
+    traits::copy_if_trivial_t<T> getValue() const noexcept;
 
     /// @brief Move out the value contained in the Optional.
     /// Complexity: O(1).
@@ -128,7 +128,7 @@ namespace colt {
   };
   
   template<typename T>
-  copy_if_trivial_t<T> Optional<T>::getValue() const noexcept
+  traits::copy_if_trivial_t<T> Optional<T>::getValue() const noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     copy_if_trivial_t<T> to_ret = reinterpret_cast<const T&>(opt_buffer);
