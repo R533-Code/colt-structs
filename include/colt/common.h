@@ -8,6 +8,22 @@
 #include <limits>
 #include <memory>
 
+/// @brief Generates the template meta-programming boilerplate to check if a type has a member.
+/// Usage: COLT_HAS_MEMBER(print)
+/// has_print<int>::value || has_print_v<int>
+#define COLT_HAS_MEMBER(member) template<typename T>\
+	class has_##member \
+	{	\
+		using one = char; \
+		struct two {char x[2]; }; \
+		template <typename C> static one test(decltype(&C::##member)); \
+		template <typename C> static two test(...); \
+	public: \
+		enum { value = sizeof(test<T>(0)) == sizeof(char) }; \
+	}; \
+	template<typename T> \
+	static constexpr bool has_##member##_v = has_##member<T>::value
+
 /// @brief Contains all colt provided utilities
 namespace colt {	
 	
@@ -184,17 +200,33 @@ namespace colt {
 
 	/*********************************
 	* COMMON TRAITS AND HELPERS
-	*********************************/
+	*********************************/	
 
-	/// @brief Tag for constructing in place
-	struct InPlaceT {};
-	/// @brief Tag object for constructing in place
-	constexpr const InPlaceT InPlace;
+	/********** HAS_MEMBER **********/
 
-	/// @brief Tag for empty Optional
-	struct NoneT {};
-	/// @brief Tag object for empty Optional
-	constexpr const NoneT None;
+	COLT_HAS_MEMBER(getByteSize);
+	COLT_HAS_MEMBER(getData);
+	COLT_HAS_MEMBER(getSize);
+	COLT_HAS_MEMBER(isEmpty);
+	COLT_HAS_MEMBER(end);
+	COLT_HAS_MEMBER(begin);
+
+	/********** ITERATORS **********/
+
+	template<typename T>
+	/// @brief Check if a type provides a 'begin' and 'end' method
+	/// @tparam T The type to check
+	struct is_iterable
+	{
+		static constexpr bool value = has_begin_v<T> && has_end_v<T>;
+	};
+
+	template<typename T>
+	/// @brief Short hand for is_iterable<T>::value
+	/// @tparam T The type to check
+	static constexpr bool is_iterable_v = is_iterable<T>::value;
+
+	/********** BY VALUE **********/
 
 	template<typename T>
 	/// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
@@ -206,23 +238,70 @@ namespace colt {
 	/// @tparam T The type to copy
 	using copy_if_trivial_t = typename copy_if_trivial<T>::type;
 
+	/********** TAGS **********/
+
+	/// @brief Tag for constructing in place
+	struct InPlaceT {};
+	/// @brief Tag object for constructing in place
+	constexpr const InPlaceT InPlace;
+
+	/// @brief Tag for empty Optional
+	struct NoneT {};
+	/// @brief Tag object for empty Optional
+	constexpr const NoneT None;
+
+	/// @brief Represents O(1)
+	struct ConstantComplexityT {};
+	/// @brief Represents amortized O(1)
+	struct AmortizedConstantComplexityT {};
+	/// @brief Represents O(log(n))
+	struct LogarithmicComplexityT {};
+	/// @brief Represents O(n)
+	struct LinearComplexityT {};
+	/// @brief Represents O(n^2)
+	struct QuadraticComplexityT {};
+
 	template<typename T>
+	/// @brief Check if a type is a tag (type used to differentiate overloads)
+	/// @tparam T The type to check
 	struct is_tag { static constexpr bool value = false; };
 
 	template<>
+	/// @brief InPlaceT is a tag
 	struct is_tag<InPlaceT> { static constexpr bool value = true; };
 
 	template<>
+	/// @brief RangeBeginT is a tag
 	struct is_tag<RangeBeginT> { static constexpr bool value = true; };
 
 	template<>
+	/// @brief RangeEndT is a tag
 	struct is_tag<RangeEndT> { static constexpr bool value = true; };
 
 	template<>
+	/// @brief NoneT is a tag
 	struct is_tag<NoneT> { static constexpr bool value = true; };
 
+	template<>
+	/// @brief ConstantComplexityT is a tag
+	struct is_tag<ConstantComplexityT> { static constexpr bool value = true; };
+	template<>
+	/// @brief AmortizedConstantComplexityT is a tag
+	struct is_tag<AmortizedConstantComplexityT> { static constexpr bool value = true; };
+	template<>
+	/// @brief LogarithmicComplexityT is a tag
+	struct is_tag<LogarithmicComplexityT> { static constexpr bool value = true; };
+	template<>
+	/// @brief LinearComplexityT is a tag
+	struct is_tag<LinearComplexityT> { static constexpr bool value = true; };
+	template<>
+	/// @brief QuadraticComplexityT is a tag
+	struct is_tag<QuadraticComplexityT> { static constexpr bool value = true; };
+
 	template<typename T>
-	static constexpr bool is_tag_v = is_tag<T>::value;
+	/// @brief Short hand for is_tag<T>::value
+	/// @tparam T The type to check
+	static constexpr bool is_tag_v = is_tag<T>::value;		
 
 	/*********************************
 	* HELPER FUNCTIONS
