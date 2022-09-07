@@ -2,6 +2,7 @@
 #define HG_COLT_VIEW
 
 #include "common.h"
+#include "iterators.h"
 
 namespace colt {
   
@@ -64,12 +65,12 @@ namespace colt {
     /// @brief Returns an iterator to the beginning of the view.
     /// Complexity: O(1)
     /// @return Iterator to the beginning of the view
-    constexpr const T* begin() const noexcept { return begin_ptr; }
+    constexpr ContiguousIterator<const T> begin() const noexcept { return begin_ptr; }
 
     /// @brief Returns an iterator past the end of the view.
     /// Complexity: O(1)
     /// @return Iterator to the end of the view
-    constexpr const T* end() const noexcept { return begin_ptr + size; }
+    constexpr ContiguousIterator<const T> end() const noexcept { return begin_ptr + size; }
 
     /// @brief Returns a pointer to the beginning of the view.
     /// Complexity: O(1)
