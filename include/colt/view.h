@@ -84,7 +84,7 @@ namespace colt {
     /// @brief Returns the byte size the view spans on.
     /// Complexity: O(1)
     /// @return The byte size
-    constexpr ByteSize getByteSize() const noexcept;
+    constexpr sizes::ByteSize getByteSize() const noexcept;
 
     /// @brief Check if the view is empty.
     /// Complexity: O(1)
@@ -147,9 +147,9 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr ByteSize ContiguousView<T>::getByteSize() const noexcept
+  constexpr sizes::ByteSize ContiguousView<T>::getByteSize() const noexcept
   {
-    return ByteSize{ size * sizeof(T) };
+    return { size * sizeof(T) };
   }
 
   template<typename T>
