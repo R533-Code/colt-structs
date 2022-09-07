@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include <type_traits>
+#include <mutex>
 #include <limits>
 #include <memory>
 
@@ -220,8 +221,39 @@ namespace colt {
     COLT_HAS_MEMBER(getData);
     COLT_HAS_MEMBER(getSize);
     COLT_HAS_MEMBER(isEmpty);
-    COLT_HAS_MEMBER(end);
+    COLT_HAS_MEMBER(end);    
     COLT_HAS_MEMBER(begin);
+    COLT_HAS_MEMBER(allocate);
+    COLT_HAS_MEMBER(deallocate);
+    COLT_HAS_MEMBER(owns);
+
+    /********** MEMORY ALLOCATION **********/
+
+    template<typename T>
+    /// @brief Check if a type provides a 'allocate' and 'deallocate' method
+    /// @tparam T The type to check
+    struct is_allocator
+    {
+      static constexpr bool value = has_allocate_v<T> && has_deallocate_v<T>;
+    };
+
+    template<typename T>
+    /// @brief Short hand for is_allocator<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_allocator_v = is_allocator<T>::value;
+
+    template<typename T>
+    /// @brief Check if a type provides a 'allocate', 'deallocate' and 'owns' method
+    /// @tparam T The type to check
+    struct is_owning_allocator
+    {
+      static constexpr bool value = is_allocator_v<T> && has_owns_v<T>;
+    };
+
+    template<typename T>
+    /// @brief Short hand for is_owning_allocator<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_owning_allocator_v = is_owning_allocator<T>::value;
 
     /********** ITERATORS **********/
 
