@@ -4,10 +4,30 @@
 #include <cassert>
 #include <cstring>
 
-#include <type_traits>
 #include <mutex>
+#include <atomic>
+
+#include <type_traits>
+
 #include <limits>
 #include <memory>
+
+#ifndef COLT_NO_DEBUG
+  #if defined(NDEBUG) || defined(_DEBUG)
+    /// @brief Defined if the library is compiled with assertions on.
+    /// Allows parts of the code to be checked
+    #define COLT_DEBUG
+    /// @brief Does 'expr' only if COLT_DEBUG is defined
+    #define COLT_ON_DEBUG(expr) do { expr; } while (0)
+    /// @brief Expands to '&' only if COLT_DEBUG is defined
+    #define COLT_REF_ON_DEBUG &
+  #endif
+#else
+  /// @brief Expands to '&' only if COLT_DEBUG is defined
+  #define COLT_REF_ON_DEBUG
+  /// @brief Does 'expr' only if COLT_DEBUG is defined
+  #define COLT_ON_DEBUG(expr) do { } while (0)
+#endif
 
 /// @brief Generates the template meta-programming boilerplate to check if a type has a member.
 /// Usage: COLT_HAS_MEMBER(print)
@@ -91,19 +111,19 @@ namespace colt {
 
       /// @brief Conversion operator to MegaByteSize
       /// @return MegaByteSize
-      explicit constexpr operator MegaByteSize() const noexcept { return { size * 1024 }; }
+      constexpr operator MegaByteSize() const noexcept { return { size * 1024 }; }
       /// @brief Conversion operator to KiloByteSize
       /// @return KiloByteSize
-      explicit constexpr operator KiloByteSize() const noexcept { return { size * 1024 * 1024 }; }
+      constexpr operator KiloByteSize() const noexcept { return { size * 1024 * 1024 }; }
       /// @brief Conversion operator to ByteSize
       /// @return ByteSize
-      explicit constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 * 1024 }; }
+      constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 * 1024 }; }
     };
 
     /// @brief User defined literal to convert a value to a GigaByteSize
     /// @param size The size to convert
     /// @return GigaByteSize of size 'size'
-    constexpr ByteSize operator"" _GB(size_t size) noexcept { return { size }; }
+    constexpr GigaByteSize operator"" _GB(size_t size) noexcept { return { size }; }
   }
 
 	/*********************************
