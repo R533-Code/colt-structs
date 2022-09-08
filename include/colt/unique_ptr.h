@@ -42,6 +42,11 @@ namespace colt
     constexpr unique_ptr(memory::TypedBlock<T> blk) noexcept
       : blk(blk) {}
     
+    /// @brief Constructs a unique_ptr from a MemBlock
+    /// @param blk The block whose ownership to steal
+    constexpr unique_ptr(memory::MemBlock blk) noexcept
+      : blk(blk) {}
+
     /// @brief Move constructor
     /// @param to_move The unique_ptr whose resources to steal
     constexpr unique_ptr(unique_ptr&& to_move) noexcept
@@ -141,7 +146,7 @@ namespace colt
     /// @return The owned TypedBlock
     constexpr memory::TypedBlock<T> releaseTyped() noexcept
     {
-      assert(hintIsTrueType());
+      assert(hintIsTrueType() && "Use release() instead when dealing with inheritances!");
       return exchange(blk, { nullptr, 0 });
     }
 
