@@ -6,7 +6,7 @@
 namespace colt {
 
   template<typename T>
-  /// @brief Manages an optional contained value.
+  /// @brief Manages an optionally contained value.
   /// @tparam T The optional type to hold
   class Optional
   {
@@ -19,19 +19,16 @@ namespace colt {
 
   public:
     /// @brief Constructs an empty Optional.
-    /// Complexity: O(1)
     Optional() noexcept
       : is_none(true) {}
     
     /// @brief Constructs an empty Optional.
-    /// Complexity: O(1).
     /// Same as Optional().
     /// @param  NoneT: use None
     Optional(traits::NoneT) noexcept
       : is_none(true) {}
 
     /// @brief Copy constructs an object into the Optional.
-    /// Complexity: O(1)
     /// @param to_copy The object to copy
     Optional(const std::enable_if_t<std::is_copy_constructible_v<T>, T>& to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>)
@@ -41,7 +38,6 @@ namespace colt {
     }
 
     /// @brief Move constructs an object into the Optional
-    /// Complexity: O(1)
     /// @param to_move The object to move
     Optional(std::enable_if_t<std::is_move_constructible_v<T>, T>&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>)
@@ -52,7 +48,6 @@ namespace colt {
 
     template<typename... Args>
     /// @brief Constructs an object into the Optional directly.
-    /// Complexity: O(1)
     /// @tparam ...Args The parameter pack
     /// @param  InPlaceT, use InPlace
     /// @param ...args The argument pack
@@ -64,7 +59,6 @@ namespace colt {
     }
     
     /// @brief Copy constructor.
-    /// Complexity: O(1)
     /// @param to_copy The Optional to copy
     Optional(const std::enable_if_t<std::is_copy_constructible_v<T>, Optional<T>>& to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>)
@@ -75,7 +69,6 @@ namespace colt {
     }
 
     /// @brief Move constructor.
-    /// Complexity: O(1)
     /// @param to_move The Optional to move
     Optional(std::enable_if_t<std::is_move_constructible_v<T>, Optional<T>>&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>)
@@ -86,43 +79,36 @@ namespace colt {
     }
 
     /// @brief Destructor, destructs the value if it exist.
-    /// Complexity: O(1)
     ~Optional() noexcept(std::is_nothrow_destructible_v<T>)
     {
       reset();
     }
 
     /// @brief Check if the Optional contains a value.
-    /// Complexity: O(1)
     /// @return True if the Optional contains a value
     operator bool() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional contains a value.
-    /// Complexity: O(1).
     /// Same as !isNone().
     /// @return True if the Optional contains a value
     bool hasValue() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional does not contain a value.
-    /// Complexity: O(1).
     /// Same as !hasValue().
     /// @return True if the Optional does not contain a value
     bool isNone() const noexcept { return is_none; }
 
     /// @brief Get the value contained in the Optional.
-    /// Complexity: O(1).
     /// Precondition: hasValue().
     /// @return The value contained
     traits::copy_if_trivial_t<T> getValue() const noexcept;
 
     /// @brief Move out the value contained in the Optional.
-    /// Complexity: O(1).
     /// Precondition: hasValue().
     /// @return The value contained in the Optional
     T&& stealValue() noexcept;
 
     /// @brief Destroy the stored value if it exists.
-    /// Complexity: O(1).
     /// Called automatically by the destructor.
     void reset() noexcept(std::is_nothrow_destructible_v<T>);
   };
@@ -151,6 +137,18 @@ namespace colt {
       is_none = true;
     }
   }
+
+#ifdef COLT_USE_IOSTREAMS
+  template<typename T>
+  static std::ostream& operator<<(std::ostream& os, const Optional<T>& var)
+  {
+    if (var.isNone())
+      os << "None";
+    else
+      os << var.getValue();
+    return os;
+  }
+#endif
 }
 
 #endif //!HG_COLT_OPTIONAL
