@@ -436,7 +436,7 @@ namespace colt {
   *********************************/
 
   template<class T>
-  constexpr T swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T>&& std::is_nothrow_assignable_v<T&, T>)
+  constexpr T swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, T>)
   {
     T old_value = std::move(o1);
     o1 = o2;
