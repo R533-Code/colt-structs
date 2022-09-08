@@ -101,17 +101,17 @@ namespace colt
 
     /// @brief Dereferences the pointer to the memory block
     /// @return Const reference to the type of the block
-    constexpr const T& operator*() const noexcept { return blk.operator*(); }
+    constexpr const T& operator*() const noexcept { return *reinterpret_cast<const T*>(blk.getPtr()); }
     /// @brief Dereferences the pointer to the memory block
     /// @return Reference to the type of the block
-    constexpr T& operator*() noexcept { return blk.operator*(); }
+    constexpr T& operator*() noexcept { return *reinterpret_cast<T*>(blk.getPtr()); }
 
     /// @brief Dereferences the pointer to the memory block
     /// @return Const reference to the type of the block
-    constexpr const T& operator->() const noexcept { return blk.operator->(); }
+    constexpr const T* operator->() const noexcept { return reinterpret_cast<const T*>(blk.getPtr()); }
     /// @brief Dereferences the pointer to the memory block
     /// @return Reference to the type of the block
-    constexpr T& operator->() noexcept { return blk.operator->(); }
+    constexpr T* operator->() noexcept { return reinterpret_cast<T*>(blk.getPtr()); }
 
     /// @brief Check if the owned block is empty (getPtr() == nullptr)
     /// @return True if the block is empty
@@ -168,6 +168,15 @@ namespace colt
   {
     return memory::new_t<T>(std::forward<Args>(args)...);
   }
+
+#ifdef COLT_USE_IOSTREAMS
+  template<typename T>
+  static std::ostream& operator<<(std::ostream& os, const unique_ptr<T>& var)
+  {
+    os << var.getPtr();
+    return os;
+  }
+#endif
 }
 
 #endif //!HG_UNIQUE_PTR
