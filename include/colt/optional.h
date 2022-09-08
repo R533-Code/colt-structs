@@ -30,7 +30,7 @@ namespace colt {
 
     /// @brief Copy constructs an object into the Optional.
     /// @param to_copy The object to copy
-    Optional(const std::enable_if_t<std::is_copy_constructible_v<T>, T>& to_copy)
+    Optional(traits::copy_if_trivial_t<const T> to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>)
       : is_none(false)
     {
@@ -39,7 +39,8 @@ namespace colt {
 
     /// @brief Move constructs an object into the Optional
     /// @param to_move The object to move
-    Optional(std::enable_if_t<std::is_move_constructible_v<T>, T>&& to_move)
+    template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
+    Optional(T&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>)
       : is_none(false)
     {
@@ -60,22 +61,22 @@ namespace colt {
     
     /// @brief Copy constructor.
     /// @param to_copy The Optional to copy
-    Optional(const std::enable_if_t<std::is_copy_constructible_v<T>, Optional<T>>& to_copy)
+    Optional(const Optional<T>& to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>)
       : is_none(to_copy.is_none)
     {
       if (!is_none)
-        new(opt_buffer) T(reinterpret_cast<const T&>(to_copy.opt_buffer));
+        new(opt_buffer) T(*std::launder(reinterpret_cast<const T*>(to_copy.opt_buffer)));
     }
 
     /// @brief Move constructor.
     /// @param to_move The Optional to move
-    Optional(std::enable_if_t<std::is_move_constructible_v<T>, Optional<T>>&& to_move)
+    Optional(Optional<T>&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>)
       : is_none(to_move.is_none)
     {
       if (!is_none)
-        new(opt_buffer) T(std::move(reinterpret_cast<T&>(to_move.opt_buffer)));
+        new(opt_buffer) T(std::move(*std::launder(reinterpret_cast<T*>(to_move.opt_buffer))));
     }
 
     /// @brief Destructor, destructs the value if it exist.
@@ -86,7 +87,7 @@ namespace colt {
 
     /// @brief Check if the Optional contains a value.
     /// @return True if the Optional contains a value
-    operator bool() const noexcept { return !is_none; }
+    explicit operator bool() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional contains a value.
     /// Same as !isNone().
@@ -117,7 +118,7 @@ namespace colt {
   traits::copy_if_trivial_t<T> Optional<T>::getValue() const noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
-    traits::copy_if_trivial_t<T> to_ret = reinterpret_cast<const T&>(opt_buffer);
+    traits::copy_if_trivial_t<T> to_ret = *std::launder(reinterpret_cast<const T*>(opt_buffer));
     return to_ret;
   }
   
@@ -125,7 +126,7 @@ namespace colt {
   T&& Optional<T>::stealValue() noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
-    return std::move(reinterpret_cast<T&>(opt_buffer));
+    return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
   }
   
   template<typename T>
@@ -133,7 +134,7 @@ namespace colt {
   {
     if (!is_none)
     {
-      reinterpret_cast<T*>(opt_buffer)->~T();
+      std::launder(reinterpret_cast<T*>(opt_buffer))->~T();
       is_none = true;
     }
   }
