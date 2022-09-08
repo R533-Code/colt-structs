@@ -29,6 +29,15 @@
   #define COLT_ON_DEBUG(expr) do { } while (0)
 #endif
 
+#ifdef COLT_USE_IOSTREAMS
+#include <iostream>
+#endif
+
+#ifdef FMT_VERSION
+#define COLT_USE_FMT
+#include <fmt/core.h>
+#endif
+
 /// @brief Generates the template meta-programming boilerplate to check if a type has a member.
 /// Usage: COLT_HAS_MEMBER(print)
 /// has_print<int>::value || has_print_v<int>
@@ -68,8 +77,16 @@ namespace colt {
     /// @return ByteSize of size 'size'
     constexpr ByteSize operator"" _B(size_t size) noexcept { return { size }; }
 
+#ifdef COLT_USE_IOSTREAMS
+    static std::ostream& operator<<(std::ostream& os, const ByteSize& var)
+    {
+      os << var.size << "B";
+      return os;
+    }
+#endif
+
     /// @brief Represents a size in kilo-bytes
-    struct KiloByteSize
+    struct KibiByteSize
     {
       /// @brief The kilo-byte size
       size_t size;
@@ -79,51 +96,75 @@ namespace colt {
       constexpr operator ByteSize() const noexcept { return { size * 1024 }; }
     };
 
-    /// @brief User defined literal to convert a value to a KiloByteSize
+    /// @brief User defined literal to convert a value to a KibiByteSize
     /// @param size The size to convert
-    /// @return KiloByteSize of size 'size'
-    constexpr KiloByteSize operator"" _KB(size_t size) noexcept { return { size }; }
+    /// @return KibiByteSize of size 'size'
+    constexpr KibiByteSize operator"" _kiB(size_t size) noexcept { return { size }; }
+
+#ifdef COLT_USE_IOSTREAMS
+    static std::ostream& operator<<(std::ostream& os, const KibiByteSize& var)
+    {
+      os << var.size << "kiB";
+      return os;
+    }
+#endif
 
     /// @brief Represents a size in mega-bytes
-    struct MegaByteSize
+    struct MebiByteSize
     {
       /// @brief The mega-byte size
       size_t size;
 
-      /// @brief Conversion operator to KiloByteSize
-      /// @return KiloByteSize
-      constexpr operator KiloByteSize() const noexcept { return { size * 1024 }; }
+      /// @brief Conversion operator to KibiByteSize
+      /// @return KibiByteSize
+      constexpr operator KibiByteSize() const noexcept { return { size * 1024 }; }
       /// @brief Conversion operator to ByteSize
       /// @return ByteSize
       constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 }; }
     };
 
-    /// @brief User defined literal to convert a value to a MegaByteSize
+    /// @brief User defined literal to convert a value to a MebiByteSize
     /// @param size The size to convert
-    /// @return MegaByteSize of size 'size'
-    constexpr MegaByteSize operator"" _MB(size_t size) noexcept { return { size }; }
+    /// @return MebiByteSize of size 'size'
+    constexpr MebiByteSize operator"" _MiB(size_t size) noexcept { return { size }; }
+
+#ifdef COLT_USE_IOSTREAMS
+    static std::ostream& operator<<(std::ostream& os, const MebiByteSize& var)
+    {
+      os << var.size << "MiB";
+      return os;
+    }
+#endif
 
     /// @brief Represents a size in giga-bytes
-    struct GigaByteSize
+    struct GibiByteSize
     {
       /// @brief The giga-byte size
       size_t size;
 
-      /// @brief Conversion operator to MegaByteSize
-      /// @return MegaByteSize
-      constexpr operator MegaByteSize() const noexcept { return { size * 1024 }; }
-      /// @brief Conversion operator to KiloByteSize
-      /// @return KiloByteSize
-      constexpr operator KiloByteSize() const noexcept { return { size * 1024 * 1024 }; }
+      /// @brief Conversion operator to MebiByteSize
+      /// @return MebiByteSize
+      constexpr operator MebiByteSize() const noexcept { return { size * 1024 }; }
+      /// @brief Conversion operator to KibiByteSize
+      /// @return KibiByteSize
+      constexpr operator KibiByteSize() const noexcept { return { size * 1024 * 1024 }; }
       /// @brief Conversion operator to ByteSize
       /// @return ByteSize
       constexpr operator ByteSize() const noexcept { return { size * 1024 * 1024 * 1024 }; }
     };
 
-    /// @brief User defined literal to convert a value to a GigaByteSize
+    /// @brief User defined literal to convert a value to a GibiByteSize
     /// @param size The size to convert
-    /// @return GigaByteSize of size 'size'
-    constexpr GigaByteSize operator"" _GB(size_t size) noexcept { return { size }; }
+    /// @return GibiByteSize of size 'size'
+    constexpr GibiByteSize operator"" _GiB(size_t size) noexcept { return { size }; }
+
+#ifdef COLT_USE_IOSTREAMS
+    static std::ostream& operator<<(std::ostream& os, const GibiByteSize& var)
+    {
+      os << var.size << "GiB";
+      return os;
+    }
+#endif
   }
 
 	/*********************************
@@ -227,6 +268,26 @@ namespace colt {
 		/// @return Whole Range
 		constexpr static Range getWholeRange() noexcept { return Range{ Begin, End }; }
 	};
+
+#ifdef COLT_USE_IOSTREAMS
+  static std::ostream& operator<<(std::ostream& os, const Range& var)
+  {
+    size_t begin = var.getBeginOffset();
+    size_t end = var.getEndOffset();
+    os << '[';
+    if (begin == 0)
+      os << "Begin, ";
+    else
+      os << begin << ", ";
+    if (end == traits::RangeEndT::value)
+      os << "End)";
+    else if (end == 0)
+      os << "Begin)";
+    else
+      os << end << ")";
+    return os;
+  }
+#endif
 
 	/*********************************
 	* COMMON TRAITS AND HELPERS
