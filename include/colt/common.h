@@ -369,6 +369,26 @@ namespace colt {
 
 	/// @brief Tag object for empty Optional
 	constexpr const traits::NoneT None;
+
+  /*********************************
+  * FUNCTIONS HELPERS
+  *********************************/
+
+  template<class T>
+  constexpr T swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T>&& std::is_nothrow_assignable_v<T&, T>)
+  {
+    T old_value = std::move(o1);
+    o1 = o2;
+    o2 = old_value;
+  }
+
+  template<class T, class U = T>
+  constexpr T exchange(T& obj, U&& new_value) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, U>)
+  {
+    T old_value = std::move(obj);
+    obj = std::forward<U>(new_value);
+    return old_value;
+  }
 }
 
 #endif //!HG_COLT_COMMON
