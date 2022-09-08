@@ -117,7 +117,7 @@ namespace colt {
   traits::copy_if_trivial_t<T> Optional<T>::getValue() const noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
-    copy_if_trivial_t<T> to_ret = reinterpret_cast<const T&>(opt_buffer);
+    traits::copy_if_trivial_t<T> to_ret = reinterpret_cast<const T&>(opt_buffer);
     return to_ret;
   }
   
