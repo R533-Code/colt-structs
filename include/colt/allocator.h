@@ -100,12 +100,12 @@ namespace colt
       /// @param ptr The pointer to the memory block
       /// @param size The size of the memory block pointed by 'ptr'
       constexpr TypedBlock(void* ptr, size_t size) noexcept
-        : ptr(reinterpret_cast<T*>(ptr)), size(size / sizeof(T)) {}
+        : ptr(std::launder(reinterpret_cast<T*>(ptr))), size(size / sizeof(T)) {}
 
       /// @brief Constructs a TypedBlock over a MemBlock
       /// @param blk The MemBlock
       constexpr TypedBlock(MemBlock blk) noexcept
-        : ptr(reinterpret_cast<T*>(blk.getPtr())), size(blk.getByteSize().size / sizeof(T)) {}
+        : ptr(std::launder(reinterpret_cast<T*>(blk.getPtr()))), size(blk.getByteSize().size / sizeof(T)) {}
 
       /// @brief Check if the block is empty (getPtr() == nullptr)
       /// @return True if the block is empty
@@ -151,7 +151,7 @@ namespace colt
 
       /// @brief Convert a TypedBlock to a MemBlock
       /// @return MemBlock
-      constexpr operator MemBlock() const noexcept { return MemBlock{ reinterpret_cast<void*>(ptr), size * sizeof(T) }; }
+      constexpr operator MemBlock() const noexcept { return MemBlock{ std::launder(reinterpret_cast<void*>(ptr)), size * sizeof(T) }; }
 
 #ifdef COLT_DEBUG
       constexpr T*& impl_get_ptr() noexcept { return ptr; }
