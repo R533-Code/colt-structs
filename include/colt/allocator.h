@@ -394,10 +394,15 @@ namespace colt
     public:
       /// @brief Register function to call on exit
       /// @param func The function to register
-      void registerOnNullFn(void(*func)(void)) noexcept
+      /// @return True if registering was successful, false if there is no more capacity for registering
+      bool registerOnNullFn(void(*func)(void)) noexcept
       {
         if (register_count.load(std::memory_order::memory_order_relaxed) < register_size)
+        {
           reg_array[register_count.fetch_add(1)] = func;
+          return true;
+        }
+        return false;
       }
 
       /// @brief Allocates a MemBlock through allocator
@@ -469,6 +474,7 @@ namespace colt
     /// @return The non-null memory block
     inline MemBlock allocate(sizes::ByteSize size) noexcept
     {
+      assert(size.size != 0 && "Cannot allocate 0 bytes!");
       return global_allocator.allocate(size);
     }
 
@@ -477,6 +483,16 @@ namespace colt
     inline void deallocate(MemBlock blk) noexcept
     {
       global_allocator.deallocate(blk);
+    }
+    
+    /// @brief Register a null callback for the global allocator.
+    /// As the global allocator will exit instead of returning a nullptr,
+    /// the user might want to print a message.
+    /// @param fn The function pointer to register
+    /// @return True if registering was successful, false if there is no more capacity for registering
+    inline bool registerOnNullFn(void(*fn)(void)) noexcept
+    {
+      return global_allocator.registerOnNullFn(fn);
     }
 
     namespace details
@@ -489,7 +505,7 @@ namespace colt
       {
         static inline TypedBlock<T> new_t(Args&&... args) noexcept
         {
-          auto blk = global_allocator.allocate({ sizeof(T) });
+          auto blk = allocate({ sizeof(T) });
           new(blk.getPtr()) T(std::forward<Args>(args)...);
           return blk;
         }
@@ -500,7 +516,7 @@ namespace colt
       {
         static inline TypedBlock<T> new_t(Args&&... args)
         {
-          auto blk = global_allocator.allocate({ sizeof(T) });
+          auto blk = allocate({ sizeof(T) });
           try
           {
             new(blk.getPtr()) T(std::forward<Args>(args)...);
@@ -508,7 +524,7 @@ namespace colt
           }
           catch (...) //avoid memory leak by freeing memory and re-throw
           {
-            global_allocator.deallocate(blk);
+            deallocate(blk);
             throw;
           }
         }
@@ -523,7 +539,7 @@ namespace colt
         static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
         {
           reinterpret_cast<T*>(blk.getPtr())->~T();
-          global_allocator.deallocate(blk);
+          deallocate(blk);
           //On debug, make the block empty to ensure that the user
           //does not use a deleted block
           COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
@@ -538,14 +554,14 @@ namespace colt
           try
           {
             reinterpret_cast<T*>(blk.getPtr())->~T();
-            global_allocator.deallocate(blk);
+            deallocate(blk);
             //On debug, make the block empty to ensure that the user
             //does not use a deleted block
             COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
           }
           catch (...)
           {
-            global_allocator.deallocate(blk);
+            deallocate(blk);
             COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
             throw;
           }
