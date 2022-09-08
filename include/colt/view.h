@@ -96,13 +96,13 @@ namespace colt {
     /// Complexity: O(1)
     /// Precondition: !isEmpty()
     /// @return The first item of the view
-    constexpr traits::copy_if_trivial<T> getFront() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T> getFront() const noexcept;
 
     /// @brief Get the back of the view.
     /// Complexity: O(1)
     /// Precondition: !isEmpty()
     /// @return The last item of the view
-    constexpr traits::copy_if_trivial<T> getBack() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T> getBack() const noexcept;
 
     /// @brief Shortens the view from the front by 1.
     /// Complexity: O(1)
@@ -131,7 +131,7 @@ namespace colt {
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
-    constexpr traits::copy_if_trivial_t<T> operator[](size_t index) const noexcept;
+    constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;
 
     /// @brief Splices a view using a range.
     /// Complexity: O(1)
@@ -154,14 +154,14 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial<T> ContiguousView<T>::getFront() const noexcept
+  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::getFront() const noexcept
   {
     assert(!isEmpty() && "View was empty!");
     return begin_ptr[0];
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial<T> ContiguousView<T>::getBack() const noexcept
+  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::getBack() const noexcept
   {
     assert(!isEmpty() && "View was empty!");
     return begin_ptr[size - 1];
@@ -198,7 +198,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<T> ContiguousView<T>::operator[](size_t index) const noexcept
+  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::operator[](size_t index) const noexcept
   {
     assert(index < size && "Invalid index!");
     return begin_ptr[index];
@@ -215,6 +215,21 @@ namespace colt {
 
     return { begin_ptr + begin, end - begin };
   }
+
+#ifdef COLT_USE_IOSTREAMS
+  template<typename T>
+  static std::ostream& operator<<(std::ostream& os, const ContiguousView<T>& var)
+  {
+    static_assert(traits::is_coutable_v<T>, "Type of unique_ptr should implement operator<<(std::ostream&)!");
+    os << '[';
+    if (!var.isEmpty())
+      os << var.getFront();
+    for (size_t i = 1; i < var.getSize(); i++)
+      os << ", " << var[i];
+    os << ']';
+    return os;
+  }
+#endif
 }
 
 #endif //!HG_COLT_VIEW
