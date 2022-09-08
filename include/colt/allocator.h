@@ -520,9 +520,9 @@ namespace colt
       template<typename T, typename... Args>
       struct delete_t_impl<true, T, Args...>
       {
-        static inline void delete_t(TypedBlock<T> COLT_REF_ON_DEBUG blk) noexcept
+        static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
         {
-          blk.getPtr()->~T();
+          reinterpret_cast<T*>(blk.getPtr())->~T();
           global_allocator.deallocate(blk);
           //On debug, make the block empty to ensure that the user
           //does not use a deleted block
@@ -533,11 +533,11 @@ namespace colt
       template<typename T, typename... Args>
       struct delete_t_impl<false, T, Args...>
       {
-        static inline void delete_t(TypedBlock<T> COLT_REF_ON_DEBUG blk) noexcept
+        static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
         {
           try
           {
-            blk.getPtr()->~T();
+            reinterpret_cast<T*>(blk.getPtr())->~T();
             global_allocator.deallocate(blk);
             //On debug, make the block empty to ensure that the user
             //does not use a deleted block
@@ -574,9 +574,19 @@ namespace colt
     /// @brief Destroys and frees an object that was allocated through the global allocator
     /// @tparam T The type to destroy
     /// @param blk The block to destroy
+    inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept(std::is_nothrow_destructible_v<T>)
+    {
+      static_assert(!std::is_array_v<T>, "Use delete_array_t for array types!");
+      return details::delete_t_impl<std::is_nothrow_destructible_v<T>, T>::delete_t(blk);
+    }
+
+    template<typename T>
+    /// @brief Destroys and frees an object that was allocated through the global allocator
+    /// @tparam T The type to destroy
+    /// @param blk The block to destroy
     inline void delete_t(TypedBlock<T> COLT_REF_ON_DEBUG blk) noexcept(std::is_nothrow_destructible_v<T>)
     {
-      static_assert(!std::is_array_v<T>, "Use new_array_t for array types!");
+      static_assert(!std::is_array_v<T>, "Use delete_array_t for array types!");
       return details::delete_t_impl<std::is_nothrow_destructible_v<T>, T>::delete_t(blk);
     }
 
