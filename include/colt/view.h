@@ -26,34 +26,28 @@ namespace colt {
     *********************************/
 
     /// @brief Constructs a view over the range [begin, begin + view_size).
-    /// Complexity: O(1)
     /// @param begin The beginning of the view
     /// @param view_size The size of the view
     constexpr ContiguousView(const T* begin, size_t view_size) noexcept
       : begin_ptr(begin), size(view_size) {}
 
     /// @brief Constructs a view over the range [begin, end).
-    /// Complexity: O(1)
     /// Precondition: end > begin.
     /// @param begin The beginning of the view
     /// @param end The end of the view
     constexpr ContiguousView(const T* begin, const T* end) noexcept;      
 
     /// @brief Default trivial copy-constructor.
-    /// Complexity: O(1)
     /// @param  ContiguousView to copy
     constexpr ContiguousView(const ContiguousView&) noexcept = default;
     /// @brief Default trivial move-constructor.
-    /// Complexity: O(1) 
     /// @param  ContiguousView to move
     constexpr ContiguousView(ContiguousView&&) noexcept = default;
     /// @brief Default trivial copy-assignment operator.
-    /// Complexity: O(1)
     /// @param  ContiguousView to copy
     /// @return Self
     constexpr ContiguousView& operator=(ContiguousView&&) noexcept = default;
     /// @brief Default trivial move-assignment operator.
-    /// Complexity: O(1)
     /// @param  ContiguousView to move
     /// @return Self
     constexpr ContiguousView& operator=(const ContiguousView&) noexcept = default;
@@ -63,78 +57,64 @@ namespace colt {
     *********************************/
 
     /// @brief Returns an iterator to the beginning of the view.
-    /// Complexity: O(1)
     /// @return Iterator to the beginning of the view
     constexpr ContiguousIterator<const T> begin() const noexcept { return begin_ptr; }
 
     /// @brief Returns an iterator past the end of the view.
-    /// Complexity: O(1)
     /// @return Iterator to the end of the view
     constexpr ContiguousIterator<const T> end() const noexcept { return begin_ptr + size; }
 
     /// @brief Returns a pointer to the beginning of the view.
-    /// Complexity: O(1)
     /// @return Pointer to the beginning of the view
     constexpr const T* getData() const noexcept { return begin_ptr; }
 
     /// @brief Returns the count of object the view spans on.
-    /// Complexity: O(1)
     /// @return The count of objects
     constexpr size_t getSize() const noexcept { return size; }
 
     /// @brief Returns the byte size the view spans on.
-    /// Complexity: O(1)
     /// @return The byte size
     constexpr sizes::ByteSize getByteSize() const noexcept;
 
     /// @brief Check if the view is empty.
-    /// Complexity: O(1)
     /// @return True if the size of the view is 0
     constexpr bool isEmpty() const noexcept { return size == 0; }
 
     /// @brief Get the front of the view.
-    /// Complexity: O(1)
     /// Precondition: !isEmpty()
     /// @return The first item of the view
     constexpr traits::copy_if_trivial_t<const T> getFront() const noexcept;
 
     /// @brief Get the back of the view.
-    /// Complexity: O(1)
     /// Precondition: !isEmpty()
     /// @return The last item of the view
     constexpr traits::copy_if_trivial_t<const T> getBack() const noexcept;
 
     /// @brief Shortens the view from the front by 1.
-    /// Complexity: O(1)
     /// Precondition: !isEmpty()
     constexpr void popFront() const noexcept;
 
     /// @brief Shortens the view from the front by N.
-    /// Complexity: O(1)
     /// Precondition: N <= size
     /// @param N The number of objects to pop
     constexpr void popFrontN(size_t N) const noexcept;
 
     /// @brief Shortens the view from the back by 1.
-    /// Complexity: O(1)
     /// Precondition: !isEmpty()
     constexpr void popBack() const noexcept;
 
     /// @brief Shortens the view from the back by N.
-    /// Complexity: O(1)
     /// Precondition: N <= size
     /// @param N The number of objects to pop
     constexpr void popBackN(size_t N) const noexcept;
 
     /// @brief Returns the object at index 'index' of the view.
-    /// Complexity: O(1)
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
     constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;
 
     /// @brief Splices a view using a range.
-    /// Complexity: O(1)
     /// @param range The range to use for splicing
     /// @return Spliced view
     constexpr ContiguousView<T> spliceRange(Range range) const noexcept;
@@ -178,7 +158,7 @@ namespace colt {
   template<typename T>
   constexpr void ContiguousView<T>::popFrontN(size_t N) const noexcept
   {
-    assert(N <= size && "View was empty!");
+    assert(N <= size && "View does not contain enough items!");
     begin_ptr += N;
     size -= N;
   }
@@ -193,7 +173,7 @@ namespace colt {
   template<typename T>
   constexpr void ContiguousView<T>::popBackN(size_t N) const noexcept
   {
-    assert(N <= size && "View was empty!");
+    assert(N <= size && "View does not contain enough items!");
     size -= N;
   }
 
