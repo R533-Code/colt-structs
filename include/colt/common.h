@@ -30,12 +30,15 @@
 #endif
 
 #ifdef COLT_USE_IOSTREAMS
-#include <iostream>
+  #include <iostream>
 #endif
 
-#ifdef FMT_VERSION
-#define COLT_USE_FMT
-#include <fmt/core.h>
+#ifdef COLT_USE_FMT
+  #ifndef FMT_VERSION
+    #undef COLT_USE_FMT
+  #else
+    #include <fmt/core.h>
+  #endif
 #endif
 
 /// @brief Generates the template meta-programming boilerplate to check if a type has a member.
@@ -307,6 +310,32 @@ namespace colt {
     COLT_HAS_MEMBER(allocate);
     COLT_HAS_MEMBER(deallocate);
     COLT_HAS_MEMBER(owns);
+    
+    /********** PRINTABLE **********/
+
+#ifdef COLT_USE_IOSTREAMS
+    template<typename T, typename dummy = void>
+    /// @brief Check if a type can be printed to std::cout through 'operator<<'
+    /// @tparam T The type to check
+    /// @tparam dummy SFINAE helper
+    struct is_coutable
+    {
+      static constexpr bool value = false;
+    };
+
+    template<typename T>
+    /// @brief Check if a type can be printed to std::cout through 'operator<<'
+    /// @tparam T The type to check
+    struct is_coutable<T, typename std::enable_if_t<std::is_same_v<decltype(std::cout << std::declval<T>()), std::ostream&>>>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<typename T>
+    /// @brief Short hand for is_coutable<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_coutable_v = is_coutable<T>::value;
+#endif
 
     /********** MEMORY ALLOCATION **********/
 
