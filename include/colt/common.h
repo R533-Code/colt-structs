@@ -45,21 +45,21 @@
 /// Usage: COLT_HAS_MEMBER(print)
 /// has_print<int>::value || has_print_v<int>
 #define COLT_HAS_MEMBER(member) template<typename T>\
-	class has_##member \
-	{	\
-		using one = char; \
-		struct two {char x[2]; }; \
-		template <typename C> static one test(decltype(&C::##member)); \
-		template <typename C> static two test(...); \
-	public: \
-		enum { value = sizeof(test<T>(0)) == sizeof(char) }; \
-	}; \
-	template<typename T> \
-	static constexpr bool has_##member##_v = has_##member<T>::value
+  class has_##member \
+  {	\
+    using one = char; \
+    struct two {char x[2]; }; \
+    template <typename C> static one test(decltype(&C::##member)); \
+    template <typename C> static two test(...); \
+  public: \
+    enum { value = sizeof(test<T>(0)) == sizeof(char) }; \
+  }; \
+  template<typename T> \
+  static constexpr bool has_##member##_v = has_##member<T>::value
 
 /// @brief Contains all colt provided utilities
 namespace colt {	
-	
+  
   /// @brief Contains size types
   namespace sizes
   {
@@ -170,107 +170,107 @@ namespace colt {
 #endif
   }
 
-	/*********************************
-	* RANGES TYPES FOR SPLICING
-	*********************************/
+  /*********************************
+  * RANGES TYPES FOR SPLICING
+  *********************************/
 
-	/// @brief Contains type traits and tag types
-	namespace traits
-	{
-		/// @brief Tag structure for a Range with no beginning offset
-		struct RangeBeginT { static constexpr size_t value = 0; };
-		/// @brief Tag structure for a Range with no end offset
-		struct RangeEndT { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
-	}
+  /// @brief Contains type traits and tag types
+  namespace traits
+  {
+    /// @brief Tag structure for a Range with no beginning offset
+    struct RangeBeginT { static constexpr size_t value = 0; };
+    /// @brief Tag structure for a Range with no end offset
+    struct RangeEndT { static constexpr size_t value = std::numeric_limits<size_t>::max(); };
+  }
 
-	/// @brief Tag object for a Range with no beginning offset
-	constexpr const traits::RangeBeginT Begin;
-	/// @brief Tag object for a Range with no end offset
-	constexpr const traits::RangeEndT End;
+  /// @brief Tag object for a Range with no beginning offset
+  constexpr const traits::RangeBeginT Begin;
+  /// @brief Tag object for a Range with no end offset
+  constexpr const traits::RangeEndT End;
 
-	/// @brief Symbolizes a range used for splicing views.
-	/// A Range contains 2 fields: the offset to the beginning of the view,
-	/// and the offset to the end of the view.
-	/// As we would like a range to be able to represent the whole view without
-	/// having to store the exact size of the view, a special value of the end offset
-	/// (RangeEndT::value) is used to represents that end.
-	class Range
-	{
-		size_t begin = traits::RangeBeginT::value;
-		size_t end = traits::RangeEndT::value;
+  /// @brief Symbolizes a range used for splicing views.
+  /// A Range contains 2 fields: the offset to the beginning of the view,
+  /// and the offset to the end of the view.
+  /// As we would like a range to be able to represent the whole view without
+  /// having to store the exact size of the view, a special value of the end offset
+  /// (RangeEndT::value) is used to represents that end.
+  class Range
+  {
+    size_t begin = traits::RangeBeginT::value;
+    size_t end = traits::RangeEndT::value;
 
-	public:
+  public:
 
-		/// @brief Constructs a Range.
-		/// Precondition: begin <= end
-		/// @param begin The index to the beginning of the Range
-		/// @param end The index to the end of the Range
-		constexpr Range(size_t begin, size_t end) noexcept
-			: begin(begin), end(end) { assert(begin <= end && "Invalid Range!"); }
-		
-		/// @brief Constructs a Range that represents an empty Range
-		constexpr Range() noexcept
-			: begin(0), end(0) {}
+    /// @brief Constructs a Range.
+    /// Precondition: begin <= end
+    /// @param begin The index to the beginning of the Range
+    /// @param end The index to the end of the Range
+    constexpr Range(size_t begin, size_t end) noexcept
+      : begin(begin), end(end) { assert(begin <= end && "Invalid Range!"); }
+    
+    /// @brief Constructs a Range that represents an empty Range
+    constexpr Range() noexcept
+      : begin(0), end(0) {}
 
-		/// @brief Constructs a Range that represents a whole Range.
-		/// Same as Range(RangeBeginT).
-		/// @param  RangeBeginT
-		/// @param  RangeEndT
-		constexpr Range(traits::RangeBeginT, traits::RangeEndT) noexcept {}
-		
-		/// @brief Constructs a Range that represents a whole Range.
-		/// Same as Range(RangeBeginT, RangeEndT).
-		/// @param  RangeBeginT
-		constexpr Range(traits::RangeBeginT) noexcept {}
+    /// @brief Constructs a Range that represents a whole Range.
+    /// Same as Range(RangeBeginT).
+    /// @param  RangeBeginT
+    /// @param  RangeEndT
+    constexpr Range(traits::RangeBeginT, traits::RangeEndT) noexcept {}
+    
+    /// @brief Constructs a Range that represents a whole Range.
+    /// Same as Range(RangeBeginT, RangeEndT).
+    /// @param  RangeBeginT
+    constexpr Range(traits::RangeBeginT) noexcept {}
 
-		/// @brief Constructs a Range from begin, till end of Range.
-		/// Same as Range(size_t, RangeEndT).
-		/// @param begin The index to the beginning of the Range
-		constexpr Range(size_t begin) noexcept
-			: begin(begin) {}
+    /// @brief Constructs a Range from begin, till end of Range.
+    /// Same as Range(size_t, RangeEndT).
+    /// @param begin The index to the beginning of the Range
+    constexpr Range(size_t begin) noexcept
+      : begin(begin) {}
 
-		/// @brief Constructs a Range from begin, till end of Range.
-		/// Same as Range(size_t).
-		/// @param begin The index to the beginning of the Range
-		/// @param  RangeEndT
-		constexpr Range(size_t begin, traits::RangeEndT) noexcept
-			: begin(begin) {}
+    /// @brief Constructs a Range from begin, till end of Range.
+    /// Same as Range(size_t).
+    /// @param begin The index to the beginning of the Range
+    /// @param  RangeEndT
+    constexpr Range(size_t begin, traits::RangeEndT) noexcept
+      : begin(begin) {}
 
-		/// @brief Constructs a Range from the beginning to 'end'
-		/// @param  RangeBeginT
-		/// @param end The end of the Range
-		constexpr Range(traits::RangeBeginT, size_t end) noexcept
-			: end(end) {}
+    /// @brief Constructs a Range from the beginning to 'end'
+    /// @param  RangeBeginT
+    /// @param end The end of the Range
+    constexpr Range(traits::RangeBeginT, size_t end) noexcept
+      : end(end) {}
 
-		/// @brief Check if the Range represents an empty view
-		/// @return True if the Range is empty
-		constexpr bool isNone() const noexcept { return begin == end; }
-		
-		/// @brief Check if the Range represents the whole view
-		/// @return True if the Range represents the whole view
-		constexpr bool isAll() const noexcept { return begin == traits::RangeBeginT::value && end == traits::RangeEndT::value; }
+    /// @brief Check if the Range represents an empty view
+    /// @return True if the Range is empty
+    constexpr bool isNone() const noexcept { return begin == end; }
+    
+    /// @brief Check if the Range represents the whole view
+    /// @return True if the Range represents the whole view
+    constexpr bool isAll() const noexcept { return begin == traits::RangeBeginT::value && end == traits::RangeEndT::value; }
 
-		/// @brief Get the size of the Range
-		/// @return Size of the Range
-		constexpr size_t getSize() const noexcept { return end - begin; }
+    /// @brief Get the size of the Range
+    /// @return Size of the Range
+    constexpr size_t getSize() const noexcept { return end - begin; }
 
-		/// @brief Get the offset to the beginning of the range
-		/// @return The offset to the beginning
-		constexpr size_t getBeginOffset() const noexcept { return begin; }
+    /// @brief Get the offset to the beginning of the range
+    /// @return The offset to the beginning
+    constexpr size_t getBeginOffset() const noexcept { return begin; }
 
-		/// @brief Get the offset to the beginning of the range
-		/// @return The offset to the end or RangeEndT::value for end of view
-		constexpr size_t getEndOffset() const noexcept { return end; }
+    /// @brief Get the offset to the beginning of the range
+    /// @return The offset to the end or RangeEndT::value for end of view
+    constexpr size_t getEndOffset() const noexcept { return end; }
 
-		/// @brief Returns an empty Range.
-		/// Same as Range{}.
-		/// @return Empty Range
-		constexpr static Range getEmptyRange() noexcept { return Range{}; }
-		/// @brief Returns a Range over the whole view.
-		/// Same as Range{ Begin, End }.
-		/// @return Whole Range
-		constexpr static Range getWholeRange() noexcept { return Range{ Begin, End }; }
-	};
+    /// @brief Returns an empty Range.
+    /// Same as Range{}.
+    /// @return Empty Range
+    constexpr static Range getEmptyRange() noexcept { return Range{}; }
+    /// @brief Returns a Range over the whole view.
+    /// Same as Range{ Begin, End }.
+    /// @return Whole Range
+    constexpr static Range getWholeRange() noexcept { return Range{ Begin, End }; }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   static std::ostream& operator<<(std::ostream& os, const Range& var)
@@ -292,9 +292,9 @@ namespace colt {
   }
 #endif
 
-	/*********************************
-	* COMMON TRAITS AND HELPERS
-	*********************************/	
+  /*********************************
+  * COMMON TRAITS AND HELPERS
+  *********************************/	
 
   namespace traits
   {
@@ -385,7 +385,7 @@ namespace colt {
     template<typename T>
     /// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
     /// @tparam T The type to copy
-    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, std::remove_const<T>::type, const T&>; };
+    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, std::remove_const_t<T>, const T&>; };
 
     template<typename T>
     /// @brief Short hand for copy_if_trivial::type
@@ -454,11 +454,11 @@ namespace colt {
     static constexpr bool is_tag_v = is_tag<T>::value;
   }
 
-	/// @brief Tag object for constructing in place
-	constexpr const traits::InPlaceT InPlace;
+  /// @brief Tag object for constructing in place
+  constexpr const traits::InPlaceT InPlace;
 
-	/// @brief Tag object for empty Optional
-	constexpr const traits::NoneT None;
+  /// @brief Tag object for empty Optional
+  constexpr const traits::NoneT None;
 
   /*********************************
   * FUNCTIONS HELPERS
