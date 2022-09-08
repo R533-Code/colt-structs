@@ -151,7 +151,7 @@ namespace colt
 
       /// @brief Convert a TypedBlock to a MemBlock
       /// @return MemBlock
-      constexpr operator MemBlock() const noexcept { return MemBlock{ std::launder(reinterpret_cast<void*>(ptr)), size * sizeof(T) }; }
+      constexpr operator MemBlock() const noexcept { return MemBlock{ reinterpret_cast<void*>(ptr), size * sizeof(T) }; }
 
 #ifdef COLT_DEBUG
       constexpr T*& impl_get_ptr() noexcept { return ptr; }
