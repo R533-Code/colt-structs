@@ -385,7 +385,7 @@ namespace colt {
     template<typename T>
     /// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
     /// @tparam T The type to copy
-    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, T, const T&>; };
+    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, std::remove_const<T>::type, const T&>; };
 
     template<typename T>
     /// @brief Short hand for copy_if_trivial::type
