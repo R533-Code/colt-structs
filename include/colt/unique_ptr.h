@@ -173,6 +173,7 @@ namespace colt
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const unique_ptr<T>& var)
   {
+    static_assert(traits::is_coutable_v<T>, "Type of unique_ptr should implement operator<<(std::ostream&)!");
     os << var.getPtr();
     return os;
   }
