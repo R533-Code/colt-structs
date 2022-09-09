@@ -383,19 +383,19 @@ namespace colt
       static_assert(traits::is_allocator_v<allocator>, "'allocator' should be an allocator!");
 
       /// @brief The function pointer type that can be registered
-      using register_fn_t = void(*)(void);
+      using register_fn_t = void(*)(void) noexcept;
 
       /// @brief The array of registered function pointer
       register_fn_t reg_array[register_size];
       /// @brief The number of registered function.
-      /// An atomic is used to protect the 'reg_array' from multiple threads
+      /// An atomic is used to protect the 'reg_array' from multiple threads accesses
       std::atomic<size_t> register_count;
 
     public:
       /// @brief Register function to call on exit
       /// @param func The function to register
       /// @return True if registering was successful, false if there is no more capacity for registering
-      bool registerOnNullFn(void(*func)(void)) noexcept
+      bool registerOnNullFn(void(*func)(void) noexcept) noexcept
       {
         if (register_count.load(std::memory_order::memory_order_relaxed) < register_size)
         {
@@ -490,7 +490,7 @@ namespace colt
     /// the user might want to print a message.
     /// @param fn The function pointer to register
     /// @return True if registering was successful, false if there is no more capacity for registering
-    inline bool registerOnNullFn(void(*fn)(void)) noexcept
+    inline bool registerOnNullFn(void(*fn)(void) noexcept) noexcept
     {
       return global_allocator.registerOnNullFn(fn);
     }
