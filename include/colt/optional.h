@@ -143,7 +143,7 @@ namespace colt {
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const Optional<T>& var)
   {
-    static_assert(traits::is_coutable_v<T>, "Type of unique_ptr should implement operator<<(std::ostream&)!");
+    static_assert(traits::is_coutable_v<T>, "Type of Optional should implement operator<<(std::ostream&)!");
     if (var.isNone())
       os << "None";
     else
