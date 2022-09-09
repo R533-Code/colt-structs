@@ -80,6 +80,10 @@ namespace colt {
     /// @return True if the size of the view is 0
     constexpr bool isEmpty() const noexcept { return size == 0; }
 
+    /// @brief Check if the view is not empty.
+    /// @return True if the size of the view is not 0
+    constexpr bool isNotEmpty() const noexcept { return size != 0; }
+
     /// @brief Get the front of the view.
     /// Precondition: !isEmpty()
     /// @return The first item of the view
@@ -200,7 +204,7 @@ namespace colt {
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const ContiguousView<T>& var)
   {
-    static_assert(traits::is_coutable_v<T>, "Type of unique_ptr should implement operator<<(std::ostream&)!");
+    static_assert(traits::is_coutable_v<T>, "Type of ContiguousView should implement operator<<(std::ostream&)!");
     os << '[';
     if (!var.isEmpty())
       os << var.getFront();
