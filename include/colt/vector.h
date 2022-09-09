@@ -181,6 +181,11 @@ namespace colt
     /// @return View over the Vector
     constexpr ContiguousView<T> toView() const noexcept { return { blk.getPtr(), size }; }
 
+    /// @brief Obtains a view over the 'range' of the Vector.
+    /// @param range The range to obtain from the Vector
+    /// @return View over 'range' of the Vector
+    constexpr ContiguousView<T> toView(Range range) const noexcept;
+
     /// @brief Converts a Vector to a view implicitly
     /// @return ContiguousView over the whole Vector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { blk.getPtr(), size }; }
@@ -342,6 +347,15 @@ namespace colt
   {
     assert(!isEmpty() && "Vector was empty!");
     return blk.getPtr()[size - 1];
+  }
+
+  template<typename T>
+  constexpr ContiguousView<T> Vector<T>::toView(Range range) const noexcept
+  {
+    size_t begin = range.getBeginOffset();
+    size_t end = range.getEndOffset();
+    end = (end > size ? size : end);
+    return { begin_ptr + begin, end - begin };
   }
   
   template<typename T>

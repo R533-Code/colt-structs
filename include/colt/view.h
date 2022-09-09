@@ -118,7 +118,7 @@ namespace colt {
     /// @return The object at index 'index'
     constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;
 
-    /// @brief Splices a view using a range.
+    /// @brief Splices a view using a range
     /// @param range The range to use for splicing
     /// @return Spliced view
     constexpr ContiguousView<T> spliceRange(Range range) const noexcept;
@@ -193,10 +193,7 @@ namespace colt {
   {
     size_t begin = range.getBeginOffset();
     size_t end = range.getEndOffset();
-    end = (end == traits::RangeEndT::value ? size : end);
-    
-    assert(end < size && "End of range should be smaller than size of view!");
-
+    end = (end > size ? size : end);    
     return { begin_ptr + begin, end - begin };
   }
 
