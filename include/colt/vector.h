@@ -55,7 +55,7 @@ namespace colt
 
     void reserve(size_t by_more) noexcept
     {
-      auto new_blk = memory::allocate({ blk.getByteSize().size + by_more * sizeof(T) });
+      memory::TypedBlock<T> new_blk = memory::allocate({ blk.getByteSize().size + by_more * sizeof(T) });
       if constexpr (std::is_trivial_v<T>)
       {
         std::memcpy(new_blk.getPtr(), blk.getPtr(), size * sizeof(T));
@@ -63,7 +63,7 @@ namespace colt
       else
       {
         for (size_t i = 0; i < size; i++)
-          new(new_blk.getPtr() + i) T(std::forward<T>(blk.getPtr() + i));
+          new(new_blk.getPtr() + i) T(std::move(blk.getPtr()[i]));
         clear();
       }
       memory::deallocate(blk);
