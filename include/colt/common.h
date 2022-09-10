@@ -184,9 +184,9 @@ namespace colt {
   }
 
   /// @brief Tag object for a Range with no beginning offset
-  constexpr const traits::RangeBeginT Begin;
+  constexpr inline const traits::RangeBeginT Begin;
   /// @brief Tag object for a Range with no end offset
-  constexpr const traits::RangeEndT End;
+  constexpr inline const traits::RangeEndT End;
 
   /// @brief Symbolizes a range used for splicing views.
   /// A Range contains 2 fields: the offset to the beginning of the view,
@@ -400,6 +400,9 @@ namespace colt {
     /// @brief Tag for empty Optional
     struct NoneT {};
 
+    /// @brief Tag for error in expected
+    struct ErrorT {};
+
     /// @brief Represents O(1)
     struct ConstantComplexityT {};
     /// @brief Represents amortized O(1)
@@ -433,6 +436,10 @@ namespace colt {
     struct is_tag<NoneT> { static constexpr bool value = true; };
 
     template<>
+    /// @brief NoneT is a tag
+    struct is_tag<ErrorT> { static constexpr bool value = true; };
+
+    template<>
     /// @brief ConstantComplexityT is a tag
     struct is_tag<ConstantComplexityT> { static constexpr bool value = true; };
     template<>
@@ -455,10 +462,13 @@ namespace colt {
   }
 
   /// @brief Tag object for constructing in place
-  constexpr const traits::InPlaceT InPlace;
+  constexpr inline const traits::InPlaceT InPlace;
 
   /// @brief Tag object for empty Optional
-  constexpr const traits::NoneT None;
+  constexpr inline const traits::NoneT None;
+
+  /// @brief Tag object for error in Expected
+  constexpr inline const traits::ErrorT Error;
 
   /*********************************
   * FUNCTIONS HELPERS
