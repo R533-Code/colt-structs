@@ -455,19 +455,13 @@ namespace colt
     
     namespace details
     {
-      /// @brief Returns a reference to the global allocator.
-      /// Used as pre-C++17, inline cannot be applied to global variables.
-      /// @return Reference to the global allocator
-      inline GlobalAllocator_t& getGlobalAllocator() noexcept
-      {
-        static GlobalAllocator_t global_allocator;
-        return global_allocator;
-      }
+      /// @brief Global allocator
+      inline GlobalAllocator_t global_allocator;
     }
 
     /// @brief Reference to the global allocator.
     /// Accesses to the global allocator are thread-safe.
-    GlobalAllocator_t& global_allocator = details::getGlobalAllocator();
+    GlobalAllocator_t& global_allocator = details::global_allocator;
 
     /// @brief Allocates a block of memory through the global allocator
     /// @param size The size of the block
