@@ -376,8 +376,8 @@ namespace colt
       bool owns(MemBlock blk) noexcept;
     };
 
-    template<typename allocator, size_t register_size = 5, size_t exit_error_code = 1>
-    class ExitOnNULLAllocator
+    template<typename allocator, size_t register_size = 5>
+    class AbortOnNULLAllocator
       : private allocator
     {
       static_assert(traits::is_allocator_v<allocator>, "'allocator' should be an allocator!");
@@ -397,9 +397,9 @@ namespace colt
       /// @return True if registering was successful, false if there is no more capacity for registering
       bool registerOnNullFn(void(*func)(void) noexcept) noexcept
       {
-        if (register_count.load(std::memory_order::memory_order_relaxed) < register_size)
+        if (register_count.load(std::memory_order_relaxed) < register_size)
         {
-          reg_array[register_count.fetch_add(1)] = func;
+          reg_array[register_count.fetch_add(1, std::memory_order_release)] = func;
           return true;
         }
         return false;
@@ -416,7 +416,7 @@ namespace colt
         const size_t registered_count = register_count.load(std::memory_order::memory_order_relaxed);
         for (size_t i = 0; i < registered_count; i++)
           reg_array[i]();
-        std::exit(exit_error_code);
+        std::abort();
       }
 
       /// @brief Deallocates a MemBlock that was allocated using the current allocator
@@ -444,7 +444,7 @@ namespace colt
     /// call std::exit(). To register a function to be called in that case,
     /// use registerOnNullFn(), which can register up to 5 functions (by default).
     using GlobalAllocator_t =
-      ExitOnNULLAllocator<
+      AbortOnNULLAllocator<
       ThreadSafeAllocator<
         Segregator<512,
         SmallAllocator_t,
