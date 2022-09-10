@@ -273,7 +273,7 @@ namespace colt
   void Vector<T>::reserve(size_t by_more) noexcept
   {
     memory::TypedBlock<T> new_blk = memory::allocate({ blk.getByteSize().size + by_more * sizeof(T) });
-    if constexpr (std::is_trivial_v<T>)
+    if constexpr (std::is_trivially_copyable_v<T>)
     {
       std::memcpy(new_blk.getPtr(), blk.getPtr(), size * sizeof(T));
     }
