@@ -459,6 +459,47 @@ namespace colt {
     /// @brief Short hand for is_tag<T>::value
     /// @tparam T The type to check
     static constexpr bool is_tag_v = is_tag<T>::value;
+
+    /********** PACKS **********/
+
+    template<typename T, typename... Args>
+    /// @brief Returns the first argument of a pack
+    /// @tparam ...Args The type pack
+    /// @tparam T The first argument
+    struct get_first
+    {
+      using type = T;
+    };
+
+    template<typename T, typename... Args>
+    /// @brief Short hand for get_first<T, Args...>::type
+    /// @tparam ...Args The type pack
+    /// @tparam T The first argument
+    using get_first_t = typename get_first<T, Args...>::type;
+
+    template<bool fi, bool... va>
+    struct disjunction {};
+
+    template<bool... va>
+    struct disjunction<true, va...>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<bool... va>
+    struct disjunction<false, va...>
+    {
+      static constexpr bool value = disjunction<va...>::value;
+    };
+
+    template<bool fi>
+    struct disjunction<fi>
+    {
+      static constexpr bool value = fi;
+    };
+
+    template<bool fi, bool... va>
+    static constexpr bool disjunction_v = disjunction<fi, va...>::value;
   }
 
   /// @brief Tag object for constructing in place
