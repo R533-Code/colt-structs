@@ -121,7 +121,7 @@ namespace colt
     /// @brief Check if the Expected contains an error.
     /// Same as isError()
     /// @return True if the Expected contains an error
-    constexpr explicit operator!() const noexcept { return is_error; }
+    constexpr bool operator!() const noexcept { return is_error; }
     /// @brief Check if the Expected contains an expected value.
     /// Same as isExpected()
     /// @return True if the Expected contains an expected value
