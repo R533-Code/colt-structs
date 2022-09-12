@@ -118,6 +118,33 @@ namespace colt
     /// @return True if the Expected contains an expected value
     constexpr bool isExpected() const noexcept { return !is_error; }
 
+    /// @brief Check if the Expected contains an error.
+    /// Same as isError()
+    /// @return True if the Expected contains an error
+    constexpr explicit operator!() const noexcept { return is_error; }
+    /// @brief Check if the Expected contains an expected value.
+    /// Same as isExpected()
+    /// @return True if the Expected contains an expected value
+    constexpr explicit operator bool() const noexcept { return !is_error; }
+
+    /// @brief Returns the expected value.
+    /// Precondition: isExpected()
+    /// @return Reference to the expected value
+    constexpr ExpectedTy& operator*() noexcept;
+    /// @brief Returns the expected value.
+    /// Precondition: isExpected()
+    /// @return Const reference to the expected value
+    constexpr const ExpectedTy& operator*() const noexcept;
+
+    /// @brief Returns the expected value.
+    /// Precondition: isExpected()
+    /// @return Pointer to the expected value
+    constexpr ExpectedTy* operator->() noexcept;
+    /// @brief Returns the expected value.
+    /// Precondition: isExpected()
+    /// @return Const pointer to the expected value
+    constexpr const ExpectedTy* operator->() const noexcept;
+
     /// @brief Returns the error contained in the Expected.
     /// Precondition: isError()
     /// @return The error contained in the Expected
@@ -240,6 +267,34 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() noexcept
+  {
+    assert(isExpected() && "'Expected' contained an error!");
+    return expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() const noexcept
+  {
+    assert(isExpected() && "'Expected' contained an error!");
+    return expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() noexcept
+  {
+    assert(isExpected() && "'Expected' contained an error!");
+    return &expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() const noexcept
+  {
+    assert(isExpected() && "'Expected' contained an error!");
+    return &expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy> Expected<ExpectedTy, ErrorTy>::getError() const noexcept
   {
     assert(isError() && "'Expected' did not contain an error!");
@@ -249,7 +304,7 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy> Expected<ExpectedTy, ErrorTy>::getExpected() const noexcept
   {
-    assert(isExpected() && "'Expected' did contained an error!");
+    assert(isExpected() && "'Expected' contained an error!");
     return expected;
   }
 
