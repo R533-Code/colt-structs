@@ -199,7 +199,7 @@ namespace colt
   /// This can be a pessimization if the SmallVector regularly contains more
   /// than 'buff_count' elements: the internal stack buffer occupies memory
   /// that will not be used.
-  /// @tparam T 
+  /// @tparam T The type to store
   class SmallVector
   {
     static_assert(!traits::is_tag_v<T>, "Cannot use tag struct as typename!");
