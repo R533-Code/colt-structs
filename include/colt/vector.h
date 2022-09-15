@@ -228,6 +228,14 @@ namespace colt
     /// @param reserve_size The capacity of the SmallVector
     constexpr SmallVector(size_t reserve_size) noexcept;      
 
+    /// @brief Copy constructor
+    /// @param to_copy The SmallVector whose data to copy
+    constexpr SmallVector(const SmallVector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
+
+    /// @brief Move constructor
+    /// @param to_move The SmallVector whose data to move
+    constexpr SmallVector(SmallVector&& to_move) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>);
+
     /// @brief Destructor
     ~SmallVector() noexcept(std::is_nothrow_destructible_v<T>);    
 
@@ -336,7 +344,7 @@ namespace colt
     /// This always causes an allocation, so be sure that the stack capacity is not
     /// enough before calling.
     /// @param by_more The count of object to reserve for
-    constexpr void reserve(size_t by_more) noexcept;    
+    constexpr void reserve(size_t by_more) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>);
 
   private:
     /// @brief Returns the stack buffer's beginning pointer
@@ -562,11 +570,39 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
+  constexpr SmallVector<T, buff_count>::SmallVector(const SmallVector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+    : capacity(to_copy.capacity), size(to_copy.size)
+  {
+    if (!isStackAllocated())
+      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).getPtr());
+    
+    T* const ptr_d = get_current_ptr();
+    for (size_t i = 0; i < size; i++)
+      new(ptr_d + i) T(to_copy.ptr[i]);
+  }
+
+  template<typename T, size_t buff_count>
+  constexpr SmallVector<T, buff_count>::SmallVector(SmallVector&& to_move) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>)
+    : capacity(to_move.capacity), size(to_move.size)
+  {
+    if (!isStackAllocated())
+      ptr = std::exchange(to_move.ptr, nullptr);
+    else
+    {
+      T* const ptr_d = get_current_ptr();
+      T* const ptr_m = get_current_ptr();
+      for (size_t i = 0; i < size; i++)
+        new(ptr_d + i) T(std::move(ptr_m[i]));
+    }
+  }
+
+  template<typename T, size_t buff_count>
   SmallVector<T, buff_count>::~SmallVector() noexcept(std::is_nothrow_destructible_v<T>)
   {
     clear();
     if (!isStackAllocated())
-      memory::deallocate({ ptr, capacity * sizeof(T) });
+      if (ptr)
+        memory::deallocate({ ptr, capacity * sizeof(T) });
   }
 
   template<typename T, size_t buff_count>
@@ -648,7 +684,7 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
-  constexpr void SmallVector<T, buff_count>::reserve(size_t by_more) noexcept
+  constexpr void SmallVector<T, buff_count>::reserve(size_t by_more) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>)
   {
     memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * (capacity + by_more) });
     T* const ptr_d = get_current_ptr();
