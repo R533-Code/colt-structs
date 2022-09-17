@@ -5,7 +5,7 @@
 #ifndef HG_COLT_CHAR
 #define HG_COLT_CHAR
 
-#include "string.h"
+#include "view.h"
 
 /// @brief Contains character usage helpers
 namespace colt
@@ -15,8 +15,11 @@ namespace colt
 	/// are contained in the name.
 	/// @param name The string view to check for
 	/// @return True if the name is valid
-	bool isValidFileName(StringView name) noexcept
+	bool isValidFileName(ContiguousView<char> name) noexcept
 	{
+		if (name.isEmpty())
+			return false;
+
 #ifdef _WIN32
 		for (const auto& chr : name)
 		{
@@ -30,7 +33,7 @@ namespace colt
 				|| chr == '>')
 				return false;
 		}
-		if (name.back() == ' ' || name.back() == '.')
+		if (name.getBack() == ' ' || name.getBack() == '.')
 			return false;
 		return true;
 #else 
