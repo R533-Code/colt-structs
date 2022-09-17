@@ -96,21 +96,21 @@ namespace colt {
 
     /// @brief Shortens the view from the front by 1.
     /// Precondition: !isEmpty()
-    constexpr void popFront() const noexcept;
+    constexpr void popFront() noexcept;
 
     /// @brief Shortens the view from the front by N.
     /// Precondition: N <= size
     /// @param N The number of objects to pop
-    constexpr void popFrontN(size_t N) const noexcept;
+    constexpr void popFrontN(size_t N) noexcept;
 
     /// @brief Shortens the view from the back by 1.
     /// Precondition: !isEmpty()
-    constexpr void popBack() const noexcept;
+    constexpr void popBack() noexcept;
 
     /// @brief Shortens the view from the back by N.
     /// Precondition: N <= size
     /// @param N The number of objects to pop
-    constexpr void popBackN(size_t N) const noexcept;
+    constexpr void popBackN(size_t N) noexcept;
 
     /// @brief Returns the object at index 'index' of the view.
     /// Precondition: index < size
@@ -152,7 +152,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popFront() const noexcept
+  constexpr void ContiguousView<T>::popFront() noexcept
   {
     assert(!isEmpty() && "View was empty!");
     ++begin_ptr;
@@ -160,7 +160,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popFrontN(size_t N) const noexcept
+  constexpr void ContiguousView<T>::popFrontN(size_t N) noexcept
   {
     assert(N <= size && "View does not contain enough items!");
     begin_ptr += N;
@@ -168,14 +168,14 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popBack() const noexcept
+  constexpr void ContiguousView<T>::popBack() noexcept
   {
     assert(!isEmpty() && "View was empty!");
     --size;
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popBackN(size_t N) const noexcept
+  constexpr void ContiguousView<T>::popBackN(size_t N) noexcept
   {
     assert(N <= size && "View does not contain enough items!");
     size -= N;
