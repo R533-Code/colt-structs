@@ -400,8 +400,11 @@ namespace colt {
     /// @brief Tag for empty Optional
     struct NoneT {};
 
-    /// @brief Tag for error in expected
+    /// @brief Tag for error in Expected
     struct ErrorT {};
+
+    /// @brief Tag for NUL terminator in StringView
+    struct WithNULT {};
 
     /// @brief Represents O(1)
     struct ConstantComplexityT {};
@@ -438,6 +441,10 @@ namespace colt {
     template<>
     /// @brief NoneT is a tag
     struct is_tag<ErrorT> { static constexpr bool value = true; };
+
+    template<>
+    /// @brief NoneT is a tag
+    struct is_tag<WithNULT> { static constexpr bool value = true; };
 
     template<>
     /// @brief ConstantComplexityT is a tag
@@ -510,6 +517,9 @@ namespace colt {
 
   /// @brief Tag object for error in Expected
   constexpr inline const traits::ErrorT Error;
+
+  /// @brief Tag object for NUL in StringView
+  constexpr inline const traits::WithNULT WithNUL;
 
   /*********************************
   * FUNCTIONS HELPERS
