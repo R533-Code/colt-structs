@@ -1,8 +1,6 @@
 #ifndef HG_COLT_STRING
 #define HG_COLT_STRING
 
-#include <cctype>
-
 #include "char.h"
 #include "vector.h"
 
@@ -22,6 +20,15 @@ namespace colt
     /// @param end The end of the view
     constexpr StringView(const CharT* begin, const CharT* end) noexcept
       : View(begin, end) {}
+    /// @brief Constructs a StringView over a NUL terminated string
+    /// @param cstr The NUL terminated string to span over
+    constexpr StringView(const CharT* cstr) noexcept
+      : View(cstr, std::strlen(cstr)) {}
+    /// @brief Constructs a StringView over a NUL terminated string, including its NUL terminator
+    /// @param cstr The NUL terminated string to span over
+    /// @param  Tag object (WithNUL)
+    constexpr StringView(const CharT* cstr, traits::WithNULT) noexcept
+      : View(cstr, std::strlen(cstr) + 1) {}
     /// @brief Copy constructor
     /// @param  The StringView to copy
     constexpr StringView(const StringView&) noexcept = default;
@@ -45,7 +52,7 @@ namespace colt
   {
     static_assert(std::is_same_v<CharT, char>, "String only supports char for now!");
     
-    using Str = SmallVector<CharT, 16>;    
+    using Str = SmallVector<CharT, 16>;
 
   public:
     /// @brief Default constructor
@@ -56,6 +63,9 @@ namespace colt
     /// @brief Move constructor
     /// @param  The String to move
     constexpr String(String&&) noexcept = default;
+    /// @brief Constructs a String from a StringView
+    /// @param strv The StringView to copy
+    constexpr String(StringView<CharT> strv) noexcept;
     /// @brief Destructor
     ~String() noexcept = default;
 
@@ -86,6 +96,15 @@ namespace colt
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;    
   };
+  
+  template<typename CharT>
+  constexpr String<CharT>::String(StringView<CharT> strv) noexcept
+    : Str(strv.getSize())
+  {
+    for (auto& i : strv)
+      Str::pushBack(i);
+  }
+  
   template<typename CharT>
   constexpr const CharT* String<CharT>::cStr() noexcept
   {
