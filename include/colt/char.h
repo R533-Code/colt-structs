@@ -10,42 +10,6 @@
 /// @brief Contains character usage helpers
 namespace colt
 {
-	/// @brief Checks if a string view does not contain invalid characters for a name.
-	/// Does not check if the file exits or not, merely verifies that no illegal characters
-	/// are contained in the name.
-	/// @param name The string view to check for
-	/// @return True if the name is valid
-	bool isValidFileName(ContiguousView<char> name) noexcept
-	{
-		if (name.isEmpty())
-			return false;
-
-#ifdef _WIN32
-		for (const auto& chr : name)
-		{
-			if (isControl(chr)
-				|| chr == ':'
-				|| chr == '"'
-				|| chr == '|'
-				|| chr == '?'
-				|| chr == '*'
-				|| chr == '<'
-				|| chr == '>')
-				return false;
-		}
-		if (name.getBack() == ' ' || name.getBack() == '.')
-			return false;
-		return true;
-#else 
-		for (const auto& chr : name)
-		{
-			if (isControl(chr))
-				return false;
-		}
-		return true;
-#endif
-	}
-
 	/// @brief Checks if a character is a space, newline, tab...
 	/// @param chr The char to check for
 	/// @return True if the character is a space
@@ -90,6 +54,42 @@ namespace colt
 	bool isControl(char chr) noexcept
 	{
 		return static_cast<unsigned char>(chr) < ' ';
+	}
+
+	/// @brief Checks if a string view does not contain invalid characters for a name.
+	/// Does not check if the file exits or not, merely verifies that no illegal characters
+	/// are contained in the name.
+	/// @param name The string view to check for
+	/// @return True if the name is valid
+	bool isValidFileName(ContiguousView<char> name) noexcept
+	{
+		if (name.isEmpty())
+			return false;
+
+#ifdef _WIN32
+		for (const auto& chr : name)
+		{
+			if (isControl(chr)
+				|| chr == ':'
+				|| chr == '"'
+				|| chr == '|'
+				|| chr == '?'
+				|| chr == '*'
+				|| chr == '<'
+				|| chr == '>')
+				return false;
+		}
+		if (name.getBack() == ' ' || name.getBack() == '.')
+			return false;
+		return true;
+#else 
+		for (const auto& chr : name)
+		{
+			if (isControl(chr))
+				return false;
+		}
+		return true;
+#endif
 	}
 }
 
