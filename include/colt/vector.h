@@ -26,7 +26,7 @@ namespace colt
 
     /// @brief Constructs a Vector with 'reserve' object reserved
     /// @param reserve The count of object to reserve
-    explicit Vector(size_t reserve) noexcept;
+    constexpr explicit Vector(size_t reserve) noexcept;
 
     template<typename... Args>
     /// @brief Constructs and fills a Vector of 'fill_size' by forwarding 'args' to the constructor
@@ -34,38 +34,38 @@ namespace colt
     /// @param fill_size The count of object to reserve
     /// @param  InPlaceT tag
     /// @param ...args The argument pack
-    Vector(size_t fill_size, traits::InPlaceT, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>);      
+    constexpr Vector(size_t fill_size, traits::InPlaceT, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args...>);      
 
     /// @brief Constructs a Vector from an initializer list.
     /// Only works for copyable T.
     /// @param list The list from which to copy the object
-    Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>);
+    constexpr Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     /// @brief Constructs a Vector from a view.
     /// @param view The view whose items to copy
-    Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>);      
+    constexpr Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>);      
 
     /// @brief Copy constructor.
     /// Only works for copyable T.
     /// @param to_copy Vector whose resources to copy
-    Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
+    constexpr Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     /// @brief Copy assignment operator.
     /// Only works for copyable T.
     /// Precondition: &to_copy != this (no self assignment)
     /// @param to_copy Vector whose resources to copy
     /// @return Self
-    Vector& operator=(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);    
+    constexpr Vector& operator=(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);    
 
     /// @brief Move constructor
     /// @param to_move Vector whose resources to steal
-    Vector(Vector&& to_move) noexcept;      
+    constexpr Vector(Vector&& to_move) noexcept;      
 
     /// @brief Move assignment operator.
     /// Precondition: &to_move != this (no self assignment)
     /// @param to_move Vector whose resources to steal
     /// @return Self
-    Vector& operator=(Vector&& to_move) noexcept;    
+    constexpr Vector& operator=(Vector&& to_move) noexcept;    
 
     /// @brief Destructor
     ~Vector() noexcept(std::is_nothrow_destructible_v<T>);    
@@ -289,7 +289,7 @@ namespace colt
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
-    constexpr T& operator[](size_t index) noexcept;    
+    constexpr T& operator[](size_t index) noexcept;
 
     /// @brief Push an object at the end of the Vector by copying
     /// @param to_copy The object to copy at the end of the Vector
@@ -363,11 +363,11 @@ namespace colt
   };
 
   template<typename T>
-  Vector<T>::Vector(size_t reserve) noexcept
+  constexpr Vector<T>::Vector(size_t reserve) noexcept
     : blk(memory::allocate({ reserve * sizeof(T) })), size(0) {}
 
   template<typename T>
-  Vector<T>::Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr Vector<T>::Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ list.size() * sizeof(T) })), size(list.size())
   {
     for (size_t i = 0; i < size; i++) //copy construct
@@ -375,7 +375,7 @@ namespace colt
   }
 
   template<typename T>
-  Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ view.getSize() * sizeof(T) })), size(view.getSize())
   {
     for (size_t i = 0; i < size; i++) //copy construct
@@ -383,7 +383,7 @@ namespace colt
   }
 
   template<typename T>
-  Vector<T>::Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr Vector<T>::Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate(to_copy.blk.getByteSize())), size(to_copy.getSize())
   {
     for (size_t i = 0; i < size; i++) //copy construct
@@ -391,7 +391,7 @@ namespace colt
   }
 
   template<typename T>
-  Vector<T>& Vector<T>::operator=(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr Vector<T>& Vector<T>::operator=(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
     assert(&to_copy != this && "Self assignment is prohibited!");
 
@@ -403,11 +403,11 @@ namespace colt
   }
 
   template<typename T>
-  Vector<T>::Vector(Vector&& to_move) noexcept
-    : blk(exchange(to_move.blk, { nullptr,0 })), size(exchange(to_move.size, 0)) {}
+  constexpr Vector<T>::Vector(Vector&& to_move) noexcept
+    : blk(exchange(to_move.blk, { nullptr, 0 })), size(exchange(to_move.size, 0)) {}
 
   template<typename T>
-  Vector<T>& Vector<T>::operator=(Vector&& to_move) noexcept
+  constexpr Vector<T>& Vector<T>::operator=(Vector&& to_move) noexcept
   {
     assert(&to_move != this && "Self assignment is prohibited!");
 
@@ -575,10 +575,13 @@ namespace colt
   {
     if (!isStackAllocated())
       ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).getPtr());
-    
-    T* const ptr_d = get_current_ptr();
-    for (size_t i = 0; i < size; i++)
-      new(ptr_d + i) T(to_copy.ptr[i]);
+    else
+    {
+      T* const ptr_d = get_stack_ptr();
+      const T* const ptr_m = to_copy.get_stack_ptr();
+      for (size_t i = 0; i < size; i++)
+        new(ptr_d + i) T(ptr_m[i]);
+    }
   }
 
   template<typename T, size_t buff_count>
@@ -589,8 +592,8 @@ namespace colt
       ptr = std::exchange(to_move.ptr, nullptr);
     else
     {
-      T* const ptr_d = get_current_ptr();
-      T* const ptr_m = get_current_ptr();
+      T* const ptr_d = get_stack_ptr();
+      T* const ptr_m = to_move.get_stack_ptr();
       for (size_t i = 0; i < size; i++)
         new(ptr_d + i) T(std::move(ptr_m[i]));
     }
@@ -703,6 +706,7 @@ namespace colt
     if (!isStackAllocated())
       memory::deallocate({ ptr_d, capacity * sizeof(T) });
     capacity += by_more;
+    ptr = blk.getPtr();
   }
 
   template<typename T, size_t buff_count>
