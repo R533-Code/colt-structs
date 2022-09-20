@@ -3,6 +3,7 @@
 
 #include "char.h"
 #include "vector.h"
+#include "expected.h"
 
 namespace colt
 {
@@ -36,12 +37,18 @@ namespace colt
     /// @param  The StringView to move
     constexpr StringView(StringView&&) noexcept = default;
 
-    /// @brief Pops all spaces from the beginning and the end of the StringView
-    constexpr void strip() noexcept;    
+    /// @brief Pops all spaces from the beginning and the end of the StringView.
+    /// The characters that are considered spaces are '\n', ' ', '\v', '\t'.
+    constexpr void stripSpaces() noexcept;    
     
     /// @brief Conversion operator
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;    
+  };
+
+  enum class StringError
+  {
+    EOF_HIT, INVALID_PATH, CANNOT_READ_ALL
   };
 
   /// @brief Contiguous array of characters.
@@ -54,7 +61,8 @@ namespace colt
     
     using Str = SmallVector<CharT, 16>;
 
-  public:
+  public:    
+
     /// @brief Default constructor
     constexpr String() noexcept = default;
     /// @brief Copy constructor
@@ -66,6 +74,13 @@ namespace colt
     /// @brief Constructs a String from a StringView
     /// @param strv The StringView to copy
     constexpr String(StringView<CharT> strv) noexcept;
+    /// @brief Constructs a StringView over a NUL terminated string
+    /// @param cstr The NUL terminated string to span over
+    constexpr String(const CharT* cstr) noexcept;
+    /// @brief Constructs a StringView over a NUL terminated string
+    /// @param cstr The NUL terminated string to span over
+    /// @param  Tag object (WithNUL)
+    constexpr String(const CharT* cstr, traits::WithNULT) noexcept;     
     /// @brief Destructor
     ~String() noexcept = default;
 
@@ -89,6 +104,21 @@ namespace colt
     /// @return Self
     constexpr String& operator+=(CharT chr) noexcept;    
 
+    /// @brief Get a line from a file (by default 'stdin').
+    /// This returns a non NUL-terminated String.
+    /// The new-line is not included, but is consumed.
+    /// @param from The FILE from which to read the characters
+    /// @return String over the line
+    static Expected<String, StringError> getLine(FILE* from = stdin) noexcept;
+    /// /// @brief Get a line from a file (by default 'stdin'), and NUL terminates the String.
+    /// The new-line is not included, but is consumed.
+    /// @param  Tag object (WithNUL)
+    /// @param from The FILE from which to read the characters
+    /// @return String over the line 
+    static Expected<String, StringError> getLine(traits::WithNULT, FILE* from = stdin) noexcept;
+    
+    //static Expected<String, StringError> getFileContent(StringView<char> path) noexcept;
+
     /// @brief Conversion operator
     /// @return StringView
     constexpr operator StringView<CharT>() const noexcept;    
@@ -103,6 +133,26 @@ namespace colt
   {
     for (auto& i : strv)
       Str::pushBack(i);
+  }
+
+  template<typename CharT>
+  constexpr String<CharT>::String(const CharT* cstr) noexcept
+    : Str()
+  {
+    size_t strl = std::strlen(cstr);
+    Str::reserve(strl);
+    for (size_t i = 0; i < strl; i++)
+      Str::pushBack(cstr[i]);
+  }
+
+  template<typename CharT>
+  constexpr String<CharT>::String(const CharT* cstr, traits::WithNULT) noexcept
+    : Str()
+  {
+    size_t strl = std::strlen(cstr) + 1;
+    Str::reserve(strl);
+    for (size_t i = 0; i < strl; i++)
+      Str::pushBack(cstr[i]);
   }
   
   template<typename CharT>
@@ -142,6 +192,36 @@ namespace colt
   }
 
   template<typename CharT>
+  Expected<String<CharT>, StringError> String<CharT>::getLine(FILE* from) noexcept
+  {
+    String str;
+
+    for (;;)
+    {
+      auto gchar = static_cast<char>(std::fgetc(stdin));
+      if (gchar != '\n' && gchar != EOF)
+        str.append(gchar);
+      else
+        break;
+    }
+    if (std::feof(from))
+      return { Error, StringError::EOF_HIT };
+    return str;
+  }
+
+  template<typename CharT>
+  Expected<String<CharT>, StringError> String<CharT>::getLine(traits::WithNULT, FILE* from) noexcept
+  {    
+    if (auto estr = String::getLine(from); estr.isError())
+      return estr; //Propagate the error
+    else
+    {
+      estr.append('\0');
+      return estr;
+    }
+  }
+
+  template<typename CharT>
   constexpr String<CharT>::operator ContiguousView<CharT>() const noexcept
   {
     return { Str::begin(), Str::end() };
@@ -154,15 +234,19 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr void StringView<CharT>::strip() noexcept
+  constexpr void StringView<CharT>::stripSpaces() noexcept
   {
     while (View::isNotEmpty())
       if (isSpace(*View::begin()))
         View::popFront();
+      else
+        break;
 
     while (View::isNotEmpty())
       if (isSpace(*(View::begin() + View::getSize() - 1)))
         View::popFront();
+      else
+        break;
   }
   
   template<typename CharT>
@@ -170,6 +254,24 @@ namespace colt
   {
     return { View::begin(), View::end() };
   }
+
+#ifdef COLT_USE_IOSTREAMS
+
+  template<typename CharT>
+  std::ostream& operator<<(std::ostream& os, const StringView<CharT>& var)
+  {
+    os.write(var.begin(), var.getSize());
+    return os;
+  }
+
+  template<typename CharT>
+  std::ostream& operator<<(std::ostream& os, const String<CharT>& var)
+  {
+    os.write(var.begin(), var.getSize());
+    return os;
+  }
+
+#endif
 }
 
 #endif //!HG_COLT_STRING
