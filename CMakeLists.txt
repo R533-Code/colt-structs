@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(ColtStructs VERSION 0.0.0.0 LANGUAGES CXX)
+project(ColtStructs VERSION 0.0.1.5 LANGUAGES CXX)
 
 # Contains all headers in 'include/colt'
 file(GLOB ColtHeaders "include/colt/*.h")
