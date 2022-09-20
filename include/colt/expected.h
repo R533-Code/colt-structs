@@ -127,48 +127,57 @@ namespace colt
     /// @return True if the Expected contains an expected value
     constexpr explicit operator bool() const noexcept { return !is_error; }
 
-    /// @brief Returns the expected value.
-    /// Precondition: isExpected()
-    /// @return Reference to the expected value
-    constexpr ExpectedTy& operator*() noexcept;
-    /// @brief Returns the expected value.
-    /// Precondition: isExpected()
-    /// @return Const reference to the expected value
-    constexpr const ExpectedTy& operator*() const noexcept;
-
-    /// @brief Returns the expected value.
-    /// Precondition: isExpected()
-    /// @return Pointer to the expected value
-    constexpr ExpectedTy* operator->() noexcept;
-    /// @brief Returns the expected value.
-    /// Precondition: isExpected()
-    /// @return Const pointer to the expected value
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected().
+    /// @return The Expected value
     constexpr const ExpectedTy* operator->() const noexcept;
-
-    /// @brief Returns the error contained in the Expected.
-    /// Precondition: isError()
-    /// @return The error contained in the Expected
-    constexpr traits::copy_if_trivial_t<const ErrorTy> getError() const noexcept;    
-
-    /// @brief Returns the expected value contained in the Expected.
-    /// Precondition: isExpected()
-    /// @return The value contained in the Expected
-    constexpr traits::copy_if_trivial_t<const ExpectedTy> getExpected() const noexcept;    
-
-    /// @brief Returns the expected value, or if it does not exist 'or_value'
-    /// @param or_value The value returned if isError()
-    /// @return The expected value or 'or_value'
-    constexpr traits::copy_if_trivial_t<const ExpectedTy> getExpectedOr(traits::copy_if_trivial_t<const ExpectedTy> or_value) const noexcept;
-
-    /// @brief Returns the expected value, or aborts if it does not exist
-    /// @return The expected value
-    constexpr traits::copy_if_trivial_t<const ExpectedTy> getExpectedOrAbort() const noexcept;
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected().
+    /// @return The Expected value
+    constexpr ExpectedTy* operator->() noexcept;    
     
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected()
+    /// @return The Expected value.
+    constexpr const ExpectedTy& operator*() const& noexcept;
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected().
+    /// @return The Expected value.
+    constexpr ExpectedTy& operator*() & noexcept;
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected()
+    /// @return The Expected value.
+    constexpr const ExpectedTy&& operator*() const&& noexcept;
+    /// @brief Returns the stored Expected value.
+    /// Precondition: isExpected()
+    /// @return The Expected value.
+    constexpr ExpectedTy&& operator*() && noexcept;    
+
+    /// @brief Returns the Expected value if contained, else 'default_value'
+    /// @param default_value The value to return if the Expected contains an error
+    /// @return The Expected value or 'default_value'
+    constexpr ExpectedTy getExpectedOr(ExpectedTy&& default_value) const&;
+    /// @brief Returns the Expected value if contained, else 'default_value'
+    /// @param default_value The value to return if the Expected contains an error
+    /// @return The Expected value or 'default_value'
+    constexpr ExpectedTy getExpectedOr(ExpectedTy&& default_value)&&;    
+
     /// @brief Returns the expected value, or aborts if it does not exist.
-    /// Precondition: on_abort != NULL
-    /// @param on_abort The function to call before aborting
+    /// @param on_abort The function to call before aborting or null
     /// @return The expected value
-    constexpr traits::copy_if_trivial_t<const ExpectedTy> getExpectedOrAbort(void(*on_abort)(void) noexcept) const noexcept;
+    constexpr const ExpectedTy& getExpectedOrAbort(void(*on_abort)(void) noexcept = nullptr) const& noexcept;
+    /// @brief Returns the expected value, or aborts if it does not exist.
+    /// @param on_abort The function to call before aborting or null
+    /// @return The expected value
+    constexpr ExpectedTy& getExpectedOrAbort(void(*on_abort)(void) noexcept = nullptr) & noexcept;
+    /// @brief Returns the expected value, or aborts if it does not exist.
+    /// @param on_abort The function to call before aborting or null
+    /// @return The expected value
+    constexpr const ExpectedTy&& getExpectedOrAbort(void(*on_abort)(void) noexcept = nullptr) const&& noexcept;
+    /// @brief Returns the expected value, or aborts if it does not exist.
+    /// @param on_abort The function to call before aborting or null
+    /// @return The expected value
+    constexpr ExpectedTy&& getExpectedOrAbort(void(*on_abort)(void) noexcept = nullptr) && noexcept;    
   };
 
   template<typename ExpectedTy, typename ErrorTy>
@@ -267,76 +276,6 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() noexcept
-  {
-    assert(isExpected() && "'Expected' contained an error!");
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr const ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() const noexcept
-  {
-    assert(isExpected() && "'Expected' contained an error!");
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() noexcept
-  {
-    assert(isExpected() && "'Expected' contained an error!");
-    return &expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr const ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() const noexcept
-  {
-    assert(isExpected() && "'Expected' contained an error!");
-    return &expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr traits::copy_if_trivial_t<const ErrorTy> Expected<ExpectedTy, ErrorTy>::getError() const noexcept
-  {
-    assert(isError() && "'Expected' did not contain an error!");
-    return error;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr traits::copy_if_trivial_t<const ExpectedTy> Expected<ExpectedTy, ErrorTy>::getExpected() const noexcept
-  {
-    assert(isExpected() && "'Expected' contained an error!");
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr traits::copy_if_trivial_t<const ExpectedTy> Expected<ExpectedTy, ErrorTy>::getExpectedOr(traits::copy_if_trivial_t<const ExpectedTy> or_value) const noexcept
-  {
-    if (isError())
-      return or_value;
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr traits::copy_if_trivial_t<const ExpectedTy> Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort() const noexcept
-  {
-    if (isError())
-      std::abort();
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
-  constexpr traits::copy_if_trivial_t<const ExpectedTy> Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort(void(*on_abort)(void) noexcept) const noexcept
-  {
-    assert(on_abort && "'on_abort' cannot be NULL!");
-    if (isError())
-    {
-      on_abort();
-      std::abort();
-    }
-    return expected;
-  }
-
-  template<typename ExpectedTy, typename ErrorTy>
   template<typename T_, typename>
   constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT, ErrorTy&& to_move) noexcept(std::is_nothrow_move_constructible_v<ErrorTy>)
     : is_error(true)
@@ -366,6 +305,112 @@ namespace colt
     : is_error(false)
   {
     new(&expected) ExpectedTy(std::forward<Args>(args)...);
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() & noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() const noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return &expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return &expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() const& noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::operator*() && noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return std::move(expected);
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy&& Expected<ExpectedTy, ErrorTy>::operator*() const&& noexcept
+  {
+    assert(!is_error && "Expected contained an error!");
+    return expected;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::getExpectedOr(ExpectedTy&& default_value) const&
+  {
+    return is_error ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : **this;
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::getExpectedOr(ExpectedTy&& default_value)&&
+  {
+    return is_error ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : std::move(**this);
+  }
+
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy& Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort(void(*on_abort)(void) noexcept) const& noexcept
+  {
+    if (is_error)
+    {
+      if (on_abort)
+        on_abort();
+      std::abort();
+    }
+    else
+      return expected;
+  }
+  
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort(void(*on_abort)(void) noexcept) & noexcept
+  {
+    if (is_error)
+    {
+      if (on_abort)
+        on_abort();
+      std::abort();
+    }
+    else
+      return expected;
+  }
+  
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr const ExpectedTy&& Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort(void(*on_abort)(void) noexcept) const&& noexcept
+  {
+    if (is_error)
+    {
+      if (on_abort)
+        on_abort();
+      std::abort();
+    }
+    else
+      return expected;
+  }
+  
+  template<typename ExpectedTy, typename ErrorTy>
+  constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::getExpectedOrAbort(void(*on_abort)(void) noexcept) && noexcept
+  {
+    if (is_error)
+    {
+      if (on_abort)
+        on_abort();
+      std::abort();
+    }
+    else
+      return std::move(expected);
   }
 
 #ifdef COLT_USE_IOSTREAMS
