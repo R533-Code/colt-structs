@@ -383,12 +383,20 @@ namespace colt {
     /********** BY VALUE **********/
 
     template<typename T>
-    /// @brief Contains type field, which is T for trivial types, and const T& for non-trivial types
+    /// @brief Contains type field, which is T for trivial types, and T for non-trivial types.
+    /// Example: copy_if_trivial<const T&>::type operator[](size_t index) {}
+    /// This would make the operator return a copy for trivial types.
+    /// Do no use to return non-const references:
+    /// Should be used with const references (const T&/const T&&).
     /// @tparam T The type to copy
     struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, std::decay_t<T>, T>; };
 
     template<typename T>
-    /// @brief Short hand for copy_if_trivial::type
+    /// @brief Short hand for copy_if_trivial::type.
+    /// Example: copy_if_trivial<const T&>::type operator[](size_t index) {}
+    /// This would make the operator return a copy for trivial types.
+    /// Do no use to return non-const references:
+    /// Should be used with const references (const T&/const T&&).
     /// @tparam T The type to copy
     using copy_if_trivial_t = typename copy_if_trivial<T>::type;
 
