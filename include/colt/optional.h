@@ -30,7 +30,7 @@ namespace colt {
 
     /// @brief Copy constructs an object into the Optional.
     /// @param to_copy The object to copy
-    Optional(traits::copy_if_trivial_t<const T> to_copy)
+    Optional(traits::copy_if_trivial_t<const T&> to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>)
       : is_none(false)
     {
@@ -102,7 +102,7 @@ namespace colt {
     /// @brief Get the value contained in the Optional.
     /// Precondition: hasValue().
     /// @return The value contained
-    traits::copy_if_trivial_t<T> getValue() const noexcept;
+    traits::copy_if_trivial_t<const T&> getValue() const noexcept;
 
     /// @brief Move out the value contained in the Optional.
     /// Precondition: hasValue().
@@ -115,10 +115,10 @@ namespace colt {
   };
   
   template<typename T>
-  traits::copy_if_trivial_t<T> Optional<T>::getValue() const noexcept
+  traits::copy_if_trivial_t<const T&> Optional<T>::getValue() const noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
-    traits::copy_if_trivial_t<T> to_ret = *std::launder(reinterpret_cast<const T*>(opt_buffer));
+    traits::copy_if_trivial_t<const T&> to_ret = *std::launder(reinterpret_cast<const T*>(opt_buffer));
     return to_ret;
   }
   

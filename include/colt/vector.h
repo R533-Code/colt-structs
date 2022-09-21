@@ -106,7 +106,7 @@ namespace colt
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
-    constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;    
+    constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;    
 
     /// @brief Returns a reference to the object at index 'index' of the Vector.
     /// Precondition: index < size
@@ -130,7 +130,7 @@ namespace colt
 
     /// @brief Push an object at the end of the Vector by copying
     /// @param to_copy The object to copy at the end of the Vector
-    constexpr void pushBack(traits::copy_if_trivial_t<const T> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
+    constexpr void pushBack(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     /// @brief Push an object at the end of the Vector by moving
@@ -162,7 +162,7 @@ namespace colt
     /// @brief Returns the first item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The first item in the Vector.
-    constexpr traits::copy_if_trivial_t<const T> getFront() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> getFront() const noexcept;
     /// @brief Returns the first item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The first item in the Vector.
@@ -171,7 +171,7 @@ namespace colt
     /// @brief Returns the last item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The last item in the Vector.
-    constexpr traits::copy_if_trivial_t<const T> getBack() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> getBack() const noexcept;
     /// @brief Returns the last item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The last item in the Vector.
@@ -283,7 +283,7 @@ namespace colt
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
-    constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;
 
     /// @brief Returns a reference to the object at index 'index' of the Vector.
     /// Precondition: index < size
@@ -293,7 +293,7 @@ namespace colt
 
     /// @brief Push an object at the end of the Vector by copying
     /// @param to_copy The object to copy at the end of the Vector
-    constexpr void pushBack(traits::copy_if_trivial_t<const T> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
+    constexpr void pushBack(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     /// @brief Push an object at the end of the Vector by moving
@@ -325,7 +325,7 @@ namespace colt
     /// @brief Returns the first item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The first item in the Vector.
-    constexpr traits::copy_if_trivial_t<const T> getFront() const noexcept;    
+    constexpr traits::copy_if_trivial_t<const T&> getFront() const noexcept;    
     /// @brief Returns the first item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The first item in the Vector.
@@ -334,7 +334,7 @@ namespace colt
     /// @brief Returns the last item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The last item in the Vector.
-    constexpr traits::copy_if_trivial_t<const T> getBack() const noexcept;    
+    constexpr traits::copy_if_trivial_t<const T&> getBack() const noexcept;    
     /// @brief Returns the last item in the Vector.
     /// Precondition: !isEmpty()
     /// @return The last item in the Vector.
@@ -427,7 +427,7 @@ namespace colt
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> Vector<T>::operator[](size_t index) const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> Vector<T>::operator[](size_t index) const noexcept
   {
     assert(index < size && "Invalid index!");
     return blk.getPtr()[index];
@@ -461,7 +461,7 @@ namespace colt
   }
 
   template<typename T>
-  constexpr void Vector<T>::pushBack(traits::copy_if_trivial_t<const T> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr void Vector<T>::pushBack(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
     if (size == blk.getSize())
       reserve(blk.getSize() + 4);
@@ -495,7 +495,7 @@ namespace colt
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> Vector<T>::getFront() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> Vector<T>::getFront() const noexcept
   {
     assert(!isEmpty() && "Vector was empty!");
     return *blk.getPtr();
@@ -509,7 +509,7 @@ namespace colt
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> Vector<T>::getBack() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> Vector<T>::getBack() const noexcept
   {
     assert(!isEmpty() && "Vector was empty!");
     return blk.getPtr()[size - 1];
@@ -609,7 +609,7 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
-  constexpr traits::copy_if_trivial_t<const T> SmallVector<T, buff_count>::operator[](size_t index) const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::operator[](size_t index) const noexcept
   {
     assert(index < size && "Invalid index!");
     return get_current_ptr()[index];
@@ -623,7 +623,7 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
-  constexpr void SmallVector<T, buff_count>::pushBack(traits::copy_if_trivial_t<const T> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+  constexpr void SmallVector<T, buff_count>::pushBack(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
     if (size == capacity)
       reserve(capacity);
@@ -659,7 +659,7 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
-  constexpr traits::copy_if_trivial_t<const T> SmallVector<T, buff_count>::getFront() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::getFront() const noexcept
   {
     assert(!isEmpty() && "Vector was empty!");
     return *get_current_ptr();
@@ -673,7 +673,7 @@ namespace colt
   }
 
   template<typename T, size_t buff_count>
-  constexpr traits::copy_if_trivial_t<const T> SmallVector<T, buff_count>::getBack() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::getBack() const noexcept
   {
     assert(!isEmpty() && "Vector was empty!");
     return get_current_ptr()[size - 1];

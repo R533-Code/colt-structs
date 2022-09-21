@@ -87,12 +87,12 @@ namespace colt {
     /// @brief Get the front of the view.
     /// Precondition: !isEmpty()
     /// @return The first item of the view
-    constexpr traits::copy_if_trivial_t<const T> getFront() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> getFront() const noexcept;
 
     /// @brief Get the back of the view.
     /// Precondition: !isEmpty()
     /// @return The last item of the view
-    constexpr traits::copy_if_trivial_t<const T> getBack() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> getBack() const noexcept;
 
     /// @brief Shortens the view from the front by 1.
     /// Precondition: !isEmpty()
@@ -116,7 +116,7 @@ namespace colt {
     /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
-    constexpr traits::copy_if_trivial_t<const T> operator[](size_t index) const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;
 
     /// @brief Splices a view using a range
     /// @param range The range to use for splicing
@@ -138,14 +138,14 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::getFront() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::getFront() const noexcept
   {
     assert(!isEmpty() && "View was empty!");
     return begin_ptr[0];
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::getBack() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::getBack() const noexcept
   {
     assert(!isEmpty() && "View was empty!");
     return begin_ptr[size - 1];
@@ -182,7 +182,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T> ContiguousView<T>::operator[](size_t index) const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::operator[](size_t index) const noexcept
   {
     assert(index < size && "Invalid index!");
     return begin_ptr[index];
