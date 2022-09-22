@@ -5,6 +5,7 @@
 
 #include "view.h"
 #include "allocator.h"
+#include "algorithm.h"
 
 namespace colt
 {
@@ -370,24 +371,21 @@ namespace colt
   constexpr Vector<T>::Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ list.size() * sizeof(T) })), size(list.size())
   {
-    for (size_t i = 0; i < size; i++) //copy construct
-      new(blk.getPtr() + i) T(std::data(list)[i]);
+    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
   }
 
   template<typename T>
   constexpr Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ view.getSize() * sizeof(T) })), size(view.getSize())
   {
-    for (size_t i = 0; i < size; i++) //copy construct
-      new(blk.getPtr() + i) T(view.getData()[i]);
+    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
   }
 
   template<typename T>
   constexpr Vector<T>::Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate(to_copy.blk.getByteSize())), size(to_copy.getSize())
   {
-    for (size_t i = 0; i < size; i++) //copy construct
-      new(blk.getPtr() + i) T(to_copy.blk.getPtr()[i]);
+    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
   }
 
   template<typename T>
@@ -444,18 +442,9 @@ namespace colt
   constexpr void Vector<T>::reserve(size_t by_more) noexcept(std::is_trivially_copyable_v<T> || std::is_nothrow_move_constructible_v<T>)
   {
     memory::TypedBlock<T> new_blk = memory::allocate({ blk.getByteSize().size + by_more * sizeof(T) });
-    if constexpr (std::is_trivially_copyable_v<T>)
-    {
-      std::memcpy(new_blk.getPtr(), blk.getPtr(), size * sizeof(T));
-    }
-    else
-    {
-      for (size_t i = 0; i < size; i++)
-      {
-        new(new_blk.getPtr() + i) T(std::move(blk.getPtr()[i]));
-        blk.getPtr()[i].~T();
-      }
-    }
+    
+    algo::contiguous_destructive_move(blk.getPtr(), new_blk.getPtr(), size);
+
     memory::deallocate(blk);
     blk = new_blk;
   }
@@ -489,8 +478,7 @@ namespace colt
   template<typename T>
   constexpr void Vector<T>::clear() noexcept(std::is_nothrow_destructible_v<T>)
   {
-    for (size_t i = 0; i < size; i++)
-      blk.getPtr()[i].~T();
+    algo::contiguous_destruct(blk.getPtr(), size);
     size = 0;
   }
 
@@ -533,11 +521,10 @@ namespace colt
   
   template<typename T>
   template<typename ...Args>
-  constexpr Vector<T>::Vector(size_t fill_size, traits::InPlaceT, Args && ...args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
+  constexpr Vector<T>::Vector(size_t fill_size, traits::InPlaceT, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
     : blk(memory::allocate({ fill_size * sizeof(T) })), size(fill_size)
   {
-    for (size_t i = 0; i < size; i++)
-      new(blk.getPtr() + i) T(std::forward<Args>(args)...)
+    algo::contiguous_construct(blk.getPtr(), size, std::forward<Args>(args)...);
   }
   
   template<typename T>
@@ -552,7 +539,7 @@ namespace colt
     
   template<typename T>
   template<typename ...Args>
-  constexpr void Vector<T>::pushBack(traits::InPlaceT, Args && ...args) noexcept(std::is_constructible_v<T, Args ...>)
+  constexpr void Vector<T>::pushBack(traits::InPlaceT, Args&&... args) noexcept(std::is_constructible_v<T, Args ...>)
   {
     if (size == blk.getSize())
       reserve(blk.getSize() + 4);
@@ -562,7 +549,7 @@ namespace colt
 
   template<typename T, size_t buff_count>
   constexpr SmallVector<T, buff_count>::SmallVector(size_t reserve_size) noexcept
-    : capacity(reserve_size <= buff_count ? buff_count : reserve_size), size(0)
+    : capacity(reserve_size <= buff_count ? buff_count : reserve_size)
   {
     //make the allocation pointer active
     if (capacity == buff_count)
@@ -574,13 +561,15 @@ namespace colt
     : capacity(to_copy.capacity), size(to_copy.size)
   {
     if (!isStackAllocated())
+    {
       ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).getPtr());
+      algo::contiguous_copy(to_copy.ptr, ptr, size);
+    }
     else
     {
       T* const ptr_d = get_stack_ptr();
       const T* const ptr_m = to_copy.get_stack_ptr();
-      for (size_t i = 0; i < size; i++)
-        new(ptr_d + i) T(ptr_m[i]);
+      algo::contiguous_copy(ptr_d, ptr_m, size);
     }
   }
 
@@ -589,13 +578,15 @@ namespace colt
     : capacity(to_move.capacity), size(to_move.size)
   {
     if (!isStackAllocated())
+    {
       ptr = std::exchange(to_move.ptr, nullptr);
+      algo::contiguous_copy(to_move.ptr, ptr, size);
+    }
     else
     {
       T* const ptr_d = get_stack_ptr();
       T* const ptr_m = to_move.get_stack_ptr();
-      for (size_t i = 0; i < size; i++)
-        new(ptr_d + i) T(std::move(ptr_m[i]));
+      algo::contiguous_move(ptr_d, ptr_m, size);
     }
   }
 
@@ -644,8 +635,7 @@ namespace colt
   {
     assert(N <= size && "Vector does not contain enough items!");
     T* const ptr_d = get_current_ptr();
-    for (size_t i = size - N; i < size; i++)
-      ptr_d[i].~T();
+    algo::contiguous_destruct(ptr_d + size - N, N);
     size -= N;
   }
 
@@ -653,8 +643,7 @@ namespace colt
   constexpr void SmallVector<T, buff_count>::clear() noexcept(std::is_nothrow_destructible_v<T>)
   {
     T* const ptr_d = get_current_ptr();
-    for (size_t i = 0; i < size; i++)
-      ptr_d[i].~T();
+    algo::contiguous_destruct(ptr_d, size);
     size = 0;
   }
 
@@ -691,18 +680,9 @@ namespace colt
   {
     memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * (capacity + by_more) });
     T* const ptr_d = get_current_ptr();
-    if constexpr (std::is_trivially_copyable_v<T>)
-    {
-      std::memcpy(blk.getPtr(), ptr_d, sizeof(T) * size);
-    }
-    else
-    {
-      for (size_t i = 0; i < size; i++)
-      {
-        new(blk.getPtr()) T(std::move(ptr_d[i]));
-        ptr_d[i].~T();
-      }
-    }
+    
+    algo::contiguous_destructive_move(ptr_d, blk.getPtr(), size);
+    
     if (!isStackAllocated())
       memory::deallocate({ ptr_d, capacity * sizeof(T) });
     capacity += by_more;
