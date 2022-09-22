@@ -397,7 +397,7 @@ namespace colt
       /// @return True if registering was successful, false if there is no more capacity for registering
       bool registerOnNullFn(void(*func)(void) noexcept) noexcept
       {
-        if (register_count.load(std::memory_order_relaxed) < register_size)
+        if (register_count.load(std::memory_order_acquire) < register_size)
         {
           reg_array[register_count.fetch_add(1, std::memory_order_release)] = func;
           return true;
@@ -413,7 +413,7 @@ namespace colt
         if (auto blk = allocator::allocate(size))
           return blk;
         //Call registered functions
-        const size_t registered_count = register_count.load(std::memory_order::memory_order_relaxed);
+        const size_t registered_count = register_count.load(std::memory_order_acquire);
         for (size_t i = 0; i < registered_count; i++)
           reg_array[i]();
         std::abort();
