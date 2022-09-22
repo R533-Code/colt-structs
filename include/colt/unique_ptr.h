@@ -163,7 +163,20 @@ namespace colt
     constexpr sizes::ByteSize getByteSize() const noexcept { return blk.getByteSize(); }    
   };
 
+  template<typename PtrT>
+  /// @brief A UniquePtr is a relocatable resource
+  /// @tparam PtrT The type of the UniquePtr
+  struct traits::is_relocatable<UniquePtr<PtrT>>
+  {
+    static constexpr bool value = true;
+  };
+
   template<typename T, typename... Args>
+  /// @brief Creates a UniquePtr of type T pointing to a T constructed with 'args'
+  /// @tparam T The type to construct
+  /// @tparam ...Args The parameter pack
+  /// @param ...args The argument pack
+  /// @return UniquePtr of type T
   UniquePtr<T> make_unique(Args&&... args) noexcept(std::is_nothrow_constructible_v<T>)
   {
     return memory::new_t<T>(std::forward<Args>(args)...);
