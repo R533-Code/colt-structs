@@ -117,7 +117,20 @@ namespace colt
     /// @return String over the line 
     static Expected<String, StringError> getLine(traits::WithNULT, FILE* from = stdin) noexcept;
     
-    //static Expected<String, StringError> getFileContent(StringView<char> path) noexcept;
+    /// @brief Returns a String containing the content of the file at path 'path'.
+    /// This functions is faster than getFileContent for large file sizes, as it checks
+    /// the size of the file to allocate once.
+    /// Returns StringError::INVALID_PATH if the path is not valid or the OS was not able to open the file.
+    /// Returns StringError::CANNOT_READ_ALL if a call to 'ftell/fseek' fails.
+    /// @param path The file path
+    /// @return String containing the content of 'from' or StringError
+    static Expected<String, StringError> getFileContent(const char* path) noexcept;
+    /// @brief Returns a String containing the content of the file 'from'.
+    /// Repeatedly calls 'fgetc' on from and appends to the String.
+    /// Can return a StringError::EOF_HIT if 'feof(from)' returns true before the first 'fgetc' call.
+    /// @param from The file on which to repeatedly call 'fgetc'
+    /// @return String containing the content of 'from' or StringError::EOF_HIT
+    static Expected<String, StringError> getFileContent(FILE* from) noexcept;
 
     /// @brief Conversion operator
     /// @return StringView
@@ -194,7 +207,7 @@ namespace colt
   template<typename CharT>
   Expected<String<CharT>, StringError> String<CharT>::getLine(FILE* from) noexcept
   {
-    String str;
+    String<CharT> str;
 
     for (;;)
     {
@@ -216,9 +229,55 @@ namespace colt
       return estr; //Propagate the error
     else
     {
-      estr.append('\0');
+      estr->append('\0');
       return estr;
     }
+  }
+
+  template<typename CharT>
+  inline Expected<String<CharT>, StringError> String<CharT>::getFileContent(const char* path) noexcept
+  {
+    String<CharT> content;
+    FILE* file = std::fopen(path, "rb");
+    if (file == nullptr)
+      return { Error, StringError::INVALID_PATH };
+
+    if (std::fseek(file, 0, SEEK_END) != 0)
+      return { Error, StringError::CANNOT_READ_ALL };
+
+    auto byte_sz = std::ftell(file);
+    if (byte_sz == -1)
+      return { Error, StringError::CANNOT_READ_ALL };
+    std::rewind(file);
+    
+    //Save enough memory for the whole file
+    content.reserve(byte_sz);
+    
+    file = std::freopen(path, "rt", file);
+    if (file == nullptr)
+      return { Error, StringError::INVALID_PATH };
+    
+    while (!feof(file))
+      content.append(static_cast<char>(std::fgetc(file)));
+    std::fclose(file);
+
+    return content;
+  }
+
+  template<typename CharT>
+  inline Expected<String<CharT>, StringError> String<CharT>::getFileContent(FILE* from) noexcept
+  {
+    assert(from && "FILE* cannot be NULL!");
+    
+    if (std::feof(from))
+      return { Error, StringError::EOF_HIT };
+
+    String<CharT> content;
+
+    while (!std::feof(from))
+      content.append(static_cast<char>(std::fgetc(from)));
+
+    return content;
   }
 
   template<typename CharT>
