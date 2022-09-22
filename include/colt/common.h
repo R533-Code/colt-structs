@@ -380,6 +380,17 @@ namespace colt {
     /// @tparam T The type to check
     static constexpr bool is_iterable_v = is_iterable<T>::value;
 
+    /********** RELOCATION **********/
+
+    template<typename T>
+    struct is_relocatable
+    {
+      static constexpr bool value = std::is_trivial_v<T>;
+    };
+
+    template<typename T>
+    static constexpr bool is_relocatable_v = is_relocatable<T>::value;
+    
     /********** BY VALUE **********/
 
     template<typename T>
