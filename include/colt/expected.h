@@ -194,7 +194,7 @@ namespace colt
     /// @brief Returns the Expected value if contained, else 'default_value'
     /// @param default_value The value to return if the Expected contains an error
     /// @return The Expected value or 'default_value'
-    constexpr ExpectedTy getExpectedOr(ExpectedTy&& default_value)&&;    
+    constexpr ExpectedTy getExpectedOr(ExpectedTy&& default_value) &&;
 
     /// @brief Returns the expected value, or aborts if it does not exist.
     /// @param on_abort The function to call before aborting or null
@@ -446,7 +446,7 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::getExpectedOr(ExpectedTy&& default_value)&&
+  constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::getExpectedOr(ExpectedTy&& default_value) &&
   {
     return is_error ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : std::move(**this);
   }
