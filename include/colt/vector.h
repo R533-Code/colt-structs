@@ -575,12 +575,11 @@ namespace colt
 
   template<typename T, size_t buff_count>
   constexpr SmallVector<T, buff_count>::SmallVector(SmallVector&& to_move) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>)
-    : capacity(to_move.capacity), size(to_move.size)
+    : capacity(to_move.capacity), size(exchange(to_move.size, 0))
   {
     if (!isStackAllocated())
     {
-      ptr = std::exchange(to_move.ptr, nullptr);
-      algo::contiguous_copy(to_move.ptr, ptr, size);
+      ptr = exchange(to_move.ptr, nullptr);
     }
     else
     {
