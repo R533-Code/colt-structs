@@ -3,8 +3,8 @@
 
 #include "common.h"
 
-namespace colt {
-
+namespace colt
+{
   template<typename T>
   /// @brief Manages an optionally contained value.
   /// @tparam T The optional type to hold
@@ -19,124 +19,257 @@ namespace colt {
 
   public:
     /// @brief Constructs an empty Optional.
-    Optional() noexcept
-      : is_none(true) {}
+    constexpr Optional() noexcept;      
     
     /// @brief Constructs an empty Optional.
     /// Same as Optional().
     /// @param  NoneT: use None
-    Optional(traits::NoneT) noexcept
-      : is_none(true) {}
+    constexpr Optional(traits::NoneT) noexcept;      
 
     /// @brief Copy constructs an object into the Optional.
     /// @param to_copy The object to copy
-    Optional(traits::copy_if_trivial_t<const T&> to_copy)
-      noexcept(std::is_nothrow_copy_constructible_v<T>)
-      : is_none(false)
-    {
-      new(opt_buffer) T(to_copy);
-    }
+    constexpr Optional(traits::copy_if_trivial_t<const T&> to_copy)
+      noexcept(std::is_nothrow_copy_constructible_v<T>);      
 
     /// @brief Move constructs an object into the Optional
     /// @param to_move The object to move
     template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
-    Optional(T&& to_move)
-      noexcept(std::is_nothrow_move_constructible_v<T>)
-      : is_none(false)
-    {
-      new(opt_buffer) T(std::move(to_move));
-    }
+    constexpr Optional(T&& to_move)
+      noexcept(std::is_nothrow_move_constructible_v<T>);      
 
     template<typename... Args>
     /// @brief Constructs an object into the Optional directly.
     /// @tparam ...Args The parameter pack
     /// @param  InPlaceT, use InPlace
     /// @param ...args The argument pack
-    Optional(traits::InPlaceT, Args&&... args)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>)
-      : is_none(false)
-    {
-      new(opt_buffer) T(std::forward<Args>(args)...);
-    }
+    constexpr Optional(traits::InPlaceT, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>);      
     
     /// @brief Copy constructor.
     /// @param to_copy The Optional to copy
-    Optional(const Optional<T>& to_copy)
-      noexcept(std::is_nothrow_copy_constructible_v<T>)
-      : is_none(to_copy.is_none)
-    {
-      if (!is_none)
-        new(opt_buffer) T(*std::launder(reinterpret_cast<const T*>(to_copy.opt_buffer)));
-    }
+    constexpr Optional(const Optional<T>& to_copy)
+      noexcept(std::is_nothrow_copy_constructible_v<T>);      
 
     /// @brief Move constructor.
     /// @param to_move The Optional to move
-    Optional(Optional<T>&& to_move)
-      noexcept(std::is_nothrow_move_constructible_v<T>)
-      : is_none(to_move.is_none)
-    {
-      if (!is_none)
-        new(opt_buffer) T(std::move(*std::launder(reinterpret_cast<T*>(to_move.opt_buffer))));
-    }
+    constexpr Optional(Optional<T>&& to_move)
+      noexcept(std::is_nothrow_move_constructible_v<T>);      
 
     /// @brief Destructor, destructs the value if it exist.
-    ~Optional() noexcept(std::is_nothrow_destructible_v<T>)
-    {
-      reset();
-    }
+    ~Optional() noexcept(std::is_nothrow_destructible_v<T>);    
 
     /// @brief Check if the Optional contains a value.
     /// @return True if the Optional contains a value
-    explicit operator bool() const noexcept { return !is_none; }
+    explicit constexpr operator bool() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional contains a value.
     /// Same as !isNone().
     /// @return True if the Optional contains a value
-    bool hasValue() const noexcept { return !is_none; }
+    constexpr bool isValue() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional does not contain a value.
-    /// Same as !hasValue().
+    /// Same as !isValue().
     /// @return True if the Optional does not contain a value
-    bool isNone() const noexcept { return is_none; }
+    constexpr bool isNone() const noexcept { return is_none; }
 
-    /// @brief Get the value contained in the Optional.
-    /// Precondition: hasValue().
-    /// @return The value contained
-    traits::copy_if_trivial_t<const T&> getValue() const noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue().
+    /// @return The value
+    constexpr const T* operator->() const noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue().
+    /// @return The value
+    constexpr T* operator->() noexcept;
 
-    /// @brief Move out the value contained in the Optional.
-    /// Precondition: hasValue().
-    /// @return The value contained in the Optional
-    T&& stealValue() noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr traits::copy_if_trivial_t<const T&> operator*() const& noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue().
+    /// @return The value.
+    constexpr T& operator*() & noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr traits::copy_if_trivial_t<const T&&> operator*() const&& noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr T&& operator*() && noexcept;
 
-    /// @brief Destroy the stored value if it exists.
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr traits::copy_if_trivial_t<const T&> getValue() const& noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue().
+    /// @return The value.
+    constexpr T& getValue() & noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr traits::copy_if_trivial_t<const T&&> getValue() const&& noexcept;
+    /// @brief Returns the stored value.
+    /// Precondition: isValue()
+    /// @return The value.
+    constexpr T&& getValue() && noexcept;
+
+    /// @brief Returns the value if contained, else 'default_value'
+    /// @param default_value The value to return if the Optional is None
+    /// @return The value or 'default_value'
+    constexpr T getValueOr(T&& default_value) const&;
+    /// @brief Returns the value if contained, else 'default_value'
+    /// @param default_value The value to return if the Optional is None
+    /// @return The value or 'default_value'
+    constexpr T getValueOr(T&& default_value) &&;
+
+    /// @brief Destroy the stored value if it exists, and sets the Optional to an empty one.
     /// Called automatically by the destructor.
-    void reset() noexcept(std::is_nothrow_destructible_v<T>);
+    constexpr void reset() noexcept(std::is_nothrow_destructible_v<T>);
   };
-  
+
   template<typename T>
-  traits::copy_if_trivial_t<const T&> Optional<T>::getValue() const noexcept
+  constexpr Optional<T>::Optional() noexcept
+    : is_none(true) {}
+
+  template<typename T>
+  constexpr Optional<T>::Optional(traits::NoneT) noexcept
+    : is_none(true) {}
+
+  template<typename T>
+  constexpr Optional<T>::Optional(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+    : is_none(false)
   {
-    assert(!is_none && "Optional does not contain a value!");
-    traits::copy_if_trivial_t<const T&> to_ret = *std::launder(reinterpret_cast<const T*>(opt_buffer));
-    return to_ret;
+    new(opt_buffer) T(to_copy);
+  }
+
+  template<typename T>
+  constexpr Optional<T>::Optional(const Optional<T>& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
+    : is_none(to_copy.is_none)
+  {
+    if (!is_none)
+      new(opt_buffer) T(*std::launder(reinterpret_cast<const T*>(to_copy.opt_buffer)));
+  }
+
+  template<typename T>
+  constexpr Optional<T>::Optional(Optional<T>&& to_move) noexcept(std::is_nothrow_move_constructible_v<T>)
+    : is_none(to_move.is_none)
+  {
+    if (!is_none)
+      new(opt_buffer) T(std::move(*std::launder(reinterpret_cast<T*>(to_move.opt_buffer))));
+  }
+
+  template<typename T>
+  Optional<T>::~Optional() noexcept(std::is_nothrow_destructible_v<T>)
+  {
+    reset();
+  }
+
+  template<typename T>
+  constexpr const T* Optional<T>::operator->() const noexcept
+  {
+    return std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
   
   template<typename T>
-  T&& Optional<T>::stealValue() noexcept
+  constexpr T* Optional<T>::operator->() noexcept
+  {
+    return std::launder(reinterpret_cast<T*>(opt_buffer));
+  }
+
+  template<typename T>
+  constexpr traits::copy_if_trivial_t<const T&> Optional<T>::operator*() const& noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+  
+  template<typename T>
+  constexpr T& Optional<T>::operator*() & noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+  
+  template<typename T>
+  constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::operator*() const&& noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+  
+  template<typename T>
+  constexpr T&& Optional<T>::operator*() && noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
   }
+
+  template<typename T>
+  constexpr traits::copy_if_trivial_t<const T&> Optional<T>::getValue() const& noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+
+  template<typename T>
+  constexpr T& Optional<T>::getValue() & noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+
+  template<typename T>
+  constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::getValue() const&& noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+  }
+
+  template<typename T>
+  constexpr T&& Optional<T>::getValue() && noexcept
+  {
+    assert(!is_none && "Optional does not contain a value!");
+    return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
+  }
+
+  template<typename T>
+  constexpr T Optional<T>::getValueOr(T&& default_value) const&
+  {
+    return is_none ? static_cast<T>(std::forward<T>(default_value)) : **this;
+  }
   
   template<typename T>
-  inline void Optional<T>::reset() noexcept(std::is_nothrow_destructible_v<T>)
+  constexpr T Optional<T>::getValueOr(T&& default_value) &&
+  {
+    return is_none ? static_cast<T>(std::forward<T>(default_value)) : std::move(**this);
+  }
+
+  template<typename T>
+  constexpr void Optional<T>::reset() noexcept(std::is_nothrow_destructible_v<T>)
   {
     if (!is_none)
     {
       std::launder(reinterpret_cast<T*>(opt_buffer))->~T();
       is_none = true;
     }
+  }
+
+  template<typename T>
+  template<typename T_, typename>
+  constexpr Optional<T>::Optional(T&& to_move) noexcept(std::is_nothrow_move_constructible_v<T>)
+    : is_none(false)
+  {
+    new(opt_buffer) T(std::move(to_move));
+  }
+
+  template<typename T>
+  template<typename ...Args>
+  constexpr Optional<T>::Optional(traits::InPlaceT, Args && ...args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
+    : is_none(false)
+  {
+    new(opt_buffer) T(std::forward<Args>(args)...);
   }
 
 #ifdef COLT_USE_IOSTREAMS
