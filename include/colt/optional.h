@@ -272,6 +272,15 @@ namespace colt
     new(opt_buffer) T(std::forward<Args>(args)...);
   }
 
+  template<typename T>
+  std::size_t hash(const Optional<T>& opt) noexcept
+  {
+    static_assert(traits::is_hashable_v<T>,
+      "Type of Optional should be hashable!");
+
+    return opt.isNone() ? 18446744073709548283 : get_hash(opt.getValue());
+  }
+
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const Optional<T>& var)
