@@ -2,6 +2,7 @@
 #define HG_COLT_EXPECTED
 
 #include "common.h"
+#include "Hash.h"
 
 namespace colt
 {
@@ -501,6 +502,17 @@ namespace colt
     }
     else
       return std::move(expected);
+  }
+
+  template<typename Exp, typename Err>
+  std::size_t hash(const Expected<Exp, Err>& exp) noexcept
+  {
+    static_assert(traits::is_hashable_v<Exp> && traits::is_hashable_v<Err>,
+      "Both types should be hashable in order to hash Expected!");
+    if (exp.isError())
+      return get_hash(exp.getError());
+    else
+      return get_hash(exp.getExpected());
   }
 
 #ifdef COLT_USE_IOSTREAMS

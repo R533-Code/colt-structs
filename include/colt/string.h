@@ -2,8 +2,9 @@
 #define HG_COLT_STRING
 
 #include "char.h"
-#include "vector.h"
-#include "expected.h"
+#include "Vector.h"
+#include "Expected.h"
+#include "Hash.h"
 
 namespace colt
 {
@@ -312,6 +313,36 @@ namespace colt
   constexpr StringView<CharT>::operator ContiguousView<CharT>() const noexcept
   {
     return { View::begin(), View::end() };
+  }
+
+  template<>
+  std::size_t hash(const StringView<char>& str) noexcept
+  {
+    auto size = str.getSize();
+    size = size > 16 ? 16 : size;
+
+    uint64_t hash = 0xCBF29CE484222325;
+    for (size_t i = 0; i < size; i++)
+    {
+      hash ^= (uint8_t)str[i];
+      hash *= 0x100000001B3; //FNV prime
+    }
+    return hash;
+  }
+
+  template<>
+  std::size_t hash(const String<char>& str) noexcept
+  {
+    auto size = str.getSize();
+    size = size > 16 ? 16 : size;
+
+    uint64_t hash = 0xCBF29CE484222325;
+    for (size_t i = 0; i < size; i++)
+    {
+      hash ^= (uint8_t)str[i];
+      hash *= 0x100000001B3; //FNV prime
+    }
+    return hash;
   }
 
 #ifdef COLT_USE_IOSTREAMS
