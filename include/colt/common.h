@@ -400,7 +400,7 @@ namespace colt {
     /// Do no use to return non-const references:
     /// Should be used with const references (const T&/const T&&).
     /// @tparam T The type to copy
-    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<T>, std::decay_t<T>, T>; };
+    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<std::decay_t<T>>, std::decay_t<T>, T>; };
 
     template<typename T>
     /// @brief Short hand for copy_if_trivial::type.
@@ -544,7 +544,7 @@ namespace colt {
   * FUNCTIONS HELPERS
   *********************************/
 
-  template<class T>
+  template<typename T>
   constexpr T swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, T>)
   {
     T old_value = std::move(o1);
@@ -552,12 +552,26 @@ namespace colt {
     o2 = old_value;
   }
 
-  template<class T, class U = T>
+  template<typename T, typename U = T>
   constexpr T exchange(T& obj, U&& new_value) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, U>)
   {
     T old_value = std::move(obj);
     obj = std::forward<U>(new_value);
     return old_value;
+  }
+
+  template <class To, class From>
+  inline To bit_cast(const From& src) noexcept
+  {
+    static_assert(sizeof(To) == sizeof(From), "sizeof of both types should be equal!");
+    static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
+      "Both type should be trivially copyable!");
+    static_assert(std::is_trivially_constructible_v<To>,
+      "This implementation additionally requires destination type to be trivially constructible");
+    
+    To dst;
+    std::memcpy(&dst, &src, sizeof(To));
+    return dst;
   }
 }
 
