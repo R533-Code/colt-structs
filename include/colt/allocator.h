@@ -386,7 +386,7 @@ namespace colt
       using register_fn_t = void(*)(void) noexcept;
 
       /// @brief The array of registered function pointer
-      register_fn_t reg_array[register_size];
+      register_fn_t reg_array[register_size] = {};
       /// @brief The number of registered function.
       /// An atomic is used to protect the 'reg_array' from multiple threads accesses
       std::atomic<size_t> register_count;
@@ -395,7 +395,7 @@ namespace colt
       /// @brief Register function to call on exit
       /// @param func The function to register
       /// @return True if registering was successful, false if there is no more capacity for registering
-      bool RegisterOnNullFn(void(*func)(void) noexcept) noexcept
+      bool registerOnNullFn(void(*func)(void) noexcept) noexcept
       {
         if (register_count.load(std::memory_order_acquire) < register_size)
         {
@@ -441,7 +441,7 @@ namespace colt
     /// @brief Global allocator type.
     /// Accesses to this allocator type are thread-safe.
     /// This allocator cannot return an empty block (nullptr), it will instead
-    /// call std::exit(). To register a function to be called in that case,
+    /// call std::abort(). To register a function to be called in that case,
     /// use RegisterOnNullFn(), which can register up to 5 functions (by default).
     using GlobalAllocator_t =
       AbortOnNULLAllocator<
@@ -486,7 +486,7 @@ namespace colt
     /// @return True if registering was successful, false if there is no more capacity for registering
     inline bool RegisterOnNullFn(void(*fn)(void) noexcept) noexcept
     {
-      return global_allocator.RegisterOnNullFn(fn);
+      return global_allocator.registerOnNullFn(fn);
     }
 
     namespace details
