@@ -395,7 +395,7 @@ namespace colt
       /// @brief Register function to call on exit
       /// @param func The function to register
       /// @return True if registering was successful, false if there is no more capacity for registering
-      bool registerOnNullFn(void(*func)(void) noexcept) noexcept
+      bool RegisterOnNullFn(void(*func)(void) noexcept) noexcept
       {
         if (register_count.load(std::memory_order_acquire) < register_size)
         {
@@ -442,7 +442,7 @@ namespace colt
     /// Accesses to this allocator type are thread-safe.
     /// This allocator cannot return an empty block (nullptr), it will instead
     /// call std::exit(). To register a function to be called in that case,
-    /// use registerOnNullFn(), which can register up to 5 functions (by default).
+    /// use RegisterOnNullFn(), which can register up to 5 functions (by default).
     using GlobalAllocator_t =
       AbortOnNULLAllocator<
       ThreadSafeAllocator<
@@ -484,9 +484,9 @@ namespace colt
     /// the user might want to print a message.
     /// @param fn The function pointer to register
     /// @return True if registering was successful, false if there is no more capacity for registering
-    inline bool registerOnNullFn(void(*fn)(void) noexcept) noexcept
+    inline bool RegisterOnNullFn(void(*fn)(void) noexcept) noexcept
     {
-      return global_allocator.registerOnNullFn(fn);
+      return global_allocator.RegisterOnNullFn(fn);
     }
 
     namespace details
