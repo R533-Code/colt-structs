@@ -484,7 +484,7 @@ namespace colt
     /// the user might want to print a message.
     /// @param fn The function pointer to register
     /// @return True if registering was successful, false if there is no more capacity for registering
-    inline bool RegisterOnNullFn(void(*fn)(void) noexcept) noexcept
+    inline bool RegisterOnNULLFn(void(*fn)(void) noexcept) noexcept
     {
       return global_allocator.registerOnNullFn(fn);
     }
