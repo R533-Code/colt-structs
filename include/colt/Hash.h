@@ -184,7 +184,7 @@ namespace colt
   }
 
   template<typename T>
-  constexpr std::size_t get_hash(const T& obj) noexcept
+  inline std::size_t get_hash(const T& obj) noexcept
   {
     static_assert(traits::is_hashable_v<T>,
       "Type does not implement colt::hash or std::hash!");
