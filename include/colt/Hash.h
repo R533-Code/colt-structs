@@ -100,7 +100,7 @@ namespace colt
   std::size_t hash(const details::cstr& str) noexcept
   {
     auto size = std::strlen(str);
-    size = size > 16 ? 16 : size;
+    size = size > 64 ? 64 : size;
     
     uint64_t hash = 0xCBF29CE484222325;
     for (size_t i = 0; i < size; i++)

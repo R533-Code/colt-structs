@@ -197,6 +197,22 @@ namespace colt {
     return { begin_ptr + begin, end - begin };
   }
 
+  template<typename T>
+  std::size_t hash(const ContiguousView<T>& view) noexcept
+  {
+    static_assert(traits::is_hashable_v<T>,
+      "Type of ContiguousView should be hashable!");
+
+    auto size = view.getSize();
+    size = size > 64 ? 64 : size;
+
+    std::size_t seed = view.getSize();
+    for (size_t i = 0; i < size; i++)
+      seed ^= get_hash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    
+    return seed;
+  }
+
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const ContiguousView<T>& var)

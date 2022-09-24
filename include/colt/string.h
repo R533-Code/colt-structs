@@ -319,7 +319,7 @@ namespace colt
   std::size_t hash(const StringView<char>& str) noexcept
   {
     auto size = str.getSize();
-    size = size > 16 ? 16 : size;
+    size = size > 64 ? 64 : size;
 
     uint64_t hash = 0xCBF29CE484222325;
     for (size_t i = 0; i < size; i++)
@@ -334,7 +334,7 @@ namespace colt
   std::size_t hash(const String<char>& str) noexcept
   {
     auto size = str.getSize();
-    size = size > 16 ? 16 : size;
+    size = size > 64 ? 64 : size;
 
     uint64_t hash = 0xCBF29CE484222325;
     for (size_t i = 0; i < size; i++)

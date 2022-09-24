@@ -3,7 +3,7 @@
 
 #include <initializer_list>
 
-#include "view.h"
+#include "View.h"
 #include "allocator.h"
 #include "algorithm.h"
 
@@ -567,9 +567,9 @@ namespace colt
     }
     else
     {
-      T* const ptr_d = get_stack_ptr();
-      const T* const ptr_m = to_copy.get_stack_ptr();
-      algo::contiguous_copy(ptr_d, ptr_m, size);
+      T* const to = get_stack_ptr();
+      T* const from = to_move.get_stack_ptr();
+      algo::contiguous_copy(from, to, size);
     }
   }
 
@@ -583,9 +583,9 @@ namespace colt
     }
     else
     {
-      T* const ptr_d = get_stack_ptr();
-      T* const ptr_m = to_move.get_stack_ptr();
-      algo::contiguous_move(ptr_d, ptr_m, size);
+      T* const to = get_stack_ptr();
+      T* const from = to_move.get_stack_ptr();
+      algo::contiguous_move(from, to, size);
     }
   }
 
@@ -634,8 +634,7 @@ namespace colt
   {
     assert(N <= size && "Vector does not contain enough items!");
     T* const ptr_d = get_current_ptr();
-    algo::contiguous_destruct(ptr_d + size - N, N);
-    size -= N;
+    algo::contiguous_destruct(ptr_d + (size -= N), N);
   }
 
   template<typename T, size_t buff_count>
@@ -724,30 +723,30 @@ namespace colt
     ++size;
   }
 
+  template<typename T>
+  std::size_t hash(const Vector<T>& view) noexcept
+  {
+    return get_hash(ContiguousView<T>(view));
+  }
+
+  template<typename T, size_t sz>
+  std::size_t hash(const SmallVector<T, sz>& view) noexcept
+  {
+    return get_hash(ContiguousView<T>(view));
+  }
+
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const Vector<T>& var)
   {
-    static_assert(traits::is_coutable_v<T>, "Type of Vector should implement operator<<(std::ostream&)!");
-    os << '[';
-    if (!var.isEmpty())
-      os << var.getFront();
-    for (size_t i = 1; i < var.getSize(); i++)
-      os << ", " << var[i];
-    os << ']';
+    os << ContiguousView<T>(var);
     return os;
   }
 
   template<typename T, size_t buff>
   static std::ostream& operator<<(std::ostream& os, const SmallVector<T, buff>& var)
   {
-    static_assert(traits::is_coutable_v<T>, "Type of SmallVector should implement operator<<(std::ostream&)!");
-    os << '[';
-    if (!var.isEmpty())
-      os << var.getFront();
-    for (size_t i = 1; i < var.getSize(); i++)
-      os << ", " << var[i];
-    os << ']';
+    os << ContiguousView<T>(var);
     return os;
   }
 #endif  
