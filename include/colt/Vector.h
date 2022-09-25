@@ -4,8 +4,8 @@
 #include <initializer_list>
 
 #include "View.h"
-#include "allocator.h"
-#include "algorithm.h"
+#include "details/allocator.h"
+#include "details/algorithm.h"
 
 namespace colt
 {

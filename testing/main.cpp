@@ -2,13 +2,13 @@
 
 #define COLT_USE_IOSTREAMS
 #define COLT_USE_FMT
-#include <colt/allocator.h>
-#include <colt/common.h>
-#include <colt/view.h>
-#include <colt/optional.h>
-#include <colt/unique_ptr.h>
-#include <colt/vector.h>
-#include <colt/expected.h>
+#include <colt/View.h>
+#include <colt/Optional.h>
+#include <colt/UniquePtr.h>
+#include <colt/Vector.h>
+#include <colt/Expected.h>
+#include <colt/String.h>
+#include <colt/Hash.h>
 
 //TODO: add {fmt} formatting by checking for FMT_VERSION
 
@@ -31,5 +31,5 @@ void print_no_memory() noexcept
 
 int main()
 {
-  memory::registerOnNullFn(print_no_memory);
+  memory::RegisterOnNULLFn(print_no_memory);
 }

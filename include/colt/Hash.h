@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <type_traits>
 
-#include "common.h"
+#include "details/common.h"
 
 namespace colt
 {

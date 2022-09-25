@@ -5,7 +5,7 @@
 #ifndef HG_COLT_UNIQUE_PTR
 #define HG_COLT_UNIQUE_PTR
 
-#include "allocator.h"
+#include "details/allocator.h"
 
 namespace colt
 {
