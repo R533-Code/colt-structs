@@ -8,8 +8,6 @@ namespace colt::algo
 {
   template<typename T>
   /// @brief Moves and destructs 'count' objects from a memory location to another.
-  /// This algorithm optimizes out relocatable and trivial type move destruction
-  /// to a 'memcpy'.
   /// @tparam T The type of the object to move and destruct
   /// @param from Pointer to the objects to move then destruct
   /// @param to Pointer to where to move constructs the objects
@@ -17,25 +15,15 @@ namespace colt::algo
   inline void contiguous_destructive_move(T* from, T* to, size_t count)
     noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_destructible_v<T>)
   {
-    if constexpr (
-      (std::is_trivially_move_constructible_v<T> && std::is_trivially_destructible_v<T>)
-      || traits::is_relocatable_v<T>)
+    for (size_t i = 0; i < count; i++)
     {
-      std::memcpy(to, from, count * sizeof(T));
-    }
-    else
-    {
-      for (size_t i = 0; i < count; i++)
-      {
-        new(to + i) T(std::move(from[i]));
-        from[i].~T();
-      }
+      new(to + i) T(std::move(from[i]));
+      from[i].~T();
     }
   }
 
   template<typename T>
   /// @brief Moves 'count' objects from a memory location to another.
-  /// This algorithm optimizes out trivial type move to a 'memcpy'.
   /// @tparam T The type to move
   /// @param from Pointer to the objects to move
   /// @param to Pointer to where to move constructs the objects
@@ -43,15 +31,8 @@ namespace colt::algo
   inline void contiguous_move(T* from, T* to, size_t count)
     noexcept(std::is_nothrow_move_constructible_v<T>)
   {
-    if constexpr (std::is_trivially_move_constructible_v<T>)
-    {
-      std::memcpy(to, from, count * sizeof(T));
-    }
-    else
-    {
-      for (size_t i = 0; i < count; i++)
-        new(to + i) T(std::move(from[i]));
-    }
+    for (size_t i = 0; i < count; i++)
+      new(to + i) T(std::move(from[i]));    
   }
 
   template<typename T, typename... Args>
@@ -70,7 +51,6 @@ namespace colt::algo
 
   template<typename T>
   /// @brief Copies 'count' objects from a memory location to another one.
-  /// This algorithm optimizes trivial types copy to a 'memcpy'.
   /// @tparam T The type to copy
   /// @param from Pointer to where to copy the objects from
   /// @param to Pointer to where to copy constructs the objects
@@ -78,15 +58,8 @@ namespace colt::algo
   inline void contiguous_copy(const T* from, T* to, size_t count)
     noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
-    if constexpr (std::is_trivially_copy_constructible_v<T>)
-    {
-      std::memcpy(to, from, count * sizeof(T));
-    }
-    else
-    {
-      for (size_t i = 0; i < count; i++)
-        new(to + i) T(from[i]);
-    }
+    for (size_t i = 0; i < count; i++)
+      new(to + i) T(from[i]);    
   }
 
   template<typename T>
