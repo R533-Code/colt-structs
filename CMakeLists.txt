@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(ColtStructs VERSION 0.0.1.5 LANGUAGES CXX)
+project(ColtStructs VERSION 0.0.2.0 LANGUAGES CXX)
 
 # Contains all headers in 'include/colt'
 file(GLOB_RECURSE ColtHeaders "include/colt/*.h")
@@ -23,6 +23,9 @@ file(GLOB_RECURSE ColtTestsPath "testing/*.cpp")
 list(LENGTH ColtTestsPath testCount)
 message(STATUS "Found " ${testCount} " tests.")
 
+# Testing for CTest
+enable_testing()
+
 # TESTING:
 # Each file in resources/tests/ that ends with .ct
 # is a file to try to run.
@@ -33,9 +36,11 @@ foreach(testPath ${ColtTestsPath})
 	# Read all the lines of the file
 	file(STRINGS ${testPath} testLines)
 	# Store the first line
-	list(GET ${testLines} 0 firstLine)
+	list(GET testLines 0 firstLine)
 	# Pop the 2 first characters which are //
 	string(REPLACE "//" "" RegexTest ${firstLine})
+	# Strip new lines from end of line
+	string(REGEX REPLACE "\n$" "" RegexTest "${RegexTes}")
 
 	# Get test name
 	get_filename_component(testName ${testPath} NAME_WE)
