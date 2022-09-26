@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 project(ColtStructs VERSION 0.0.1.5 LANGUAGES CXX)
 
 # Contains all headers in 'include/colt'
-file(GLOB ColtHeaders "include/colt/*.h")
+file(GLOB_RECURSE ColtHeaders "include/colt/*.h")
 
 add_executable(colt_test
 	${ColtHeaders}
