@@ -219,6 +219,21 @@ namespace colt
     /// @brief The count of active objects
     size_t size = 0;
 
+  private:
+    /// @brief Returns the stack buffer's beginning pointer
+    /// @return Const pointer to the stack buffer
+    constexpr const T* get_stack_ptr() const noexcept { return std::launder(reinterpret_cast<const T*>(buffer)); }
+    /// @brief Returns the stack buffer's beginning pointer
+    /// @return Pointer to the stack buffer
+    constexpr T* get_stack_ptr() noexcept { return std::launder(reinterpret_cast<T*>(buffer)); }
+
+    /// @brief Returns the pointer to the current active allocation
+    /// @return Const pointer to the current active allocation
+    constexpr const T* get_current_ptr() const noexcept;
+    /// @brief Returns the pointer to the current active allocation
+    /// @return Pointer to the current active allocation
+    constexpr T* get_current_ptr() noexcept;
+
   public:
     /// @brief Default constructor
     constexpr SmallVector() noexcept = default;
@@ -347,20 +362,13 @@ namespace colt
     /// @param by_more The count of object to reserve for
     constexpr void reserve(size_t by_more) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>);
 
-  private:
-    /// @brief Returns the stack buffer's beginning pointer
-    /// @return Const pointer to the stack buffer
-    constexpr const T* get_stack_ptr() const noexcept { return std::launder(reinterpret_cast<const T*>(buffer)); }
-    /// @brief Returns the stack buffer's beginning pointer
-    /// @return Pointer to the stack buffer
-    constexpr T* get_stack_ptr() noexcept { return std::launder(reinterpret_cast<T*>(buffer)); }
+    /// @brief Obtains a view over the whole Vector
+    /// @return View over the Vector
+    constexpr ContiguousView<T> toView() const noexcept { return { get_current_ptr(), size}; }
 
-    /// @brief Returns the pointer to the current active allocation
-    /// @return Const pointer to the current active allocation
-    constexpr const T* get_current_ptr() const noexcept;    
-    /// @brief Returns the pointer to the current active allocation
-    /// @return Pointer to the current active allocation
-    constexpr T* get_current_ptr() noexcept;
+    /// @brief Converts a Vector to a view implicitly
+    /// @return ContiguousView over the whole Vector
+    constexpr explicit operator ContiguousView<T>() const noexcept { return { get_current_ptr(), size }; }  
   };
 
   template<typename T>
@@ -568,14 +576,14 @@ namespace colt
     else
     {
       T* const to = get_stack_ptr();
-      T* const from = to_move.get_stack_ptr();
+      const T* const from = to_copy.get_stack_ptr();
       algo::contiguous_copy(from, to, size);
     }
   }
 
   template<typename T, size_t buff_count>
   constexpr SmallVector<T, buff_count>::SmallVector(SmallVector&& to_move) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>)
-    : capacity(to_move.capacity), size(exchange(to_move.size, 0))
+    : capacity(to_move.capacity), size(to_move.size)
   {
     if (!isStackAllocated())
     {
