@@ -17,19 +17,7 @@ namespace colt
   std::size_t hash(const bool& b) noexcept
   {
     return b ? 1231 : 1237;
-  }
-
-  template<>
-  std::size_t hash(const char& chr) noexcept
-  {
-    return chr;
-  }
-
-  template<>
-  std::size_t hash(const uint8_t& i) noexcept
-  {
-    return i;
-  }
+  }  
 
   template<>
   std::size_t hash(const uint16_t& i) noexcept
@@ -55,13 +43,7 @@ namespace colt
     x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
     x = x ^ (x >> 31);
     return x;
-  }
-
-  template<>
-  std::size_t hash(const int8_t& i) noexcept
-  {
-    return static_cast<size_t>(i);
-  }
+  }  
 
   template<>
   std::size_t hash(const int16_t& i) noexcept
@@ -87,6 +69,27 @@ namespace colt
     x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
     x = x ^ (x >> 31);
     return x;
+  }
+
+  template<>
+  std::size_t hash(const char& chr) noexcept
+  {
+    const auto i = static_cast<uint64_t>(chr);
+    return hash(i);
+  }
+
+  template<>
+  std::size_t hash(const uint8_t& i) noexcept
+  {
+    const auto in = static_cast<uint64_t>(i);
+    return hash(in);
+  }
+
+  template<>
+  std::size_t hash(const int8_t& i) noexcept
+  {
+    const auto in = static_cast<uint64_t>(i);
+    return hash(in);
   }
 
   namespace details
