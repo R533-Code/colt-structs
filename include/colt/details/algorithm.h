@@ -46,7 +46,7 @@ namespace colt::algo
     noexcept(std::is_nothrow_constructible_v<T, Args>)
   {
     for (size_t i = 0; i < count; i++)
-      new(where + count) T(std::forward<Args>(args)...);
+      new(where + i) T(std::forward<Args>(args)...);
   }
 
   template<typename T>
