@@ -400,6 +400,50 @@ namespace colt {
     /// @tparam T The type to copy
     using copy_if_trivial_t = typename copy_if_trivial<T>::type;
 
+    /********** COMPARISONS **********/
+
+    template<typename T, typename = std::void_t<>>
+    /// @brief Check if a type implements a colt::hash specialization
+    /// @tparam T The type to check for
+    /// @tparam  SFINAE helper
+    struct is_equal_comparable
+    {
+      static constexpr bool value = false;
+    };
+
+    template<typename T>
+    /// @brief Check if a type implements a colt::hash specialization
+    /// @tparam T The type to check for
+    /// @tparam  SFINAE helper
+    struct is_equal_comparable<T, std::void_t<decltype(std::declval<T>() == std::declval<T>())>>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<typename T>
+    static constexpr bool is_equal_comparable_v = is_equal_comparable<T>::value;
+    
+    template<typename T, typename = std::void_t<>>
+    /// @brief Check if a type implements a colt::hash specialization
+    /// @tparam T The type to check for
+    /// @tparam  SFINAE helper
+    struct is_not_equal_comparable
+    {
+      static constexpr bool value = false;
+    };
+
+    template<typename T>
+    /// @brief Check if a type implements a colt::hash specialization
+    /// @tparam T The type to check for
+    /// @tparam  SFINAE helper
+    struct is_not_equal_comparable<T, std::void_t<decltype(std::declval<T>() != std::declval<T>())>>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<typename T>
+    static constexpr bool is_not_equal_comparable_v = is_equal_comparable<T>::value;
+
     /********** TAGS **********/
 
     /// @brief Tag for constructing in place
