@@ -389,7 +389,7 @@ namespace colt {
     /// Do no use to return non-const references:
     /// Should be used with const references (const T&/const T&&).
     /// @tparam T The type to copy
-    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<std::decay_t<T>>, std::decay_t<T>, T>; };
+    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<std::decay_t<T>> && sizeof(T) <= 16, std::decay_t<T>, T>; };
 
     template<typename T>
     /// @brief Short hand for copy_if_trivial::type.
@@ -578,7 +578,7 @@ namespace colt {
   *********************************/
 
   template<typename T>
-  constexpr T swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, T>)
+  constexpr void swap(T& o1, T& o2) noexcept(std::is_nothrow_move_constructible_v<T> && std::is_nothrow_assignable_v<T&, T>)
   {
     T old_value = std::move(o1);
     o1 = o2;
