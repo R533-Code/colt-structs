@@ -459,24 +459,21 @@ namespace colt
       inline GlobalAllocator_t global_allocator;
     }
 
-    /// @brief Reference to the global allocator.
-    /// Accesses to the global allocator are thread-safe.
-    GlobalAllocator_t& global_allocator = details::global_allocator;
-
+    [[nodiscard]]
     /// @brief Allocates a block of memory through the global allocator
     /// @param size The size of the block
-    /// @return The non-null memory block
+    /// @return The non-null memory block    
     inline MemBlock allocate(sizes::ByteSize size) noexcept
     {
       assert(size.size != 0 && "Cannot allocate 0 bytes!");
-      return global_allocator.allocate(size);
+      return details::global_allocator.allocate(size);
     }
 
     /// @brief Deallocates a block of memory that was obtained through the global allocator
     /// @param blk The block to deallocate
     inline void deallocate(MemBlock blk) noexcept
     {
-      global_allocator.deallocate(blk);
+      details::global_allocator.deallocate(blk);
     }
     
     /// @brief Register a null callback for the global allocator.
@@ -486,7 +483,7 @@ namespace colt
     /// @return True if registering was successful, false if there is no more capacity for registering
     inline bool RegisterOnNULLFn(void(*fn)(void) noexcept) noexcept
     {
-      return global_allocator.registerOnNullFn(fn);
+      return details::global_allocator.registerOnNullFn(fn);
     }
 
     namespace details
@@ -564,6 +561,7 @@ namespace colt
     }
 
     template<typename T, typename... Args>
+    [[nodiscard]]
     /// @brief Constructs an object using the global allocator.
     /// No memory leaks can happen through this function: if the constructor throws,
     /// the memory is freed before propagating the exception.
