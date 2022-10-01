@@ -4,6 +4,8 @@
 namespace colt
 {
 	template<typename T>
+	/// @brief Contiguous Iterator, which is just a pointer
+	/// @tparam T The type of the pointer
 	using ContiguousIterator = T*;
 }
 
