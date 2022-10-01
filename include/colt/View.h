@@ -66,7 +66,7 @@ namespace colt {
 
     /// @brief Returns a pointer to the beginning of the view.
     /// @return Pointer to the beginning of the view
-    constexpr const T* getData() const noexcept { return begin_ptr; }
+    constexpr const T* get_data() const noexcept { return begin_ptr; }
 
     /// @brief Returns the count of object the view spans on.
     /// @return The count of objects
@@ -74,28 +74,28 @@ namespace colt {
 
     /// @brief Returns the byte size the view spans on.
     /// @return The byte size
-    constexpr sizes::ByteSize getByteSize() const noexcept;
+    constexpr sizes::ByteSize get_byte_size() const noexcept;
 
     /// @brief Check if the view is empty.
     /// @return True if the size of the view is 0
-    constexpr bool isEmpty() const noexcept { return size == 0; }
+    constexpr bool is_empty() const noexcept { return size == 0; }
 
     /// @brief Check if the view is not empty.
     /// @return True if the size of the view is not 0
-    constexpr bool isNotEmpty() const noexcept { return size != 0; }
+    constexpr bool is_not_empty() const noexcept { return size != 0; }
 
     /// @brief Get the front of the view.
-    /// Precondition: !isEmpty()
+    /// Precondition: !is_empty()
     /// @return The first item of the view
-    constexpr traits::copy_if_trivial_t<const T&> getFront() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> get_front() const noexcept;
 
     /// @brief Get the back of the view.
-    /// Precondition: !isEmpty()
+    /// Precondition: !is_empty()
     /// @return The last item of the view
-    constexpr traits::copy_if_trivial_t<const T&> getBack() const noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> get_back() const noexcept;
 
     /// @brief Shortens the view from the front by 1.
-    /// Precondition: !isEmpty()
+    /// Precondition: !is_empty()
     constexpr void popFront() noexcept;
 
     /// @brief Shortens the view from the front by N.
@@ -104,13 +104,13 @@ namespace colt {
     constexpr void popFrontN(size_t N) noexcept;
 
     /// @brief Shortens the view from the back by 1.
-    /// Precondition: !isEmpty()
-    constexpr void popBack() noexcept;
+    /// Precondition: !is_empty()
+    constexpr void pop_back() noexcept;
 
     /// @brief Shortens the view from the back by N.
     /// Precondition: N <= size
     /// @param N The number of objects to pop
-    constexpr void popBackN(size_t N) noexcept;
+    constexpr void pop_back_n(size_t N) noexcept;
 
     /// @brief Returns the object at index 'index' of the view.
     /// Precondition: index < size
@@ -132,29 +132,29 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr sizes::ByteSize ContiguousView<T>::getByteSize() const noexcept
+  constexpr sizes::ByteSize ContiguousView<T>::get_byte_size() const noexcept
   {
     return { size * sizeof(T) };
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::getFront() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::get_front() const noexcept
   {
-    assert(!isEmpty() && "View was empty!");
+    assert(!is_empty() && "View was empty!");
     return begin_ptr[0];
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::getBack() const noexcept
+  constexpr traits::copy_if_trivial_t<const T&> ContiguousView<T>::get_back() const noexcept
   {
-    assert(!isEmpty() && "View was empty!");
+    assert(!is_empty() && "View was empty!");
     return begin_ptr[size - 1];
   }
 
   template<typename T>
   constexpr void ContiguousView<T>::popFront() noexcept
   {
-    assert(!isEmpty() && "View was empty!");
+    assert(!is_empty() && "View was empty!");
     ++begin_ptr;
     --size;
   }
@@ -168,14 +168,14 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popBack() noexcept
+  constexpr void ContiguousView<T>::pop_back() noexcept
   {
-    assert(!isEmpty() && "View was empty!");
+    assert(!is_empty() && "View was empty!");
     --size;
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popBackN(size_t N) noexcept
+  constexpr void ContiguousView<T>::pop_back_n(size_t N) noexcept
   {
     assert(N <= size && "View does not contain enough items!");
     size -= N;
@@ -191,8 +191,8 @@ namespace colt {
   template<typename T>
   constexpr ContiguousView<T> ContiguousView<T>::spliceRange(Range range) const noexcept
   {
-    size_t begin = range.getBeginOffset();
-    size_t end = range.getEndOffset();
+    size_t begin = range.get_begin_offset();
+    size_t end = range.get_end_offset();
     end = (end > size ? size : end);    
     return { begin_ptr + begin, end - begin };
   }
@@ -219,8 +219,8 @@ namespace colt {
   {
     static_assert(traits::is_coutable_v<T>, "Type of ContiguousView should implement operator<<(std::ostream&)!");
     os << '[';
-    if (!var.isEmpty())
-      os << var.getFront();
+    if (!var.is_empty())
+      os << var.get_front();
     for (size_t i = 1; i < var.getSize(); i++)
       os << ", " << var[i];
     os << ']';
