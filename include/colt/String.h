@@ -172,7 +172,7 @@ namespace colt
   template<typename CharT>
   constexpr const CharT* String<CharT>::c_str() noexcept
   {
-    if (Str::isNotEmpty())
+    if (Str::is_not_empty())
       if (Str::getBack() == '\0')
         return;
     append('\0');
@@ -296,13 +296,13 @@ namespace colt
   template<typename CharT>
   constexpr void StringView<CharT>::strip_spaces() noexcept
   {
-    while (View::isNotEmpty())
+    while (View::is_not_empty())
       if (isSpace(*View::begin()))
         View::popFront();
       else
         break;
 
-    while (View::isNotEmpty())
+    while (View::is_not_empty())
       if (isSpace(*(View::begin() + View::getSize() - 1)))
         View::popFront();
       else
