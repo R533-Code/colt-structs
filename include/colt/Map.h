@@ -77,7 +77,7 @@ namespace colt
     }
 
     /// @brief Increments a probing index, faster than a modulo operation.
-    /// Equivalent to a faster 'prob + 1 % slots.getSize()', but all increment
+    /// Equivalent to a faster 'prob + 1 % slots.get_size()', but all increment
     /// done one a probe should pass by this functions.
     /// @param prob The probing index to increment
     /// @return The incremented index
@@ -201,7 +201,7 @@ namespace colt
 
     /// @brief Returns the capacity of the current allocation
     /// @return The capacity of the current allocation
-    constexpr size_t get_capacity() const noexcept { return slots.getSize(); }
+    constexpr size_t get_capacity() const noexcept { return slots.get_size(); }
     
     /// @brief Returns a MapIterator to the first active slot in the Map, or end() if no slots are active
     /// @return MapIterator to the first active slot or end()
@@ -340,8 +340,8 @@ namespace colt
   constexpr bool Map<Key, Value>::find_key(size_t key_hash, traits::copy_if_trivial_t<const Key&> key, size_t& prob, const Vector<details::KeySentinel>& metadata, memory::TypedBlock<Slot> blk) noexcept
   {
     assert(key_hash == GetHash(key));
-    assert(metadata.getSize() == blk.getSize());
-    size_t prob_index = key_hash % blk.getSize();
+    assert(metadata.get_size() == blk.get_size());
+    size_t prob_index = key_hash % blk.get_size();
     for (;;)
     {
       if (auto sentinel = metadata[prob_index];
@@ -352,13 +352,13 @@ namespace colt
       }
       else if (details::is_sentinel_equal(sentinel, key_hash))
       {
-        if (blk.getPtr()[prob_index].first == key)
+        if (blk.get_ptr()[prob_index].first == key)
         {
           prob = prob_index;
           return false;
         }
       }
-      prob_index = details::advance_prob(prob_index, blk.getSize());
+      prob_index = details::advance_prob(prob_index, blk.get_size());
     }
   }
 
@@ -369,20 +369,20 @@ namespace colt
     auto new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
 
     Vector<details::KeySentinel> new_metadata = { new_capacity, InPlace, details::EMPTY };
-    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
       auto sentinel = sentinel_metadata[i];
       if (details::is_sentinel_active(sentinel))
       {
         //find the key
-        Slot* ptr = slots.getPtr() + i;
+        Slot* ptr = slots.get_ptr() + i;
         const size_t key_hash = GetHash(ptr->first);
         size_t prob_index;
         //Rehash the key to get its new index in the new array
         if (find_key(key_hash, ptr->first, prob_index, sentinel_metadata, slots))
         {
           //Move destruct
-          new(slots.getPtr() + prob_index) Slot(std::move(*ptr));
+          new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
           ptr->~Slot();
 
           //Set the slot to ACTIVE
@@ -423,10 +423,10 @@ namespace colt
   template<typename Key, typename Value>
   constexpr void Map<Key, Value>::clear() noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>)
   {
-    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
       if (details::is_sentinel_active(sentinel_metadata[i]))
-        slots.getPtr()[i].~Slot(); //destroy active slots
+        slots.get_ptr()[i].~Slot(); //destroy active slots
     }
     size = 0;
   }
@@ -434,10 +434,10 @@ namespace colt
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::begin() noexcept
   {
-    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
       if (details::is_sentinel_active(sentinel_metadata[i]))
-        return { slots.getPtr() + i, this };
+        return { slots.get_ptr() + i, this };
     }
     return end();
   }
@@ -445,16 +445,16 @@ namespace colt
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::end() noexcept
   {
-    return { slots.getPtr() + slots.getSize(), this };
+    return { slots.get_ptr() + slots.get_size(), this };
   }
 
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::begin() const noexcept
   {
-    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
       if (details::is_sentinel_active(sentinel_metadata[i]))
-        return { slots.getPtr() + i, this };
+        return { slots.get_ptr() + i, this };
     }
     return end();
   }
@@ -462,7 +462,7 @@ namespace colt
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::end() const noexcept
   {
-    return { slots.getPtr() + slots.getSize(), this };
+    return { slots.get_ptr() + slots.get_size(), this };
   }
 
   template<typename Key, typename Value>
@@ -489,7 +489,7 @@ namespace colt
   constexpr typename const Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) const noexcept
   {
     const size_t key_hash = GetHash(key);
-    size_t prob_index = key_hash % slots.getSize();
+    size_t prob_index = key_hash % slots.get_size();
     for (;;)
     {
       if (auto sentinel = sentinel_metadata[prob_index];
@@ -499,15 +499,15 @@ namespace colt
       }
       else if (details::is_sentinel_deleted(sentinel))
       {
-        prob_index = details::advance_prob(prob_index, slots.getSize());
+        prob_index = details::advance_prob(prob_index, slots.get_size());
         continue;
       }
       else if (details::is_sentinel_equal(sentinel, key_hash))
       {
-        if (slots.getPtr()[prob_index].first == key)
-          return slots.getPtr() + prob_index;
+        if (slots.get_ptr()[prob_index].first == key)
+          return slots.get_ptr() + prob_index;
       }
-      prob_index = details::advance_prob(prob_index, slots.getSize());
+      prob_index = details::advance_prob(prob_index, slots.get_size());
     }
   }
 
@@ -534,17 +534,17 @@ namespace colt
     size_t prob_index;
     if (find_key(key_hash, key, prob_index, sentinel_metadata, slots))
     {
-      new(slots.getPtr() + prob_index) Slot(key, value);
+      new(slots.get_ptr() + prob_index) Slot(key, value);
       //Set the slot to ACTIVE
       sentinel_metadata[prob_index] = details::create_active_sentinel(key_hash);
       //Update size
       ++size;
-      return { slots.getPtr() + prob_index, InsertionResult::SUCCESS };
+      return { slots.get_ptr() + prob_index, InsertionResult::SUCCESS };
     }
     else
     {
-      slots.getPtr()[prob_index].second = value;
-      return { slots.getPtr() + prob_index, InsertionResult::ASSIGNED };
+      slots.get_ptr()[prob_index].second = value;
+      return { slots.get_ptr() + prob_index, InsertionResult::ASSIGNED };
     }
   }
 
@@ -553,7 +553,7 @@ namespace colt
   {
     if (Slot* ptr = find(key))
     {
-      size_t index = (slots.getPtr() + slots.getSize()) - ptr;
+      size_t index = (slots.get_ptr() + slots.get_size()) - ptr;
       sentinel_metadata[index] = details::DELETED; //set the sentinel to deleted
       ptr->~Slot(); //destroy the key/value pair
       //Update size
@@ -586,32 +586,32 @@ namespace colt
     size_t prob_index;
     if (find_key(key_hash, key, prob_index, sentinel_metadata, slots))
     {
-      new(slots.getPtr() + prob_index) Slot(key, value);
+      new(slots.get_ptr() + prob_index) Slot(key, value);
       //Set the slot to ACTIVE
       sentinel_metadata[prob_index] = details::create_active_sentinel(key_hash);
       //Update size
       ++size;
-      return { slots.getPtr() + prob_index, InsertionResult::SUCCESS };
+      return { slots.get_ptr() + prob_index, InsertionResult::SUCCESS };
     }
     else
-      return { slots.getPtr() + prob_index, InsertionResult::EXISTS };
+      return { slots.get_ptr() + prob_index, InsertionResult::EXISTS };
   }
 
   template<typename Key, typename Value>
   template<typename SlotT>
   constexpr Map<Key, Value>::MapIterator<SlotT>& Map<Key, Value>::MapIterator<SlotT>::operator++() noexcept
   {
-    size_t index = slot_ptr - map_ptr->slots.getPtr() + 1;
-    for (size_t i = index; i < map_ptr->sentinel_metadata.getSize(); i++)
+    size_t index = slot_ptr - map_ptr->slots.get_ptr() + 1;
+    for (size_t i = index; i < map_ptr->sentinel_metadata.get_size(); i++)
     {
       if (details::is_sentinel_active(map_ptr->sentinel_metadata[i]))
       {
-        slot_ptr = map_ptr->slots.getPtr() + i;
+        slot_ptr = map_ptr->slots.get_ptr() + i;
         return *this;
       }
     }
     //Set to end()
-    slot_ptr = map_ptr->slots.getPtr() + map_ptr->slots.getSize();
+    slot_ptr = map_ptr->slots.get_ptr() + map_ptr->slots.get_size();
     return *this;
   }
 
