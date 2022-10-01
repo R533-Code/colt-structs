@@ -79,7 +79,7 @@ namespace colt
 				|| chr == '>')
 				return false;
 		}
-		if (name.getBack() == ' ' || name.getBack() == '.')
+		if (name.get_back() == ' ' || name.get_back() == '.')
 			return false;
 		return true;
 #else 
