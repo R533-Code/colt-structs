@@ -146,7 +146,7 @@ namespace colt
     : Str(strv.getSize())
   {
     for (auto& i : strv)
-      Str::pushBack(i);
+      Str::push_back(i);
   }
 
   template<typename CharT>
@@ -156,7 +156,7 @@ namespace colt
     size_t strl = std::strlen(cstr);
     Str::reserve(strl);
     for (size_t i = 0; i < strl; i++)
-      Str::pushBack(cstr[i]);
+      Str::push_back(cstr[i]);
   }
 
   template<typename CharT>
@@ -166,14 +166,14 @@ namespace colt
     size_t strl = std::strlen(cstr) + 1;
     Str::reserve(strl);
     for (size_t i = 0; i < strl; i++)
-      Str::pushBack(cstr[i]);
+      Str::push_back(cstr[i]);
   }
   
   template<typename CharT>
   constexpr const CharT* String<CharT>::c_str() noexcept
   {
     if (Str::is_not_empty())
-      if (Str::getBack() == '\0')
+      if (Str::get_back() == '\0')
         return;
     append('\0');
   }
@@ -181,14 +181,14 @@ namespace colt
   template<typename CharT>
   constexpr void String<CharT>::append(CharT chr) noexcept
   {
-    Str::pushBack(chr);
+    Str::push_back(chr);
   }
   
   template<typename CharT>
   constexpr void String<CharT>::append(StringView<CharT> strv) noexcept
   {
     for (auto& i : strv)
-      Str::pushBack(i);
+      Str::push_back(i);
   }
   
   template<typename CharT>
