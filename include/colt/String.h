@@ -40,7 +40,7 @@ namespace colt
 
     /// @brief Pops all spaces from the beginning and the end of the StringView.
     /// The characters that are considered spaces are '\n', ' ', '\v', '\t'.
-    constexpr void stripSpaces() noexcept;    
+    constexpr void strip_spaces() noexcept;    
     
     /// @brief Conversion operator
     /// @return ContiguousView
@@ -87,7 +87,7 @@ namespace colt
 
     /// @brief NUL terminates the String
     /// @return Pointer to the NUL terminated String
-    constexpr const CharT* cStr() noexcept;
+    constexpr const CharT* c_str() noexcept;
 
     /// @brief Appends a character to the end of the String
     /// @param chr The character to append
@@ -170,7 +170,7 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr const CharT* String<CharT>::cStr() noexcept
+  constexpr const CharT* String<CharT>::c_str() noexcept
   {
     if (Str::isNotEmpty())
       if (Str::getBack() == '\0')
@@ -294,7 +294,7 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr void StringView<CharT>::stripSpaces() noexcept
+  constexpr void StringView<CharT>::strip_spaces() noexcept
   {
     while (View::isNotEmpty())
       if (isSpace(*View::begin()))

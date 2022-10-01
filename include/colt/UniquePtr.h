@@ -15,7 +15,7 @@ namespace colt
   /// This unique pointer class deals internally with MemBlock, not TypedBlock:
   /// This avoids memory leaks that could happen if a UniquePtr of type child,
   /// is converted to UniquePtr of type parent (and sizeof(child) > sizeof(parent).
-  /// This is why the releaseTyped() can only be used when hintIsTrueType() is true.
+  /// This is why the release_typed() can only be used when is_true_type_hint() is true.
   /// @tparam T The type pointed to by the UniquePtr
   class UniquePtr
   {
@@ -115,38 +115,38 @@ namespace colt
 
     /// @brief Check if the owned block is empty (getPtr() == nullptr)
     /// @return True if the block is empty
-    constexpr bool isNull() const noexcept { return blk.getPtr() == nullptr; }
+    constexpr bool is_null() const noexcept { return blk.getPtr() == nullptr; }
     /// @brief Check if the owned block is empty (getPtr() != nullptr)
     /// @return True if the block is not empty
-    constexpr bool isNotNull() const noexcept { return blk.getPtr() != nullptr; }    
+    constexpr bool is_not_null() const noexcept { return blk.getPtr() != nullptr; }    
 
     /// @brief Get the pointer to the block
       /// @return Const pointer to the type of the block
-    constexpr const T* getPtr() const noexcept { return reinterpret_cast<const T*>(blk.getPtr()); }
+    constexpr const T* get_ptr() const noexcept { return reinterpret_cast<const T*>(blk.getPtr()); }
     /// @brief Get the pointer to the block
     /// @return Pointer to the type of the block
-    constexpr T* getPtr() noexcept { return reinterpret_cast<T*>(blk.getPtr()); }
+    constexpr T* get_ptr() noexcept { return reinterpret_cast<T*>(blk.getPtr()); }
 
     /// @brief Check if the current block has the size of the UniquePtr type.
     /// This is a hint: in inheritance, a UniquePtr of child class can be assigned
     /// to a UniquePtr of base class. If both do not have the same size, this information
     /// is retained through the owned block's byte size.
-    /// @return True if getByteSize() == sizeof(T)
-    constexpr bool hintIsTrueType() const noexcept { return blk.getByteSize() == sizeof(T); }
+    /// @return True if get_byte_size() == sizeof(T)
+    constexpr bool is_true_type_hint() const noexcept { return blk.get_byte_size() == sizeof(T); }
     /// @brief Check if the current block has the size of the UniquePtr type.
     /// This is a hint: in inheritance, a UniquePtr of child class can be assigned
     /// to a UniquePtr of base class. If both do not have the same size, this information
     /// is retained through the owned block's byte size.
-    /// @return True if getByteSize() != sizeof(T)
-    constexpr bool hintIsNotTrueType() const noexcept { return blk.getByteSize() != sizeof(T); }
+    /// @return True if get_byte_size() != sizeof(T)
+    constexpr bool is_not_true_type_hint() const noexcept { return blk.get_byte_size() != sizeof(T); }
 
     /// @brief Releases ownership of the owned TypedBlock.
     /// Precondition: hintTrueType() == true.
     /// This method should not be used when inheritances are used.
     /// @return The owned TypedBlock
-    constexpr memory::TypedBlock<T> releaseTyped() noexcept
+    constexpr memory::TypedBlock<T> release_typed() noexcept
     {
-      assert(hintIsTrueType() && "Use release() instead when dealing with inheritances!");
+      assert(is_true_type_hint() && "Use release() instead when dealing with inheritances!");
       return exchange(blk, { nullptr, 0 });
     }
 
@@ -160,7 +160,7 @@ namespace colt
 
     /// @brief Returns the byte size of the allocation
     /// @return The byte size of the allocation
-    constexpr sizes::ByteSize getByteSize() const noexcept { return blk.getByteSize(); }    
+    constexpr sizes::ByteSize get_byte_size() const noexcept { return blk.get_byte_size(); }    
   };
 
   template<typename T, typename... Args>
