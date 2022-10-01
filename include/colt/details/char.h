@@ -63,7 +63,7 @@ namespace colt
 	/// @return True if the name is valid
 	bool isValidFileName(ContiguousView<char> name) noexcept
 	{
-		if (name.isEmpty())
+		if (name.is_empty())
 			return false;
 
 #ifdef _WIN32
