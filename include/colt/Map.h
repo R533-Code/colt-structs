@@ -2,6 +2,7 @@
 #define HG_COLT_MULTIMAP
 
 #include <utility>
+#include <iterator>
 
 #include "Hash.h"
 #include "Vector.h"
@@ -108,7 +109,7 @@ namespace colt
     static_assert(traits::is_hashable_v<Key>, "Key of a Map should be hashable!");
     static_assert(traits::is_equal_comparable_v<Key>, "Key of a Map should implement operator==!");
 
-    using Slot = std::pair<const Key, Value>;
+    using Slot = typename std::pair<const Key, Value>;
 
     /// @brief Contains meta-data information about the slots of the map
     Vector<details::KeySentinel> sentinel_metadata = {};
@@ -119,16 +120,69 @@ namespace colt
     /// @brief The load factor before reallocation
     float load_factor = 0.70f;
 
+    template<typename SlotT>
+    /// @brief Map Iterator
+    /// @tparam SlotT The Slot type of the Map (for const qualifiers)
+    struct MapIterator
+    {
+      /// @brief Forward Iterator
+      using iterator_category = std::forward_iterator_tag;
+      /// @brief Value type of the iterator
+      using value_type = SlotT;
+      /// @brief Pointer type of the iterator
+      using pointer = SlotT*;
+      /// @brief Reference type of the iterator
+      using reference = Slot&;
+
+    private:
+      /// @brief Pointer to the current active slot or end()
+      SlotT* slot_ptr;
+      /// @brief Pointer to the map from which the iterator was constructed
+      traits::match_const_t<SlotT, Map>* map_ptr;
+
+    public:
+      /// @brief Constructor of MapIterator
+      /// @param slot The active slot or end()
+      /// @param map_ptr The pointer to the map
+      constexpr MapIterator(SlotT* slot, traits::match_const_t<SlotT, Map>* map_ptr) noexcept
+        : slot_ptr(slot), map_ptr(map_ptr) {}
+
+      /// @brief Returns a pointer to the current slot pointer to
+      /// @return Current slot or end()
+      constexpr SlotT* operator->() noexcept { return slot_ptr; }
+      /// @brief Returns a pointer to the current slot pointer to
+      /// @return Current slot or end()
+      constexpr const SlotT* operator->() const noexcept { return slot_ptr; }
+      /// @brief Returns a reference to the current slot pointer to
+      /// @return Current slot or end()
+      constexpr SlotT& operator*() noexcept { return *slot_ptr; }
+      /// @brief Returns a reference to the current slot pointer to
+      /// @return Current slot or end()
+      constexpr const SlotT& operator*() const noexcept { return *slot_ptr; }
+
+      /// @brief Increments the current iterator to the next active slot or end()
+      /// @return Self
+      constexpr MapIterator& operator++() noexcept;
+
+      /// @brief Check if two MapIterator are equal
+      /// @param a First MapIterator
+      /// @param b Second MapIterator
+      /// @return True if equal
+      friend constexpr bool operator==(const MapIterator& a, const MapIterator& b) noexcept { return a.slot_ptr == b.slot_ptr; }
+      /// @brief Check if two MapIterator are not equal
+      /// @param a First MapIterator
+      /// @param b Second MapIterator
+      /// @return True if not equal
+      friend constexpr bool operator!=(const MapIterator& a, const MapIterator& b) noexcept { return a.slot_ptr != b.slot_ptr; }
+    };
+
   public:
     /// @brief Constructs an empty Map, of load factor 0.7
-    constexpr Map() = default;
+    constexpr Map(float load_factor = 0.70f) noexcept;
 
     /// @brief Constructs a Map of load factor 0.7, reserving memory for 'reserve_size' objects
     /// @param reserve_size The count of object to reserve for
-    constexpr Map(size_t reserve_size) noexcept
-      : sentinel_metadata(reserve_size, InPlace, details::EMPTY)
-      , slots(memory::allocate({ reserve_size * sizeof(Slot) }))
-    {}
+    constexpr Map(size_t reserve_size, float load_factor = 0.70f) noexcept;
 
     /// @brief Destructs a Map and its active elements
     ~Map()
@@ -147,6 +201,26 @@ namespace colt
     /// @brief Returns the capacity of the current allocation
     /// @return The capacity of the current allocation
     constexpr size_t getCapacity() const noexcept { return slots.getSize(); }
+    
+    /// @brief Returns a MapIterator to the first active slot in the Map, or end() if no slots are active
+    /// @return MapIterator to the first active slot or end()
+    constexpr MapIterator<Slot> begin() noexcept;
+    /// @brief Returns a MapIterator past the end of the Map
+    /// @return MapIterator that should not be dereferenced
+    constexpr MapIterator<Slot> end() noexcept;
+    /// @brief Returns a MapIterator to the first active slot in the Map, or end() if no slots are active
+    /// @return MapIterator to the first active slot or end()
+    constexpr MapIterator<const Slot> begin() const noexcept;
+    /// @brief Returns a MapIterator past the end of the Map
+    /// @return MapIterator that should not be dereferenced
+    constexpr MapIterator<const Slot> end() const noexcept;
+
+    /// @brief Check if the Map is empty
+    /// @return True if the Map is empty
+    constexpr bool isEmpty() const noexcept { return size == 0; }
+    /// @brief Check if the Map is not empty
+    /// @return True if the Map is not empty
+    constexpr bool isNotEmpty() const noexcept { return size != 0; }
 
     /// @brief Check if the Map will reallocate on the next call of insert/insertOrAssign
     /// @return True if the Map will reallocate
@@ -171,7 +245,8 @@ namespace colt
     /// @return Pointer to the key/value pair if found, or null
     constexpr Slot* find(traits::copy_if_trivial_t<const Key&> key) noexcept;
 
-    /// @brief Check if the Map contains a key/value pair of key 'key'
+    /// @brief Check if the Map contains a key/value pair of key 'key'.
+    /// Prefer using 'find' if the value which is being checked for will be used.
     /// @param key The key to check for
     /// @return True if the Map contains 'key' else false
     constexpr bool contains(traits::copy_if_trivial_t<const Key&> key) const noexcept;
@@ -216,6 +291,12 @@ namespace colt
       noexcept(std::is_nothrow_destructible_v<Key>
         && std::is_nothrow_destructible_v<Value>);
 
+    constexpr void reserve(size_t by_more)
+      noexcept(std::is_nothrow_destructible_v<Key>
+        && std::is_nothrow_destructible_v<Value>
+        && std::is_nothrow_move_constructible_v<Key>
+        && std::is_nothrow_move_constructible_v<Value>);
+
     /// @brief Calls 'find' on 'key'
     /// @param key The key to search for
     /// @return Pointer to the found slot or null if not found
@@ -247,7 +328,7 @@ namespace colt
       const Vector<details::KeySentinel>& metadata, memory::TypedBlock<Slot> blk) noexcept;
 
     /// @brief Doubles the Map's capacity, rehashing in the process
-    constexpr void realloc_map()
+    constexpr void realloc_map(size_t new_capacity)
       noexcept(std::is_nothrow_destructible_v<Key>
         && std::is_nothrow_destructible_v<Value>
         && std::is_nothrow_move_constructible_v<Key>
@@ -281,12 +362,12 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr void Map<Key, Value>::realloc_map() noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>&& std::is_nothrow_move_constructible_v<Key>&& std::is_nothrow_move_constructible_v<Value>)
+  constexpr void Map<Key, Value>::realloc_map(size_t new_capacity) noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>&& std::is_nothrow_move_constructible_v<Key>&& std::is_nothrow_move_constructible_v<Value>)
   {
     //Grow by twice the capacity
-    auto new_slot = memory::allocate({ (slots.getSize() + 16) * 2 * sizeof(Slot) });
+    auto new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
 
-    Vector<details::KeySentinel> new_metadata = { (slots.getSize() + 16) * 2, InPlace, details::EMPTY };
+    Vector<details::KeySentinel> new_metadata = { new_capacity, InPlace, details::EMPTY };
     for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
     {
       auto sentinel = sentinel_metadata[i];
@@ -315,6 +396,22 @@ namespace colt
   }
 
   template<typename Key, typename Value>
+  constexpr Map<Key, Value>::Map(float load_factor) noexcept
+    : load_factor(load_factor)
+  {
+    assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
+  }
+
+  template<typename Key, typename Value>
+  constexpr Map<Key, Value>::Map(size_t reserve_size, float load_factor) noexcept
+    : sentinel_metadata(reserve_size, InPlace, details::EMPTY)
+    , slots(memory::allocate({ reserve_size * sizeof(Slot) }))
+    , load_factor(load_factor)
+  {
+    assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
+  }
+
+  template<typename Key, typename Value>
   Map<Key, Value>::~Map() noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>)
   {
     clear();
@@ -327,17 +424,50 @@ namespace colt
   {
     for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
     {
-      auto sentinel = sentinel_metadata[i];
-      if (details::is_sentinel_active(sentinel))
+      if (details::is_sentinel_active(sentinel_metadata[i]))
         slots.getPtr()[i].~Slot(); //destroy active slots
     }
     size = 0;
   }
 
   template<typename Key, typename Value>
+  constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::begin() noexcept
+  {
+    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    {
+      if (details::is_sentinel_active(sentinel_metadata[i]))
+        return { slots.getPtr() + i, this };
+    }
+    return end();
+  }
+
+  template<typename Key, typename Value>
+  constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::end() noexcept
+  {
+    return { slots.getPtr() + slots.getSize(), this };
+  }
+
+  template<typename Key, typename Value>
+  constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::begin() const noexcept
+  {
+    for (size_t i = 0; i < sentinel_metadata.getSize(); i++)
+    {
+      if (details::is_sentinel_active(sentinel_metadata[i]))
+        return { slots.getPtr() + i, this };
+    }
+    return end();
+  }
+
+  template<typename Key, typename Value>
+  constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::end() const noexcept
+  {
+    return { slots.getPtr() + slots.getSize(), this };
+  }
+
+  template<typename Key, typename Value>
   constexpr bool Map<Key, Value>::willReallocate() const noexcept
   {
-    return float(getSize() + 1) / getCapacity() > load_factor;
+    return float(getSize() + 1) > load_factor * getCapacity();
   }
 
   template<typename Key, typename Value>
@@ -348,14 +478,14 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) noexcept
+  constexpr typename Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) noexcept
   {
     //No UB as the map is not const
     return const_cast<Slot*>(static_cast<const Map*>(this)->find(key));
   }
 
   template<typename Key, typename Value>
-  constexpr const Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) const noexcept
+  constexpr typename const Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) const noexcept
   {
     const size_t key_hash = GetHash(key);
     size_t prob_index = key_hash % slots.getSize();
@@ -387,7 +517,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr std::pair<Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insertOrAssign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
+  constexpr std::pair<typename Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insertOrAssign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
     noexcept(std::is_nothrow_destructible_v<Key>
       && std::is_nothrow_destructible_v<Value>
       && std::is_nothrow_move_constructible_v<Key>
@@ -397,7 +527,7 @@ namespace colt
       && std::is_nothrow_copy_assignable_v<Value>)
   {
     if (willReallocate())
-      realloc_map();
+      realloc_map(getCapacity() + 16);
 
     const size_t key_hash = GetHash(key);
     size_t prob_index;
@@ -434,7 +564,13 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr std::pair<Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insert(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
+  constexpr void Map<Key, Value>::reserve(size_t by_more) noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>&& std::is_nothrow_move_constructible_v<Key>&& std::is_nothrow_move_constructible_v<Value>)
+  {
+    realloc_map(by_more);
+  }
+
+  template<typename Key, typename Value>
+  constexpr std::pair<typename Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insert(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
     noexcept(std::is_nothrow_destructible_v<Key>
       && std::is_nothrow_destructible_v<Value>
       && std::is_nothrow_move_constructible_v<Key>
@@ -443,7 +579,7 @@ namespace colt
       && std::is_nothrow_copy_constructible_v<Value>)
   {
     if (willReallocate())
-      realloc_map();
+      realloc_map(getCapacity() + 16);
 
     const size_t key_hash = GetHash(key);
     size_t prob_index;
@@ -459,6 +595,48 @@ namespace colt
     else
       return { slots.getPtr() + prob_index, InsertionResult::EXISTS };
   }
+
+  template<typename Key, typename Value>
+  template<typename SlotT>
+  constexpr Map<Key, Value>::MapIterator<SlotT>& Map<Key, Value>::MapIterator<SlotT>::operator++() noexcept
+  {
+    size_t index = slot_ptr - map_ptr->slots.getPtr() + 1;
+    for (size_t i = index; i < map_ptr->sentinel_metadata.getSize(); i++)
+    {
+      if (details::is_sentinel_active(map_ptr->sentinel_metadata[i]))
+      {
+        slot_ptr = map_ptr->slots.getPtr() + i;
+        return *this;
+      }
+    }
+    //Set to end()
+    slot_ptr = map_ptr->slots.getPtr() + map_ptr->slots.getSize();
+    return *this;
+  }
+
+#ifdef COLT_USE_IOSTREAMS
+
+  template<typename Key, typename Value>
+  static std::ostream& operator<<(std::ostream& os, const Map<Key, Value>& var) noexcept
+  {
+    auto begin_it = var.begin();
+
+    os << '[';
+    if (begin_it != var.end())
+    {
+      os << "{ " << begin_it->first << ": " << begin_it->second << " }";
+      ++begin_it;
+    }
+    while (begin_it != var.end())
+    {
+      os << ", { " << begin_it->first << ": " << begin_it->second << " }";
+      ++begin_it;
+    }
+    os << ']';
+    return os;
+  }
+
+#endif
 }
 
 #endif //!HG_COLT_MULTIMAP
