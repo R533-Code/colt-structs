@@ -63,55 +63,55 @@ namespace colt
     explicit constexpr operator bool() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional contains a value.
-    /// Same as !isNone().
+    /// Same as !is_none().
     /// @return True if the Optional contains a value
     constexpr bool is_value() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional does not contain a value.
-    /// Same as !isValue().
+    /// Same as !is_value().
     /// @return True if the Optional does not contain a value
     constexpr bool is_none() const noexcept { return is_none; }
 
     /// @brief Returns the stored value.
-    /// Precondition: isValue().
+    /// Precondition: is_value().
     /// @return The value
     constexpr const T* operator->() const noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue().
+    /// Precondition: is_value().
     /// @return The value
     constexpr T* operator->() noexcept;
 
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr traits::copy_if_trivial_t<const T&> operator*() const& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue().
+    /// Precondition: is_value().
     /// @return The value.
     constexpr T& operator*() & noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr traits::copy_if_trivial_t<const T&&> operator*() const&& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr T&& operator*() && noexcept;
 
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr traits::copy_if_trivial_t<const T&> get_value() const& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue().
+    /// Precondition: is_value().
     /// @return The value.
     constexpr T& get_value() & noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr traits::copy_if_trivial_t<const T&&> get_value() const&& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: isValue()
+    /// Precondition: is_value()
     /// @return The value.
     constexpr T&& get_value() && noexcept;
 
