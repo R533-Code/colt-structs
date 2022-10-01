@@ -244,23 +244,23 @@ namespace colt {
 
     /// @brief Check if the Range represents an empty view
     /// @return True if the Range is empty
-    constexpr bool isNone() const noexcept { return begin == end; }
+    constexpr bool is_none() const noexcept { return begin == end; }
     
     /// @brief Check if the Range represents the whole view
     /// @return True if the Range represents the whole view
-    constexpr bool isAll() const noexcept { return begin == traits::RangeBeginT::value && end == traits::RangeEndT::value; }
+    constexpr bool is_all() const noexcept { return begin == traits::RangeBeginT::value && end == traits::RangeEndT::value; }
 
     /// @brief Get the size of the Range
     /// @return Size of the Range
-    constexpr size_t getSize() const noexcept { return end - begin; }
+    constexpr size_t get_size() const noexcept { return end - begin; }
 
     /// @brief Get the offset to the beginning of the range
     /// @return The offset to the beginning
-    constexpr size_t getBeginOffset() const noexcept { return begin; }
+    constexpr size_t get_begin_offset() const noexcept { return begin; }
 
     /// @brief Get the offset to the beginning of the range
     /// @return The offset to the end or RangeEndT::value for end of view
-    constexpr size_t getEndOffset() const noexcept { return end; }
+    constexpr size_t get_end_offset() const noexcept { return end; }
 
     /// @brief Returns an empty Range.
     /// Same as Range{}.
@@ -275,8 +275,8 @@ namespace colt {
 #ifdef COLT_USE_IOSTREAMS
   static std::ostream& operator<<(std::ostream& os, const Range& var)
   {
-    size_t begin = var.getBeginOffset();
-    size_t end = var.getEndOffset();
+    size_t begin = var.get_begin_offset();
+    size_t end = var.get_end_offset();
     os << '[';
     if (begin == 0)
       os << "Begin, ";
@@ -301,10 +301,10 @@ namespace colt {
 
     /********** HAS_MEMBER **********/
 
-    COLT_HAS_MEMBER(getByteSize);
-    COLT_HAS_MEMBER(getData);
-    COLT_HAS_MEMBER(getSize);
-    COLT_HAS_MEMBER(isEmpty);
+    COLT_HAS_MEMBER(get_byte_size);
+    COLT_HAS_MEMBER(get_data);
+    COLT_HAS_MEMBER(get_size);
+    COLT_HAS_MEMBER(is_empty);
     COLT_HAS_MEMBER(end);    
     COLT_HAS_MEMBER(begin);
     COLT_HAS_MEMBER(allocate);
