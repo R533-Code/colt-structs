@@ -41,21 +41,21 @@ int main(int argc, char** argv)
 {
   {
     SmallVector<uint64_t, 6> vec1;
-    if (vec1.isStackAllocated())
+    if (vec1.is_stack_allocated())
       fputs("true", stdout);
     else
       fputs("false", stdout);
 
     for (size_t i = 0; i < 6; i++)
-      vec1.pushBack(i);
-    if (vec1.isStackAllocated())
+      vec1.push_back(i);
+    if (vec1.is_stack_allocated())
       fputs("true", stdout);
     else
       fputs("false", stdout);
 
     std::cout << vec1;
-    vec1.pushBack(6);
-    if (vec1.isStackAllocated())
+    vec1.push_back(6);
+    if (vec1.is_stack_allocated())
       fputs("true", stdout);
     else
       fputs("false", stdout);
@@ -69,8 +69,8 @@ int main(int argc, char** argv)
     SmallVector<Test, 6> vec1;    
 
     for (size_t i = 0; i < 6; i++)
-      vec1.pushBack(InPlace, i);
-    vec1.pushBack(InPlace, 100);
+      vec1.push_back(InPlace, i);
+    vec1.push_back(InPlace, 100);
   }
   if (alloc_count == free_count)
     fputs("No leaks!", stdout);
