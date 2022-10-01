@@ -65,12 +65,12 @@ namespace colt
     /// @brief Check if the Optional contains a value.
     /// Same as !isNone().
     /// @return True if the Optional contains a value
-    constexpr bool isValue() const noexcept { return !is_none; }
+    constexpr bool is_value() const noexcept { return !is_none; }
 
     /// @brief Check if the Optional does not contain a value.
     /// Same as !isValue().
     /// @return True if the Optional does not contain a value
-    constexpr bool isNone() const noexcept { return is_none; }
+    constexpr bool is_none() const noexcept { return is_none; }
 
     /// @brief Returns the stored value.
     /// Precondition: isValue().
@@ -101,28 +101,28 @@ namespace colt
     /// @brief Returns the stored value.
     /// Precondition: isValue()
     /// @return The value.
-    constexpr traits::copy_if_trivial_t<const T&> getValue() const& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> get_value() const& noexcept;
     /// @brief Returns the stored value.
     /// Precondition: isValue().
     /// @return The value.
-    constexpr T& getValue() & noexcept;
+    constexpr T& get_value() & noexcept;
     /// @brief Returns the stored value.
     /// Precondition: isValue()
     /// @return The value.
-    constexpr traits::copy_if_trivial_t<const T&&> getValue() const&& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&&> get_value() const&& noexcept;
     /// @brief Returns the stored value.
     /// Precondition: isValue()
     /// @return The value.
-    constexpr T&& getValue() && noexcept;
+    constexpr T&& get_value() && noexcept;
 
     /// @brief Returns the value if contained, else 'default_value'
     /// @param default_value The value to return if the Optional is None
     /// @return The value or 'default_value'
-    constexpr T getValueOr(T&& default_value) const&;
+    constexpr T get_value_or(T&& default_value) const&;
     /// @brief Returns the value if contained, else 'default_value'
     /// @param default_value The value to return if the Optional is None
     /// @return The value or 'default_value'
-    constexpr T getValueOr(T&& default_value) &&;
+    constexpr T get_value_or(T&& default_value) &&;
 
     /// @brief Destroy the stored value if it exists, and sets the Optional to an empty one.
     /// Called automatically by the destructor.
@@ -207,41 +207,41 @@ namespace colt
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T&> Optional<T>::getValue() const& noexcept
+  constexpr traits::copy_if_trivial_t<const T&> Optional<T>::get_value() const& noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
 
   template<typename T>
-  constexpr T& Optional<T>::getValue() & noexcept
+  constexpr T& Optional<T>::get_value() & noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
 
   template<typename T>
-  constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::getValue() const&& noexcept
+  constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::get_value() const&& noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
 
   template<typename T>
-  constexpr T&& Optional<T>::getValue() && noexcept
+  constexpr T&& Optional<T>::get_value() && noexcept
   {
     assert(!is_none && "Optional does not contain a value!");
     return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
   }
 
   template<typename T>
-  constexpr T Optional<T>::getValueOr(T&& default_value) const&
+  constexpr T Optional<T>::get_value_or(T&& default_value) const&
   {
     return is_none ? static_cast<T>(std::forward<T>(default_value)) : **this;
   }
   
   template<typename T>
-  constexpr T Optional<T>::getValueOr(T&& default_value) &&
+  constexpr T Optional<T>::get_value_or(T&& default_value) &&
   {
     return is_none ? static_cast<T>(std::forward<T>(default_value)) : std::move(**this);
   }
@@ -278,7 +278,7 @@ namespace colt
     static_assert(traits::is_hashable_v<T>,
       "Type of Optional should be hashable!");
 
-    return opt.isNone() ? 18446744073709548283 : get_hash(opt.getValue());
+    return opt.is_none() ? 18446744073709548283 : get_hash(opt.get_value());
   }
 
 #ifdef COLT_USE_IOSTREAMS
@@ -286,10 +286,10 @@ namespace colt
   static std::ostream& operator<<(std::ostream& os, const Optional<T>& var)
   {
     static_assert(traits::is_coutable_v<T>, "Type of Optional should implement operator<<(std::ostream&)!");
-    if (var.isNone())
+    if (var.is_none())
       os << "None";
     else
-      os << var.getValue();
+      os << var.get_value();
     return os;
   }
 #endif
