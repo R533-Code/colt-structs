@@ -43,12 +43,12 @@ namespace colt
       constexpr MemBlock(void* ptr, size_t size) noexcept
         : ptr(ptr), size(size) {}
 
-      /// @brief Check if the block is empty (getPtr() == nullptr)
+      /// @brief Check if the block is empty (get_ptr() == nullptr)
       /// @return True if the block is empty
-      constexpr bool isEmpty() const noexcept { return ptr == nullptr; }
-      /// @brief Check if the block is empty (getPtr() != nullptr)
+      constexpr bool is_empty() const noexcept { return ptr == nullptr; }
+      /// @brief Check if the block is empty (get_ptr() != nullptr)
       /// @return True if the block is not empty
-      constexpr bool isNotEmpty() const noexcept { return ptr != nullptr; }
+      constexpr bool is_not_empty() const noexcept { return ptr != nullptr; }
 
       /// @brief Implicitly converts a block to a boolean, like a pointer
       /// @return True if the block is not empty
@@ -59,14 +59,14 @@ namespace colt
 
       /// @brief Get the pointer to the block
       /// @return Const pointer to the type of the block
-      constexpr const void* getPtr() const noexcept { return ptr; }
+      constexpr const void* get_ptr() const noexcept { return ptr; }
       /// @brief Get the pointer to the block
       /// @return Pointer to the type of the block
-      constexpr void* getPtr() noexcept { return ptr; }
+      constexpr void* get_ptr() noexcept { return ptr; }
 
       /// @brief Returns the byte size of the allocation
       /// @return The byte size of the allocation
-      constexpr sizes::ByteSize getByteSize() const noexcept { return { size }; }
+      constexpr sizes::ByteSize get_byte_size() const noexcept { return { size }; }
 
 #ifdef COLT_DEBUG
       constexpr void*& impl_get_ptr() noexcept { return ptr; }
@@ -105,14 +105,14 @@ namespace colt
       /// @brief Constructs a TypedBlock over a MemBlock
       /// @param blk The MemBlock
       constexpr TypedBlock(MemBlock blk) noexcept
-        : ptr(std::launder(reinterpret_cast<T*>(blk.getPtr()))), size(blk.getByteSize().size / sizeof(T)) {}
+        : ptr(std::launder(reinterpret_cast<T*>(blk.get_ptr()))), size(blk.get_byte_size().size / sizeof(T)) {}
 
-      /// @brief Check if the block is empty (getPtr() == nullptr)
+      /// @brief Check if the block is empty (get_ptr() == nullptr)
       /// @return True if the block is empty
-      constexpr bool isEmpty() const noexcept { return ptr == nullptr; }
-      /// @brief Check if the block is empty (getPtr() != nullptr)
+      constexpr bool is_empty() const noexcept { return ptr == nullptr; }
+      /// @brief Check if the block is empty (get_ptr() != nullptr)
       /// @return True if the block is not empty
-      constexpr bool isNotEmpty() const noexcept { return ptr != nullptr; }
+      constexpr bool is_not_empty() const noexcept { return ptr != nullptr; }
 
       /// @brief Implicitly converts a block to a boolean, like a pointer
       /// @return True if the block is not empty
@@ -137,17 +137,17 @@ namespace colt
 
       /// @brief Get the pointer to the block
       /// @return Const pointer to the type of the block
-      constexpr const T* getPtr() const noexcept { return ptr; }
+      constexpr const T* get_ptr() const noexcept { return ptr; }
       /// @brief Get the pointer to the block
       /// @return Pointer to the type of the block
-      constexpr T* getPtr() noexcept { return ptr; }
+      constexpr T* get_ptr() noexcept { return ptr; }
 
       /// @brief Returns the count of objects in the block
       /// @return The count of objects
-      constexpr size_t getSize() const noexcept { return size; }
+      constexpr size_t get_size() const noexcept { return size; }
       /// @brief Returns the byte size of the allocation
       /// @return The byte size of the allocation
-      constexpr sizes::ByteSize getByteSize() const noexcept { return { size * sizeof(T) }; }
+      constexpr sizes::ByteSize get_byte_size() const noexcept { return { size * sizeof(T) }; }
 
       /// @brief Convert a TypedBlock to a MemBlock
       /// @return MemBlock
@@ -171,7 +171,7 @@ namespace colt
 
       /// @brief Ensures that 'to_free' is an empty MemBlock
       /// @param to_free The MemBlock to check for
-      void deallocate(MemBlock to_free) noexcept { assert(to_free.getPtr() == nullptr && "ptr should be NULL!"); };
+      void deallocate(MemBlock to_free) noexcept { assert(to_free.get_ptr() == nullptr && "ptr should be NULL!"); };
     };
 
     /// @brief Allocator that uses the heap, calling to malloc/free
@@ -190,7 +190,7 @@ namespace colt
       /// @param to_free The block to free
       void deallocate(MemBlock to_free) noexcept
       {
-        std::free(to_free.getPtr());
+        std::free(to_free.get_ptr());
       }
     };
 
@@ -278,14 +278,14 @@ namespace colt
       /// @param to_free The block whose resources to free
       void deallocate(MemBlock blk) noexcept
       {
-        if (!is_in_range(blk.getByteSize().size))
+        if (!is_in_range(blk.get_byte_size().size))
         {
           allocator::deallocate(blk);
           return;
         }
         
         //Add to memory to the free list
-        auto p = reinterpret_cast<Node*>(blk.getPtr());
+        auto p = reinterpret_cast<Node*>(blk.get_ptr());
         p->next = root;
         root = p;
       }
@@ -497,7 +497,7 @@ namespace colt
         static inline TypedBlock<T> new_t(Args&&... args) noexcept
         {
           auto blk = allocate({ sizeof(T) });
-          new(blk.getPtr()) T(std::forward<Args>(args)...);
+          new(blk.get_ptr()) T(std::forward<Args>(args)...);
           return blk;
         }
       };
@@ -510,7 +510,7 @@ namespace colt
           auto blk = allocate({ sizeof(T) });
           try
           {
-            new(blk.getPtr()) T(std::forward<Args>(args)...);
+            new(blk.get_ptr()) T(std::forward<Args>(args)...);
             return blk;
           }
           catch (...) //avoid memory leak by freeing memory and re-throw
@@ -529,7 +529,7 @@ namespace colt
       {
         static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
         {
-          reinterpret_cast<T*>(blk.getPtr())->~T();
+          reinterpret_cast<T*>(blk.get_ptr())->~T();
           deallocate(blk);
           //On debug, make the block empty to ensure that the user
           //does not use a deleted block
@@ -544,7 +544,7 @@ namespace colt
         {
           try
           {
-            reinterpret_cast<T*>(blk.getPtr())->~T();
+            reinterpret_cast<T*>(blk.get_ptr())->~T();
             deallocate(blk);
             //On debug, make the block empty to ensure that the user
             //does not use a deleted block
@@ -642,15 +642,15 @@ namespace colt
       assert(!is_empty() && "StackAllocator was empty!");
       assert(owns(to_free) && "Block was not owned by the allocator!");
 
-      size_t aligned_size = align_up(to_free.getByteSize().size);
-      if (reinterpret_cast<char*>(to_free.getPtr()) + aligned_size == top)
+      size_t aligned_size = align_up(to_free.get_byte_size().size);
+      if (reinterpret_cast<char*>(to_free.get_ptr()) + aligned_size == top)
         top -= aligned_size;
     }
 
     template<size_t size>
     bool StackAllocator<size>::owns(MemBlock blk) noexcept
     {
-      return buffer <= blk.getPtr() && blk.getPtr() < top;
+      return buffer <= blk.get_ptr() && blk.get_ptr() < top;
     }
 
     template<size_t size>
@@ -688,7 +688,7 @@ namespace colt
     template<size_t size, typename Primary, typename Secondary>
     void Segregator<size, Primary, Secondary>::deallocate(MemBlock to_free) noexcept
     {
-      if (to_free.getByteSize().size <= size)
+      if (to_free.get_byte_size().size <= size)
         Primary::deallocate(to_free);
       else
         Secondary::deallocate(to_free);
