@@ -106,6 +106,7 @@ namespace colt
   /// @tparam Value The Value that is accessed through the Key
   class Map
   {
+    static_assert(!traits::is_tag_v<Key> && traits::is_tag_v<Value>, "Cannot use tag struct as typename!");
     static_assert(traits::is_hashable_v<Key>, "Key of a Map should be hashable!");
     static_assert(traits::is_equal_comparable_v<Key>, "Key of a Map should implement operator==!");
 
@@ -619,8 +620,10 @@ namespace colt
   template<typename Key, typename Value>
   static std::ostream& operator<<(std::ostream& os, const Map<Key, Value>& var) noexcept
   {
-    auto begin_it = var.begin();
+    static_assert(traits::is_coutable_v<Key>, "Key of Map should implement operator<<(std::ostream&)!");
+    static_assert(traits::is_coutable_v<Value>, "Value of Map should implement operator<<(std::ostream&)!");
 
+    auto begin_it = var.begin();
     os << '[';
     if (begin_it != var.end())
     {
