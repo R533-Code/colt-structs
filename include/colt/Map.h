@@ -196,11 +196,11 @@ namespace colt
 
     /// @brief Returns the number of active elements in the Map
     /// @return The count of active elements
-    constexpr size_t getSize() const noexcept { return size; }
+    constexpr size_t get_size() const noexcept { return size; }
 
     /// @brief Returns the capacity of the current allocation
     /// @return The capacity of the current allocation
-    constexpr size_t getCapacity() const noexcept { return slots.getSize(); }
+    constexpr size_t get_capacity() const noexcept { return slots.getSize(); }
     
     /// @brief Returns a MapIterator to the first active slot in the Map, or end() if no slots are active
     /// @return MapIterator to the first active slot or end()
@@ -217,23 +217,23 @@ namespace colt
 
     /// @brief Check if the Map is empty
     /// @return True if the Map is empty
-    constexpr bool isEmpty() const noexcept { return size == 0; }
+    constexpr bool is_empty() const noexcept { return size == 0; }
     /// @brief Check if the Map is not empty
     /// @return True if the Map is not empty
-    constexpr bool isNotEmpty() const noexcept { return size != 0; }
+    constexpr bool is_not_empty() const noexcept { return size != 0; }
 
     /// @brief Check if the Map will reallocate on the next call of insert/insertOrAssign
     /// @return True if the Map will reallocate
-    constexpr bool willReallocate() const noexcept;
+    constexpr bool will_reallocate() const noexcept;
 
     /// @brief Returns the load factor of the Map
     /// @return The load factor
-    constexpr float getLoadFactor() const noexcept { return load_factor; }
+    constexpr float get_load_factor() const noexcept { return load_factor; }
 
     /// @brief Sets the load factor to 'nload_factor'.
     /// Precondition: nload_factor < 1.0f && nload_factor > 0.0f.
     /// @param nload_factor The new load factor
-    constexpr void setLoadFactor(float nload_factor) noexcept;
+    constexpr void set_load_factor(float nload_factor) noexcept;
 
     /// @brief Finds the key/value pair of key 'key'
     /// @param key The key to search for
@@ -275,7 +275,7 @@ namespace colt
     /// @param key The key of the value 'value'
     /// @param value The value to insert or assign
     /// @return Pair of pointer to the inserted/assigned slot, and SUCESS on insertion or ASSIGN on assignment
-    constexpr std::pair<Slot*, InsertionResult> insertOrAssign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
+    constexpr std::pair<Slot*, InsertionResult> insert_or_assign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
       noexcept(std::is_nothrow_destructible_v<Key>
         && std::is_nothrow_destructible_v<Value>
         && std::is_nothrow_move_constructible_v<Key>
@@ -465,13 +465,13 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr bool Map<Key, Value>::willReallocate() const noexcept
+  constexpr bool Map<Key, Value>::will_reallocate() const noexcept
   {
-    return float(getSize() + 1) > load_factor * getCapacity();
+    return float(get_size() + 1) > load_factor * get_capacity();
   }
 
   template<typename Key, typename Value>
-  constexpr void Map<Key, Value>::setLoadFactor(float nload_factor) noexcept
+  constexpr void Map<Key, Value>::set_load_factor(float nload_factor) noexcept
   {
     assert(nload_factor < 1.0f && nload_factor > 0.0f && "Invalid load factor!");
     load_factor = nload_factor;
@@ -517,7 +517,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr std::pair<typename Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insertOrAssign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
+  constexpr std::pair<typename Map<Key, Value>::Slot*, InsertionResult> Map<Key, Value>::insert_or_assign(traits::copy_if_trivial_t<const Key&> key, traits::copy_if_trivial_t<const Value&> value)
     noexcept(std::is_nothrow_destructible_v<Key>
       && std::is_nothrow_destructible_v<Value>
       && std::is_nothrow_move_constructible_v<Key>
@@ -526,8 +526,8 @@ namespace colt
       && std::is_nothrow_copy_constructible_v<Value>
       && std::is_nothrow_copy_assignable_v<Value>)
   {
-    if (willReallocate())
-      realloc_map(getCapacity() + 16);
+    if (will_reallocate())
+      realloc_map(get_capacity() + 16);
 
     const size_t key_hash = GetHash(key);
     size_t prob_index;
@@ -578,8 +578,8 @@ namespace colt
       && std::is_nothrow_copy_constructible_v<Key>
       && std::is_nothrow_copy_constructible_v<Value>)
   {
-    if (willReallocate())
-      realloc_map(getCapacity() + 16);
+    if (will_reallocate())
+      realloc_map(get_capacity() + 16);
 
     const size_t key_hash = GetHash(key);
     size_t prob_index;
