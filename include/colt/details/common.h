@@ -400,6 +400,23 @@ namespace colt {
     /// @tparam T The type to copy
     using copy_if_trivial_t = typename copy_if_trivial<T>::type;
 
+    /********** CONST HELPERS **********/
+
+    template<typename From, typename T>
+    /// @brief Matches the const qualifier of another type
+    /// @tparam T The type to which to apply the const qualifier of From
+    /// @tparam From The type whose const qualifier to apply to T
+    struct match_const
+    {
+      using type = std::conditional_t<std::is_const_v<From>, std::add_const_t<T>, std::remove_const_t<T>>;
+    };
+
+    template<typename From, typename T>
+    /// @brief Short hand for match_const<From, T>::type, matches the const qualifier of another type
+    /// @tparam T The type to which to apply the const qualifier of From
+    /// @tparam From The type whose const qualifier to apply to T
+    using match_const_t = match_const<From, T>::type;
+
     /********** COMPARISONS **********/
 
     template<typename T, typename = std::void_t<>>
