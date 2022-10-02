@@ -9,10 +9,10 @@
 namespace colt
 {
   template<typename CharT = char>
-  class StringView
+  class StringViewOf
     : public ContiguousView<CharT>
   {
-    static_assert(std::is_same_v<CharT, char>, "StringView only supports char for now!");
+    static_assert(std::is_same_v<CharT, char>, "StringViewOf only supports char for now!");
 
     using View = ContiguousView<CharT>;
 
@@ -20,23 +20,23 @@ namespace colt
     /// @brief Range constructor
     /// @param begin The beginning of the view
     /// @param end The end of the view
-    constexpr StringView(const CharT* begin, const CharT* end) noexcept
+    constexpr StringViewOf(const CharT* begin, const CharT* end) noexcept
       : View(begin, end) {}
     /// @brief Constructs a StringView over a NUL terminated string
     /// @param cstr The NUL terminated string to span over
-    constexpr StringView(const CharT* cstr) noexcept
+    constexpr StringViewOf(const CharT* cstr) noexcept
       : View(cstr, std::strlen(cstr)) {}
     /// @brief Constructs a StringView over a NUL terminated string, including its NUL terminator
     /// @param cstr The NUL terminated string to span over
     /// @param  Tag object (WithNUL)
-    constexpr StringView(const CharT* cstr, traits::WithNULT) noexcept
+    constexpr StringViewOf(const CharT* cstr, traits::WithNULT) noexcept
       : View(cstr, std::strlen(cstr) + 1) {}
     /// @brief Copy constructor
     /// @param  The StringView to copy
-    constexpr StringView(const StringView&) noexcept = default;
+    constexpr StringViewOf(const StringViewOf&) noexcept = default;
     /// @brief Move constructor
     /// @param  The StringView to move
-    constexpr StringView(StringView&&) noexcept = default;
+    constexpr StringViewOf(StringViewOf&&) noexcept = default;
 
     /// @brief Pops all spaces from the beginning and the end of the StringView.
     /// The characters that are considered spaces are '\n', ' ', '\v', '\t'.
@@ -44,8 +44,28 @@ namespace colt
     
     /// @brief Conversion operator
     /// @return ContiguousView
-    constexpr operator ContiguousView<CharT>() const noexcept;    
+    constexpr operator ContiguousView<CharT>() const noexcept;
+
+    constexpr friend bool operator==(const StringViewOf& strv1, const StringViewOf& strv2) noexcept
+    {
+      if (strv1.get_size() != strv2.get_size())
+        return false;
+      for (size_t i = 0; i < strv1.get_size(); i++)
+      {
+        if (strv1[i] != strv2[i])
+          return false;
+      }
+      return true;
+    }
+
+    constexpr friend bool operator!=(const StringViewOf& strv1, const StringViewOf& strv2) noexcept
+    {
+      return !(strv1 == strv2);
+    }
   };
+
+  /// @brief StringViewOf char
+  using StringView = StringViewOf<char>;
 
   enum class StringError
   {
@@ -74,7 +94,7 @@ namespace colt
     constexpr String(String&&) noexcept = default;
     /// @brief Constructs a String from a StringView
     /// @param strv The StringView to copy
-    constexpr String(StringView<CharT> strv) noexcept;
+    constexpr String(StringViewOf<CharT> strv) noexcept;
     /// @brief Constructs a StringView over a NUL terminated string
     /// @param cstr The NUL terminated string to span over
     constexpr String(const CharT* cstr) noexcept;
@@ -94,12 +114,12 @@ namespace colt
     constexpr void append(CharT chr) noexcept;
     /// @brief Appends a StringView to the end of the String
     /// @param strv The view to append
-    constexpr void append(StringView<CharT> strv) noexcept;    
+    constexpr void append(StringViewOf<CharT> strv) noexcept;
 
     /// @brief Appends a character to the end of the String
     /// @param strv The view to append
     /// @return Self
-    constexpr String& operator+=(StringView<CharT> strv) noexcept;    
+    constexpr String& operator+=(StringViewOf<CharT> strv) noexcept;
     /// @brief Appends a character to the end of the String
     /// @param chr The character to append
     /// @return Self
@@ -134,15 +154,32 @@ namespace colt
     static Expected<String, StringError> getFileContent(FILE* from) noexcept;
 
     /// @brief Conversion operator
-    /// @return StringView
-    constexpr operator StringView<CharT>() const noexcept;    
+    /// @return StringViewOf
+    constexpr operator StringViewOf<CharT>() const noexcept;    
     /// @brief Conversion operator
     /// @return ContiguousView
-    constexpr operator ContiguousView<CharT>() const noexcept;    
+    constexpr operator ContiguousView<CharT>() const noexcept;
+
+    constexpr friend bool operator==(const String& strv1, const String& strv2) noexcept
+    {
+      if (strv1.get_size() != strv2.get_size())
+        return false;
+      for (size_t i = 0; i < strv1.get_size(); i++)
+      {
+        if (strv1[i] != strv2[i])
+          return false;
+      }
+      return true;
+    }
+
+    constexpr friend bool operator!=(const String& strv1, const String& strv2) noexcept
+    {
+      return !(strv1 == strv2);
+    }
   };
   
   template<typename CharT>
-  constexpr String<CharT>::String(StringView<CharT> strv) noexcept
+  constexpr String<CharT>::String(StringViewOf<CharT> strv) noexcept
     : Str(strv.get_size())
   {
     for (auto& i : strv)
