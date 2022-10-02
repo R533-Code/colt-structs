@@ -473,7 +473,8 @@ namespace colt
     /// @param blk The block to deallocate
     inline void deallocate(MemBlock blk) noexcept
     {
-      details::global_allocator.deallocate(blk);
+      if (blk.get_ptr())
+        details::global_allocator.deallocate(blk);
     }
     
     /// @brief Register a null callback for the global allocator.
