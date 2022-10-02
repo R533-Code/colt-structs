@@ -432,7 +432,10 @@ namespace colt {
     /// Do no use to return non-const references:
     /// Should be used with const references (const T&/const T&&).
     /// @tparam T The type to copy
-    struct copy_if_trivial { using type = typename std::conditional_t<std::is_trivial_v<std::decay_t<T>> && sizeof(T) <= 16, std::decay_t<T>, T>; };
+    struct copy_if_trivial
+    {
+      using type = typename std::conditional_t<std::is_trivial_v<std::decay_t<T>> && sizeof(T) <= 16, std::decay_t<T>, T>;
+    };
 
     template<typename T>
     /// @brief Short hand for copy_if_trivial::type.
@@ -451,14 +454,14 @@ namespace colt {
     /// @tparam From The type whose const qualifier to apply to T
     struct match_const
     {
-      using type = std::conditional_t<std::is_const_v<From>, std::add_const_t<T>, std::remove_const_t<T>>;
+      using type = typename std::conditional_t<std::is_const_v<From>, std::add_const_t<T>, std::remove_const_t<T>>;
     };
 
     template<typename From, typename T>
     /// @brief Short hand for match_const<From, T>::type, matches the const qualifier of another type
     /// @tparam T The type to which to apply the const qualifier of From
     /// @tparam From The type whose const qualifier to apply to T
-    using match_const_t = match_const<From, T>::type;
+    using match_const_t = typename match_const<From, T>::type;
 
     /********** COMPARISONS **********/
 
