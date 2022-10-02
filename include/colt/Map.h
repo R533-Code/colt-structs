@@ -1,5 +1,5 @@
-#ifndef HG_COLT_MULTIMAP
-#define HG_COLT_MULTIMAP
+#ifndef HG_COLT_MAP
+#define HG_COLT_MAP
 
 #include <utility>
 #include <iterator>
@@ -436,7 +436,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::begin() noexcept
+  constexpr Map<Key, Value>::MapIterator<typename Map<Key, Value>::Slot> Map<Key, Value>::begin() noexcept
   {
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
@@ -447,13 +447,13 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<Map<Key, Value>::Slot> Map<Key, Value>::end() noexcept
+  constexpr Map<Key, Value>::MapIterator<typename Map<Key, Value>::Slot> Map<Key, Value>::end() noexcept
   {
     return { slots.get_ptr() + slots.get_size(), this };
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::begin() const noexcept
+  constexpr Map<Key, Value>::MapIterator<typename const Map<Key, Value>::Slot> Map<Key, Value>::begin() const noexcept
   {
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
@@ -464,7 +464,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<const Map<Key, Value>::Slot> Map<Key, Value>::end() const noexcept
+  constexpr Map<Key, Value>::MapIterator<typename const Map<Key, Value>::Slot> Map<Key, Value>::end() const noexcept
   {
     return { slots.get_ptr() + slots.get_size(), this };
   }
