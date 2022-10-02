@@ -13,7 +13,7 @@ namespace colt
 	/// @brief Checks if a character is a space, newline, tab...
 	/// @param chr The char to check for
 	/// @return True if the character is a space
-	bool isSpace(char chr) noexcept
+	static bool isSpace(char chr) noexcept
 	{
 		return static_cast<unsigned char>(chr) == ' '
 			|| static_cast<unsigned char>(chr) == '\n'
@@ -26,7 +26,7 @@ namespace colt
 	/// @brief Checks if a character is a digit
 	/// @param chr The char to check for
 	/// @return True if the character is a digit
-	bool isDigit(char chr) noexcept
+	static bool isDigit(char chr) noexcept
 	{
 		return static_cast<unsigned char>(chr) > 47 && static_cast<unsigned char>(chr) < 58;
 	}
@@ -34,7 +34,7 @@ namespace colt
 	/// @brief Checks if a character is alpha [a-zA-Z]
 	/// @param chr The char to check for
 	/// @return True if the character is alpha
-	bool isAlpha(char chr) noexcept
+	static bool isAlpha(char chr) noexcept
 	{
 		return (static_cast<unsigned char>(chr) >  64 && static_cast<unsigned char>(chr) < 91)
 			|| (static_cast<unsigned char>(chr) > 96 && static_cast<unsigned char>(chr) < 123);
@@ -43,7 +43,7 @@ namespace colt
 	/// @brief Checks if a character is alpha numerical
 	/// @param chr The char to check for
 	/// @return True if the character is alpha numerical
-	bool isAlnum(char chr) noexcept
+	static bool isAlnum(char chr) noexcept
 	{
 		return isDigit(chr) || isAlpha(chr);
 	}
@@ -51,7 +51,7 @@ namespace colt
 	/// @brief Checks if a character is a control character
 	/// @param chr The char to check for
 	/// @return True if the character is a control character
-	bool isControl(char chr) noexcept
+	static bool isControl(char chr) noexcept
 	{
 		return static_cast<unsigned char>(chr) < ' ';
 	}
@@ -61,7 +61,7 @@ namespace colt
 	/// are contained in the name.
 	/// @param name The string view to check for
 	/// @return True if the name is valid
-	bool isValidFileName(ContiguousView<char> name) noexcept
+	static bool isValidFileName(ContiguousView<char> name) noexcept
 	{
 		if (name.is_empty())
 			return false;
