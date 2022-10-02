@@ -397,8 +397,7 @@ namespace colt
       }
     }
     sentinel_metadata = std::move(new_metadata);
-    if (slots)
-      memory::deallocate(slots);
+    memory::deallocate(slots);
     slots = new_slot;
   }
 
@@ -422,8 +421,7 @@ namespace colt
   Map<Key, Value>::~Map() noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>)
   {
     clear();
-    if (slots)
-      memory::deallocate(slots);
+    memory::deallocate(slots);
   }
 
   template<typename Key, typename Value>
