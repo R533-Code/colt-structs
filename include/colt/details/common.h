@@ -311,6 +311,49 @@ namespace colt {
     COLT_HAS_MEMBER(deallocate);
     COLT_HAS_MEMBER(owns);
     
+    /********** BYTE SIZES **********/
+
+    template<typename T>
+    /// @brief Check if a type is a size from namespace colt::sizes
+    /// @tparam T The type to check for
+    struct is_byte_size
+    {
+      static constexpr bool value = false;
+    };
+
+    template<>
+    /// @brief Overload for is_byte_size
+    struct is_byte_size<sizes::ByteSize>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<>
+    /// @brief Overload for is_byte_size
+    struct is_byte_size<sizes::KibiByteSize>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<>
+    /// @brief Overload for is_byte_size
+    struct is_byte_size<sizes::MebiByteSize>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<>
+    /// @brief Overload for is_byte_size
+    struct is_byte_size<sizes::GibiByteSize>
+    {
+      static constexpr bool value = true;
+    };
+
+    template<typename T>
+    /// @brief Short hand for is_byte_size<T>::value
+    /// @tparam T The type to check
+    static constexpr bool is_byte_size_v = is_byte_size<T>::value;
+
     /********** PRINTABLE **********/
 
 #ifdef COLT_USE_IOSTREAMS
