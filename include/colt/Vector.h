@@ -252,8 +252,18 @@ namespace colt
     /// @param to_move The SmallVector whose data to move
     constexpr SmallVector(SmallVector&& to_move) noexcept(std::is_nothrow_move_constructible_v<T> || std::is_trivially_copyable_v<T>);
 
+    /// @brief Move assignment operator
+    /// @param to_move The SmallVector whose data to move
+    /// @return Self
+    constexpr SmallVector& operator=(SmallVector&& to_move) noexcept(std::is_nothrow_destructible_v<T>);
+
+    /// @brief Copy assignment operator
+    /// @param to_copy The SmallVector whose data to copy
+    /// @return Self
+    constexpr SmallVector& operator=(const SmallVector& to_copy) noexcept(std::is_nothrow_destructible_v<T>);
+
     /// @brief Destructor
-    ~SmallVector() noexcept(std::is_nothrow_destructible_v<T>);    
+    ~SmallVector() noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Returns an iterator to the beginning of the Vector
     /// @return Iterator to the beginning
@@ -601,6 +611,55 @@ namespace colt
       T* const from = to_move.get_stack_ptr();
       algo::contiguous_move(from, to, size);
     }
+  }
+
+  template<typename T, size_t buff_count>
+  constexpr SmallVector<T, buff_count>& SmallVector<T, buff_count>::operator=(SmallVector&& to_move) noexcept(std::is_nothrow_destructible_v<T>)
+  {
+    assert(&to_move != this && "Self assignment is prohibited!");
+    clear();
+    if (!is_stack_allocated())
+    {
+      if (ptr)
+        memory::deallocate({ ptr, capacity * sizeof(T) });
+    }
+    
+    if (to_move.is_stack_allocated())
+    {
+      capacity = buff_count;
+      algo::contiguous_move(to_move.get_stack_ptr(), get_stack_ptr(), to_move.size);
+    }
+    else
+    {
+      capacity = to_move.capacity;
+      ptr = exchange(to_move.ptr, nullptr);
+    }
+    size = to_move.size;
+  }
+
+  template<typename T, size_t buff_count>
+  constexpr SmallVector<T, buff_count>& SmallVector<T, buff_count>::operator=(const SmallVector& to_copy) noexcept(std::is_nothrow_destructible_v<T>)
+  {
+    assert(&to_copy != this && "Self assignment is prohibited!");
+    clear();
+
+    if (capacity >= to_copy.capacity)
+    {
+      algo::contiguous_copy(to_copy.get_current_ptr(), get_current_ptr(), to_copy.size);
+    }
+    else //not stack allocated
+    {
+      if (!is_stack_allocated())
+      {
+        if (ptr)
+          memory::deallocate({ ptr, capacity * sizeof(T) });
+      }
+      memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * (capacity + to_copy.capacity) });
+      capacity = blk.get_size();
+      ptr = blk.get_ptr();
+      algo::contiguous_copy(to_copy.ptr, ptr, to_copy.size);
+    }
+    size = to_copy.size;
   }
 
   template<typename T, size_t buff_count>
