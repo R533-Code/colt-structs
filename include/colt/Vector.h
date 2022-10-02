@@ -281,7 +281,7 @@ namespace colt
 
     /// @brief The count of active elements in the SmallVector
     /// @return The count of active elements in the SmallVector
-    constexpr size_t getSize() const noexcept { return size; }
+    constexpr size_t get_size() const noexcept { return size; }
     /// @brief Returns the capacity of the current allocation.
     /// If the SmallVector is currently using stack memory, returns 'buff_count'
     /// @return Capacity of the current allocation or 'buff_count'
@@ -365,6 +365,11 @@ namespace colt
     /// @brief Obtains a view over the whole Vector
     /// @return View over the Vector
     constexpr ContiguousView<T> to_view() const noexcept { return { get_current_ptr(), size}; }
+    
+    /// @brief Obtains a view over the 'range' of the Vector.
+    /// @param range The range to obtain from the Vector
+    /// @return View over 'range' of the Vector
+    constexpr ContiguousView<T> to_view(Range range) const noexcept;
 
     /// @brief Converts a Vector to a view implicitly
     /// @return ContiguousView over the whole Vector
@@ -522,6 +527,7 @@ namespace colt
   constexpr ContiguousView<T> Vector<T>::to_view(Range range) const noexcept
   {
     size_t begin = range.get_begin_offset();
+    assert(begin < size && "Invalid begin offset for Range!");
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);
     return { begin_ptr + begin, end - begin };
@@ -693,6 +699,16 @@ namespace colt
       memory::deallocate({ ptr_d, capacity * sizeof(T) });
     capacity += by_more;
     ptr = blk.getPtr();
+  }
+
+  template<typename T, size_t buff_count>
+  constexpr ContiguousView<T> SmallVector<T, buff_count>::to_view(Range range) const noexcept
+  {
+    size_t begin = range.get_begin_offset();
+    assert(begin < size && "Invalid begin offset for Range!");
+    size_t end = range.get_end_offset();
+    end = (end > size ? size : end);
+    return { get_current_ptr() + begin, end - begin};
   }
 
   template<typename T, size_t buff_count>
