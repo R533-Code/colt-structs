@@ -222,14 +222,14 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr void String<CharT>::append(StringView<CharT> strv) noexcept
+  constexpr void String<CharT>::append(StringViewOf<CharT> strv) noexcept
   {
     for (auto& i : strv)
       Str::push_back(i);
   }
   
   template<typename CharT>
-  constexpr String<CharT>& String<CharT>::operator+=(StringView<CharT> strv) noexcept
+  constexpr String<CharT>& String<CharT>::operator+=(StringViewOf<CharT> strv) noexcept
   {
     append(strv);
     return *this;
@@ -325,13 +325,13 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr String<CharT>::operator StringView<CharT>() const noexcept
+  constexpr String<CharT>::operator StringViewOf<CharT>() const noexcept
   {
     return { Str::begin(), Str::end() };
   }
   
   template<typename CharT>
-  constexpr void StringView<CharT>::strip_spaces() noexcept
+  constexpr void StringViewOf<CharT>::strip_spaces() noexcept
   {
     while (View::is_not_empty())
       if (isSpace(*View::begin()))
@@ -347,13 +347,13 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr StringView<CharT>::operator ContiguousView<CharT>() const noexcept
+  constexpr StringViewOf<CharT>::operator ContiguousView<CharT>() const noexcept
   {
     return { View::begin(), View::end() };
   }
 
   template<>
-  std::size_t hash(const StringView<char>& str) noexcept
+  std::size_t hash(const StringViewOf<char>& str) noexcept
   {
     auto size = str.get_size();
     size = size > 64 ? 64 : size;
@@ -385,7 +385,7 @@ namespace colt
 #ifdef COLT_USE_IOSTREAMS
 
   template<typename CharT>
-  std::ostream& operator<<(std::ostream& os, const StringView<CharT>& var)
+  std::ostream& operator<<(std::ostream& os, const StringViewOf<CharT>& var)
   {
     os.write(var.begin(), var.get_size());
     return os;
