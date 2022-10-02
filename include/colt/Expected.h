@@ -34,24 +34,26 @@ namespace colt
     /// @brief Buffer for both error type and expected value
     union
     {
-      /// @brief The expected value (active when is_error == false)
+      /// @brief The expected value (active when is_error_v == false)
       ExpectedTy expected;
-      /// @brief The error value (active when is_error == true)
+      /// @brief The error value (active when is_error_v == true)
       ErrorTy error;
     };
     
     /// @brief True if an error is stored in the Expected
-    bool is_error;
+    bool is_error_v;
 
   public:
     /// @brief Default constructs an error in the Expected
     /// @param  ErrorT tag
-    constexpr Expected(traits::ErrorT) noexcept(std::is_default_constructible_v<ErrorTy>);      
+    constexpr Expected(traits::ErrorT)
+      noexcept(std::is_default_constructible_v<ErrorTy>);
 
     /// @brief Copy constructs an error in the Expected
     /// @param  ErrorT tag
     /// @param value The value to copy
-    constexpr Expected(traits::ErrorT, traits::copy_if_trivial_t<const ErrorTy&> value) noexcept(std::is_nothrow_copy_constructible_v<ErrorTy>);
+    constexpr Expected(traits::ErrorT, traits::copy_if_trivial_t<const ErrorTy&> value)
+      noexcept(std::is_nothrow_copy_constructible_v<ErrorTy>);
 
     template<typename T_ = ErrorTy, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     /// @brief Move constructs an error in the Expected
@@ -59,7 +61,8 @@ namespace colt
     /// @tparam  SFINAE helper
     /// @param  ErrorT tag
     /// @param to_move The value to move
-    constexpr Expected(traits::ErrorT, ErrorTy&& to_move) noexcept(std::is_nothrow_move_constructible_v<ErrorTy>);
+    constexpr Expected(traits::ErrorT, ErrorTy&& to_move)
+      noexcept(std::is_nothrow_move_constructible_v<ErrorTy>);
 
     template<typename... Args>
     /// @brief Constructs an error in place in the Expected
@@ -67,21 +70,25 @@ namespace colt
     /// @param  InPlaceT tag
     /// @param  ErrorT tag
     /// @param ...args Argument pack forwarded to the constructor
-    constexpr Expected(traits::InPlaceT, traits::ErrorT, Args&&... args) noexcept(std::is_nothrow_constructible_v<ErrorTy, Args...>);      
+    constexpr Expected(traits::InPlaceT, traits::ErrorT, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<ErrorTy, Args...>);      
 
     /// @brief Default constructs an expected value in the Expected
-    constexpr Expected() noexcept(std::is_default_constructible_v<ExpectedTy>);      
+    constexpr Expected()
+      noexcept(std::is_default_constructible_v<ExpectedTy>);      
 
     /// @brief Copy constructs an expected value in the Expected
     /// @param value The value to copy
-    constexpr Expected(traits::copy_if_trivial_t<const ExpectedTy&> value) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>);     
+    constexpr Expected(traits::copy_if_trivial_t<const ExpectedTy&> value)
+      noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>);     
 
     template<typename T_ = ExpectedTy, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     /// @brief Move constructs an expected value in the Expected
     /// @tparam T_ SFINAE helper
     /// @tparam  SFINAE helper
     /// @param to_move The value to move
-    constexpr Expected(ExpectedTy&& to_move) noexcept(std::is_nothrow_move_constructible_v<T_>);    
+    constexpr Expected(ExpectedTy&& to_move)
+      noexcept(std::is_nothrow_move_constructible_v<T_>);    
 
     template<typename... Args, typename = std::enable_if_t<!std::is_same_v<traits::get_first_t<Args...>, traits::ErrorT>>>
     /// @brief Constructs an expected value in place in the Expected
@@ -89,44 +96,54 @@ namespace colt
     /// @param  InPlaceT tag
     /// @param  ErrorT tag
     /// @param ...args Argument pack forwarded to the constructor
-    constexpr Expected(traits::InPlaceT, Args&&... args) noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args...>);      
+    constexpr Expected(traits::InPlaceT, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args...>);      
 
     /// @brief Copy constructs an Expected
     /// @param copy The Expected to copy
-    constexpr Expected(const Expected& copy) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy> && std::is_nothrow_copy_constructible_v<ErrorTy>);
+    constexpr Expected(const Expected& copy)
+      noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>
+        && std::is_nothrow_copy_constructible_v<ErrorTy>);
 
     /// @brief Copy assignment operator
     /// @param copy The Expected to copy
     /// @return Self
-    constexpr Expected& operator=(const Expected& copy) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy> && std::is_nothrow_copy_constructible_v<ErrorTy>);
+    constexpr Expected& operator=(const Expected& copy)
+      noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>
+        && std::is_nothrow_copy_constructible_v<ErrorTy>);
 
     /// @brief Move constructs an Expected
     /// @param move The Expected to move
-    constexpr Expected(Expected&& move) noexcept(std::is_nothrow_move_constructible_v<ExpectedTy> && std::is_nothrow_move_constructible_v<ErrorTy>);
+    constexpr Expected(Expected&& move)
+      noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>
+        && std::is_nothrow_move_constructible_v<ErrorTy>);
 
     /// @brief Move assignment operator
     /// @param move The Expected to move
     /// @return Self
-    constexpr Expected& operator=(Expected&& move) noexcept(std::is_nothrow_move_constructible_v<ExpectedTy> && std::is_nothrow_move_constructible_v<ErrorTy>);
+    constexpr Expected& operator=(Expected&& move)
+      noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>
+        && std::is_nothrow_move_constructible_v<ErrorTy>);
     
     /// @brief Destructs the value/error contained in the Expected
-    ~Expected() noexcept(std::is_nothrow_destructible_v<ExpectedTy> && std::is_nothrow_destructible_v<ErrorTy>);
+    ~Expected() noexcept(std::is_nothrow_destructible_v<ExpectedTy>
+      && std::is_nothrow_destructible_v<ErrorTy>);
 
     /// @brief Check if the Expected contains an error
     /// @return True if the Expected contains an error
-    constexpr bool is_error() const noexcept { return is_error; }
+    constexpr bool is_error() const noexcept { return is_error_v; }
     /// @brief Check if the Expected contains an expected value
     /// @return True if the Expected contains an expected value
-    constexpr bool is_expected() const noexcept { return !is_error; }
+    constexpr bool is_expected() const noexcept { return !is_error_v; }
 
     /// @brief Check if the Expected contains an error.
     /// Same as isError()
     /// @return True if the Expected contains an error
-    constexpr bool operator!() const noexcept { return is_error; }
+    constexpr bool operator!() const noexcept { return is_error_v; }
     /// @brief Check if the Expected contains an expected value.
     /// Same as isExpected()
     /// @return True if the Expected contains an expected value
-    constexpr explicit operator bool() const noexcept { return !is_error; }
+    constexpr explicit operator bool() const noexcept { return !is_error_v; }
 
     /// @brief Returns the stored Expected value.
     /// Precondition: isExpected().
@@ -216,36 +233,42 @@ namespace colt
   };
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT) noexcept(std::is_default_constructible_v<ErrorTy>)
-    : is_error(true)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT)
+    noexcept(std::is_default_constructible_v<ErrorTy>)
+    : is_error_v(true)
   {
     new(&error) ErrorTy();
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT, traits::copy_if_trivial_t<const ErrorTy&> value) noexcept(std::is_nothrow_copy_constructible_v<ErrorTy>)
-    : is_error(true)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT, traits::copy_if_trivial_t<const ErrorTy&> value)
+    noexcept(std::is_nothrow_copy_constructible_v<ErrorTy>)
+    : is_error_v(true)
   {
     new(&error) ErrorTy(value);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected() noexcept(std::is_default_constructible_v<ExpectedTy>)
-    : is_error(false)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected()
+    noexcept(std::is_default_constructible_v<ExpectedTy>)
+    : is_error_v(false)
   {
     new(&expected) ExpectedTy();
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::copy_if_trivial_t<const ExpectedTy&> value) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>)
-    : is_error(false)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::copy_if_trivial_t<const ExpectedTy&> value)
+    noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>)
+    : is_error_v(false)
   {
     new(&expected) ExpectedTy(value);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(const Expected& copy) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>&& std::is_nothrow_copy_constructible_v<ErrorTy>)
-    : is_error(copy.is_error)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(const Expected& copy)
+    noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>
+      && std::is_nothrow_copy_constructible_v<ErrorTy>)
+    : is_error_v(copy.is_error_v)
   {
     if (is_error)
       new(&error) ErrorTy(copy.error);
@@ -254,46 +277,52 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>& Expected<ExpectedTy, ErrorTy>::operator=(const Expected& copy) noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>&& std::is_nothrow_copy_constructible_v<ErrorTy>)
+  constexpr Expected<ExpectedTy, ErrorTy>& Expected<ExpectedTy, ErrorTy>::operator=(const Expected& copy)
+    noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>
+      && std::is_nothrow_copy_constructible_v<ErrorTy>)
   {
     assert(this != &copy && "Self assignment is prohibited!");
 
-    if (is_error)
+    if (is_error_v)
       error.~ErrorTy();
     else
       expected.~ExpectedTy();
 
-    is_error = move.is_error;
-    if (is_error)
-      new(&error) ErrorTy(move.error);
+    is_error_v = copy.is_error_v;
+    if (is_error_v)
+      new(&error) ErrorTy(copy.is_error_v);
     else
-      new(&expected) ExpectedTy(move.expected);
+      new(&expected) ExpectedTy(copy.expected);
 
     return *this;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(Expected&& move) noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>&& std::is_nothrow_move_constructible_v<ErrorTy>)
-    : is_error(move.is_error)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(Expected&& move)
+    noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>
+      && std::is_nothrow_move_constructible_v<ErrorTy>)
+    : is_error_v(move.is_error_v)
   {
-    if (is_error)
+    if (is_error_v)
       new(&error) ErrorTy(std::move(move.error));
     else
       new(&expected) ExpectedTy(std::move(move.expected));
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  constexpr Expected<ExpectedTy, ErrorTy>& Expected<ExpectedTy, ErrorTy>::operator=(Expected&& move) noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>&& std::is_nothrow_move_constructible_v<ErrorTy>)
+  constexpr Expected<ExpectedTy, ErrorTy>& Expected<ExpectedTy, ErrorTy>::operator=(Expected&& move)
+    noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>
+      && std::is_nothrow_move_constructible_v<ErrorTy>)
   {
-    assert(this != &copy && "Self assignment is prohibited!");
+    assert(this != &move && "Self assignment is prohibited!");
 
     if (is_error)
       error.~ErrorTy();
     else
       expected.~ExpectedTy();
 
-    is_error = move.is_error;
-    if (is_error)
+    is_error_v = move.is_error_v;
+    if (is_error_v)
       new(&error) ErrorTy(std::move(move.error));
     else
       new(&expected) ExpectedTy(std::move(move.expected));
@@ -302,9 +331,11 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  Expected<ExpectedTy, ErrorTy>::~Expected() noexcept(std::is_nothrow_destructible_v<ExpectedTy>&& std::is_nothrow_destructible_v<ErrorTy>)
+  Expected<ExpectedTy, ErrorTy>::~Expected()
+    noexcept(std::is_nothrow_destructible_v<ExpectedTy>
+      && std::is_nothrow_destructible_v<ErrorTy>)
   {
-    if (is_error)
+    if (is_error_v)
       error.~ErrorTy();
     else
       expected.~ExpectedTy();
@@ -312,32 +343,36 @@ namespace colt
 
   template<typename ExpectedTy, typename ErrorTy>
   template<typename T_, typename>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT, ErrorTy&& to_move) noexcept(std::is_nothrow_move_constructible_v<ErrorTy>)
-    : is_error(true)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::ErrorT, ErrorTy&& to_move)
+    noexcept(std::is_nothrow_move_constructible_v<ErrorTy>)
+    : is_error_v(true)
   {
     new(&error) ErrorTy(std::move(to_move));
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   template<typename ...Args>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, traits::ErrorT, Args && ...args) noexcept(std::is_nothrow_constructible_v<ErrorTy, Args ...>)
-    : is_error(true)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, traits::ErrorT, Args && ...args)
+    noexcept(std::is_nothrow_constructible_v<ErrorTy, Args ...>)
+    : is_error_v(true)
   {
     new(&error) ErrorTy(std::forward<Args>(args)...);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   template<typename T_, typename>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(ExpectedTy&& to_move) noexcept(std::is_nothrow_move_constructible_v<T_>)
-    : is_error(false)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(ExpectedTy&& to_move)
+    noexcept(std::is_nothrow_move_constructible_v<T_>)
+    : is_error_v(false)
   {
     new(&expected) ExpectedTy(std::move(to_move));
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   template<typename ...Args, typename>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, Args && ...args) noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args ...>)
-    : is_error(false)
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args ...>)
+    : is_error_v(false)
   {
     new(&expected) ExpectedTy(std::forward<Args>(args)...);
   }
@@ -345,117 +380,117 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr const ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() const noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return &expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return &expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() & noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&> Expected<ExpectedTy, ErrorTy>::operator*() const& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::operator*() && noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return std::move(expected);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&&> Expected<ExpectedTy, ErrorTy>::operator*() const&& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::get_value() & noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&> Expected<ExpectedTy, ErrorTy>::get_value() const& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::get_value() && noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return std::move(expected);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&&> Expected<ExpectedTy, ErrorTy>::get_value() const&& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy& Expected<ExpectedTy, ErrorTy>::get_error() & noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&> Expected<ExpectedTy, ErrorTy>::get_error() const& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy&& Expected<ExpectedTy, ErrorTy>::get_error() && noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return std::move(expected);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&&> Expected<ExpectedTy, ErrorTy>::get_error() const&& noexcept
   {
-    assert(!is_error && "Expected contained an error!");
+    assert(!is_error_v && "Expected contained an error!");
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::get_value_or(ExpectedTy&& default_value) const&
   {
-    return is_error ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : **this;
+    return is_error_v ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : **this;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy Expected<ExpectedTy, ErrorTy>::get_value_or(ExpectedTy&& default_value) &&
   {
-    return is_error ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : std::move(**this);
+    return is_error_v ? static_cast<ExpectedTy>(std::forward<ExpectedTy>(default_value)) : std::move(**this);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&> Expected<ExpectedTy, ErrorTy>::get_value_or_abort(void(*on_abort)(void) noexcept) const& noexcept
   {
-    if (is_error)
+    if (is_error_v)
     {
       if (on_abort)
         on_abort();
@@ -468,7 +503,7 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::get_value_or_abort(void(*on_abort)(void) noexcept) & noexcept
   {
-    if (is_error)
+    if (is_error_v)
     {
       if (on_abort)
         on_abort();
@@ -481,7 +516,7 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&&> Expected<ExpectedTy, ErrorTy>::get_value_or_abort(void(*on_abort)(void) noexcept) const&& noexcept
   {
-    if (is_error)
+    if (is_error_v)
     {
       if (on_abort)
         on_abort();
@@ -494,7 +529,7 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::get_value_or_abort(void(*on_abort)(void) noexcept) && noexcept
   {
-    if (is_error)
+    if (is_error_v)
     {
       if (on_abort)
         on_abort();
