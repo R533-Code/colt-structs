@@ -70,7 +70,7 @@ namespace colt {
 
     /// @brief Returns the count of object the view spans on.
     /// @return The count of objects
-    constexpr size_t getSize() const noexcept { return size; }
+    constexpr size_t get_size() const noexcept { return size; }
 
     /// @brief Returns the byte size the view spans on.
     /// @return The byte size
@@ -96,12 +96,12 @@ namespace colt {
 
     /// @brief Shortens the view from the front by 1.
     /// Precondition: !is_empty()
-    constexpr void popFront() noexcept;
+    constexpr void pop_front() noexcept;
 
     /// @brief Shortens the view from the front by N.
     /// Precondition: N <= size
     /// @param N The number of objects to pop
-    constexpr void popFrontN(size_t N) noexcept;
+    constexpr void pop_front_n(size_t N) noexcept;
 
     /// @brief Shortens the view from the back by 1.
     /// Precondition: !is_empty()
@@ -121,7 +121,7 @@ namespace colt {
     /// @brief Splices a view using a range
     /// @param range The range to use for splicing
     /// @return Spliced view
-    constexpr ContiguousView<T> spliceRange(Range range) const noexcept;
+    constexpr ContiguousView<T> splice_range(Range range) const noexcept;
   };
   
   template<typename T>
@@ -152,7 +152,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popFront() noexcept
+  constexpr void ContiguousView<T>::pop_front() noexcept
   {
     assert(!is_empty() && "View was empty!");
     ++begin_ptr;
@@ -160,7 +160,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr void ContiguousView<T>::popFrontN(size_t N) noexcept
+  constexpr void ContiguousView<T>::pop_front_n(size_t N) noexcept
   {
     assert(N <= size && "View does not contain enough items!");
     begin_ptr += N;
@@ -189,9 +189,10 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr ContiguousView<T> ContiguousView<T>::spliceRange(Range range) const noexcept
+  constexpr ContiguousView<T> ContiguousView<T>::splice_range(Range range) const noexcept
   {
     size_t begin = range.get_begin_offset();
+    assert(begin < size && "Invalid begin offset for Range!");
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);    
     return { begin_ptr + begin, end - begin };
@@ -203,10 +204,10 @@ namespace colt {
     static_assert(traits::is_hashable_v<T>,
       "Type of ContiguousView should be hashable!");
 
-    auto size = view.getSize();
+    auto size = view.get_size();
     size = size > 64 ? 64 : size;
 
-    std::size_t seed = view.getSize();
+    std::size_t seed = view.get_size();
     for (size_t i = 0; i < size; i++)
       seed ^= get_hash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     
@@ -221,7 +222,7 @@ namespace colt {
     os << '[';
     if (!var.is_empty())
       os << var.get_front();
-    for (size_t i = 1; i < var.getSize(); i++)
+    for (size_t i = 1; i < var.get_size(); i++)
       os << ", " << var[i];
     os << ']';
     return os;

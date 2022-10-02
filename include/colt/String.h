@@ -143,7 +143,7 @@ namespace colt
   
   template<typename CharT>
   constexpr String<CharT>::String(StringView<CharT> strv) noexcept
-    : Str(strv.getSize())
+    : Str(strv.get_size())
   {
     for (auto& i : strv)
       Str::push_back(i);
@@ -303,7 +303,7 @@ namespace colt
         break;
 
     while (View::is_not_empty())
-      if (isSpace(*(View::begin() + View::getSize() - 1)))
+      if (isSpace(*(View::begin() + View::get_size() - 1)))
         View::popFront();
       else
         break;
@@ -318,7 +318,7 @@ namespace colt
   template<>
   std::size_t hash(const StringView<char>& str) noexcept
   {
-    auto size = str.getSize();
+    auto size = str.get_size();
     size = size > 64 ? 64 : size;
 
     uint64_t hash = 0xCBF29CE484222325;
@@ -333,7 +333,7 @@ namespace colt
   template<>
   std::size_t hash(const String<char>& str) noexcept
   {
-    auto size = str.getSize();
+    auto size = str.get_size();
     size = size > 64 ? 64 : size;
 
     uint64_t hash = 0xCBF29CE484222325;
@@ -350,14 +350,14 @@ namespace colt
   template<typename CharT>
   std::ostream& operator<<(std::ostream& os, const StringView<CharT>& var)
   {
-    os.write(var.begin(), var.getSize());
+    os.write(var.begin(), var.get_size());
     return os;
   }
 
   template<typename CharT>
   std::ostream& operator<<(std::ostream& os, const String<CharT>& var)
   {
-    os.write(var.begin(), var.getSize());
+    os.write(var.begin(), var.get_size());
     return os;
   }
 
