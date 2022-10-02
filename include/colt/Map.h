@@ -329,6 +329,7 @@ namespace colt
       const Vector<details::KeySentinel>& metadata, memory::TypedBlock<Slot> blk) noexcept;
 
     /// @brief Doubles the Map's capacity, rehashing in the process
+    /// @param new_capacity The new capacity of the Map
     constexpr void realloc_map(size_t new_capacity)
       noexcept(std::is_nothrow_destructible_v<Key>
         && std::is_nothrow_destructible_v<Value>
