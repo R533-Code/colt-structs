@@ -8,6 +8,17 @@
 
 namespace colt
 {
+  namespace details
+  {
+    static constexpr size_t strlen(const char* str) noexcept
+    {
+      size_t ret = 0;
+      while (str[ret] != '\0')
+        ++ret;
+      return ret;
+    }
+  }
+
   template<typename CharT = char>
   class StringViewOf
     : public ContiguousView<CharT>
@@ -25,12 +36,12 @@ namespace colt
     /// @brief Constructs a StringView over a NUL terminated string
     /// @param cstr The NUL terminated string to span over
     constexpr StringViewOf(const CharT* cstr) noexcept
-      : View(cstr, std::strlen(cstr)) {}
+      : View(cstr, details::strlen(cstr)) {}
     /// @brief Constructs a StringView over a NUL terminated string, including its NUL terminator
     /// @param cstr The NUL terminated string to span over
     /// @param  Tag object (WithNUL)
     constexpr StringViewOf(const CharT* cstr, traits::WithNULT) noexcept
-      : View(cstr, std::strlen(cstr) + 1) {}
+      : View(cstr, details::strlen(cstr) + 1) {}
     /// @brief Copy constructor
     /// @param  The StringView to copy
     constexpr StringViewOf(const StringViewOf&) noexcept = default;
@@ -190,7 +201,7 @@ namespace colt
   constexpr String<CharT>::String(const CharT* cstr) noexcept
     : Str()
   {
-    size_t strl = std::strlen(cstr);
+    size_t strl = details::strlen(cstr);
     Str::reserve(strl);
     for (size_t i = 0; i < strl; i++)
       Str::push_back(cstr[i]);
@@ -200,7 +211,7 @@ namespace colt
   constexpr String<CharT>::String(const CharT* cstr, traits::WithNULT) noexcept
     : Str()
   {
-    size_t strl = std::strlen(cstr) + 1;
+    size_t strl = details::strlen(cstr) + 1;
     Str::reserve(strl);
     for (size_t i = 0; i < strl; i++)
       Str::push_back(cstr[i]);
