@@ -165,6 +165,11 @@ namespace colt
       /// @return Self
       constexpr MapIterator& operator++() noexcept;
 
+      /// @brief Post increment operator
+      /// @param  Post increment
+      /// @return Current iterator
+      constexpr MapIterator operator++(int) noexcept;
+
       /// @brief Check if two MapIterator are equal
       /// @param a First MapIterator
       /// @param b Second MapIterator
@@ -614,6 +619,15 @@ namespace colt
     //Set to end()
     slot_ptr = map_ptr->slots.get_ptr() + map_ptr->slots.get_size();
     return *this;
+  }
+
+  template<typename Key, typename Value>
+  template<typename SlotT>
+  constexpr Map<Key, Value>::MapIterator<SlotT> Map<Key, Value>::MapIterator<SlotT>::operator++(int) noexcept
+  {
+    MapIterator to_ret = *this; //copy
+    ++(*this); //increment
+    return to_ret;
   }
 
 #ifdef COLT_USE_IOSTREAMS
