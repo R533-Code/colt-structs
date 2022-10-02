@@ -15,3 +15,4 @@ All the allocations that these structures perform uses the Colt global allocator
 - `SmallVector`: Contiguous dynamic array of objects with a stack buffer.
 - `String`: Optionally NUL terminated dynamic array of characters with a stack buffer.
 - `UniquePtr`: Automatically managed pointer to a resource
+- `Map`: Key/Value associative container
