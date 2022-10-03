@@ -223,7 +223,7 @@ namespace colt
   constexpr T& Optional<T>::get_value() & noexcept
   {
     assert(!is_none_v && "Optional does not contain a value!");
-    return *std::launder(reinterpret_cast<const T*>(opt_buffer));
+    return *std::launder(reinterpret_cast<T*>(opt_buffer));
   }
 
   template<typename T>
