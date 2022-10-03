@@ -128,7 +128,7 @@ namespace colt {
   constexpr ContiguousView<T>::ContiguousView(const T* begin, const T* end) noexcept
     : begin_ptr(begin), size(end - begin)
   {
-    assert(begin < end && "'end' should be greater than 'begin'!");
+    assert(begin <= end && "'end' should be greater than 'begin'!");
   }
 
   template<typename T>
