@@ -101,31 +101,31 @@ namespace colt
 
     /// @brief Dereferences the pointer to the memory block
     /// @return Const reference to the type of the block
-    constexpr const T& operator*() const noexcept { return *reinterpret_cast<const T*>(blk.getPtr()); }
+    constexpr const T& operator*() const noexcept { return *reinterpret_cast<const T*>(blk.get_ptr()); }
     /// @brief Dereferences the pointer to the memory block
     /// @return Reference to the type of the block
-    constexpr T& operator*() noexcept { return *reinterpret_cast<T*>(blk.getPtr()); }
+    constexpr T& operator*() noexcept { return *reinterpret_cast<T*>(blk.get_ptr()); }
 
     /// @brief Dereferences the pointer to the memory block
     /// @return Const reference to the type of the block
-    constexpr const T* operator->() const noexcept { return reinterpret_cast<const T*>(blk.getPtr()); }
+    constexpr const T* operator->() const noexcept { return reinterpret_cast<const T*>(blk.get_ptr()); }
     /// @brief Dereferences the pointer to the memory block
     /// @return Reference to the type of the block
-    constexpr T* operator->() noexcept { return reinterpret_cast<T*>(blk.getPtr()); }
+    constexpr T* operator->() noexcept { return reinterpret_cast<T*>(blk.get_ptr()); }
 
-    /// @brief Check if the owned block is empty (getPtr() == nullptr)
+    /// @brief Check if the owned block is empty (get_ptr() == nullptr)
     /// @return True if the block is empty
-    constexpr bool is_null() const noexcept { return blk.getPtr() == nullptr; }
-    /// @brief Check if the owned block is empty (getPtr() != nullptr)
+    constexpr bool is_null() const noexcept { return blk.get_ptr() == nullptr; }
+    /// @brief Check if the owned block is empty (get_ptr() != nullptr)
     /// @return True if the block is not empty
-    constexpr bool is_not_null() const noexcept { return blk.getPtr() != nullptr; }    
+    constexpr bool is_not_null() const noexcept { return blk.get_ptr() != nullptr; }    
 
     /// @brief Get the pointer to the block
       /// @return Const pointer to the type of the block
-    constexpr const T* get_ptr() const noexcept { return reinterpret_cast<const T*>(blk.getPtr()); }
+    constexpr const T* get_ptr() const noexcept { return reinterpret_cast<const T*>(blk.get_ptr()); }
     /// @brief Get the pointer to the block
     /// @return Pointer to the type of the block
-    constexpr T* get_ptr() noexcept { return reinterpret_cast<T*>(blk.getPtr()); }
+    constexpr T* get_ptr() noexcept { return reinterpret_cast<T*>(blk.get_ptr()); }
 
     /// @brief Check if the current block has the size of the UniquePtr type.
     /// This is a hint: in inheritance, a UniquePtr of child class can be assigned
@@ -179,7 +179,7 @@ namespace colt
   static std::ostream& operator<<(std::ostream& os, const UniquePtr<T>& var)
   {
     static_assert(traits::is_coutable_v<T>, "Type of UniquePtr should implement operator<<(std::ostream&)!");
-    os << var.getPtr();
+    os << var.get_ptr();
     return os;
   }
 #endif
