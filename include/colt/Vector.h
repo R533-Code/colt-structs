@@ -73,24 +73,24 @@ namespace colt
 
     /// @brief Returns an iterator to the beginning of the Vector
     /// @return Iterator to the beginning
-    constexpr ContiguousIterator<T> begin() noexcept { return blk.getPtr(); }
+    constexpr ContiguousIterator<T> begin() noexcept { return blk.get_ptr(); }
     /// @brief Returns a iterator to the end of the Vector
     /// @return Iterator to the end
-    constexpr ContiguousIterator<T> end() noexcept { return blk.getPtr() + size; }
+    constexpr ContiguousIterator<T> end() noexcept { return blk.get_ptr() + size; }
 
     /// @brief Returns a const iterator to the beginning of the Vector
     /// @return Const iterator to the beginning
-    constexpr ContiguousIterator<const T> begin() const noexcept { return blk.getPtr(); }
+    constexpr ContiguousIterator<const T> begin() const noexcept { return blk.get_ptr(); }
     /// @brief Returns a const iterator to the end of the Vector
     /// @return Const iterator to the end
-    constexpr ContiguousIterator<const T> end() const noexcept { return blk.getPtr() + size; }
+    constexpr ContiguousIterator<const T> end() const noexcept { return blk.get_ptr() + size; }
 
     /// @brief Returns a pointer to the beginning of the data
     /// @return Const pointer to the beginning of the data
-    constexpr const T* get_data() const noexcept { return blk.getPtr(); }
+    constexpr const T* get_data() const noexcept { return blk.get_ptr(); }
     /// @brief Returns a pointer to the beginning of the data
     /// @return Pointer to the beginning of the data
-    constexpr T* get_data() noexcept { return blk.getPtr(); }
+    constexpr T* get_data() noexcept { return blk.get_ptr(); }
 
     /// @brief Returns the count of active objects in the Vector
     /// @return The count of objects in the Vector
@@ -180,7 +180,7 @@ namespace colt
 
     /// @brief Obtains a view over the whole Vector
     /// @return View over the Vector
-    constexpr ContiguousView<T> to_view() const noexcept { return { blk.getPtr(), size }; }
+    constexpr ContiguousView<T> to_view() const noexcept { return { blk.get_ptr(), size }; }
 
     /// @brief Obtains a view over the 'range' of the Vector.
     /// @param range The range to obtain from the Vector
@@ -189,7 +189,7 @@ namespace colt
 
     /// @brief Converts a Vector to a view implicitly
     /// @return ContiguousView over the whole Vector
-    constexpr explicit operator ContiguousView<T>() const noexcept { return { blk.getPtr(), size }; }
+    constexpr explicit operator ContiguousView<T>() const noexcept { return { blk.get_ptr(), size }; }
   };
 
   template<typename T, size_t buff_count = 5>
@@ -394,21 +394,21 @@ namespace colt
   constexpr Vector<T>::Vector(std::initializer_list<T> list) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ list.size() * sizeof(T) })), size(list.size())
   {
-    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
+    algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
   }
 
   template<typename T>
   constexpr Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ view.getSize() * sizeof(T) })), size(view.getSize())
   {
-    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
+    algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
   }
 
   template<typename T>
   constexpr Vector<T>::Vector(const Vector& to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate(to_copy.blk.get_byte_size())), size(to_copy.getSize())
   {
-    algo::contiguous_copy(list.begin(), blk.getPtr(), size);
+    algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
   }
 
   template<typename T>
@@ -451,14 +451,14 @@ namespace colt
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::operator[](size_t index) const noexcept
   {
     assert(index < size && "Invalid index!");
-    return blk.getPtr()[index];
+    return blk.get_ptr()[index];
   }
 
   template<typename T>
   constexpr T& Vector<T>::operator[](size_t index) noexcept
   {
     assert(index < size && "Invalid index!");
-    return blk.getPtr()[index];
+    return blk.get_ptr()[index];
   }
 
   template<typename T>
@@ -466,7 +466,7 @@ namespace colt
   {
     memory::TypedBlock<T> new_blk = memory::allocate({ blk.get_byte_size().size + by_more * sizeof(T) });
     
-    algo::contiguous_destructive_move(blk.getPtr(), new_blk.getPtr(), size);
+    algo::contiguous_destructive_move(blk.get_ptr(), new_blk.get_ptr(), size);
 
     memory::deallocate(blk);
     blk = new_blk;
@@ -477,7 +477,7 @@ namespace colt
   {
     if (size == blk.getSize())
       reserve(blk.getSize() + 4);
-    new(blk.getPtr() + size) T(to_copy);
+    new(blk.get_ptr() + size) T(to_copy);
     ++size;
   }
 
@@ -486,7 +486,7 @@ namespace colt
   {
     assert(!is_empty() && "Vector was empty!");
     --size;
-    blk.getPtr()[size].~T();
+    blk.get_ptr()[size].~T();
   }
 
   template<typename T>
@@ -494,14 +494,14 @@ namespace colt
   {
     assert(N <= size && "Vector does not contain enough items!");
     for (size_t i = size - N; i < size; i++)
-      blk.getPtr()[i].~T();
+      blk.get_ptr()[i].~T();
     size -= N;
   }
 
   template<typename T>
   constexpr void Vector<T>::clear() noexcept(std::is_nothrow_destructible_v<T>)
   {
-    algo::contiguous_destruct(blk.getPtr(), size);
+    algo::contiguous_destruct(blk.get_ptr(), size);
     size = 0;
   }
 
@@ -509,28 +509,28 @@ namespace colt
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::get_front() const noexcept
   {
     assert(!is_empty() && "Vector was empty!");
-    return *blk.getPtr();
+    return *blk.get_ptr();
   }
 
   template<typename T>
   constexpr T& Vector<T>::get_front() noexcept
   {
     assert(!is_empty() && "Vector was empty!");
-    return *blk.getPtr();
+    return *blk.get_ptr();
   }
 
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::get_back() const noexcept
   {
     assert(!is_empty() && "Vector was empty!");
-    return blk.getPtr()[size - 1];
+    return blk.get_ptr()[size - 1];
   }
 
   template<typename T>
   constexpr T& Vector<T>::get_back() noexcept
   {
     assert(!is_empty() && "Vector was empty!");
-    return blk.getPtr()[size - 1];
+    return blk.get_ptr()[size - 1];
   }
 
   template<typename T>
@@ -548,7 +548,7 @@ namespace colt
   constexpr Vector<T>::Vector(size_t fill_size, traits::InPlaceT, Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
     : blk(memory::allocate({ fill_size * sizeof(T) })), size(fill_size)
   {
-    algo::contiguous_construct(blk.getPtr(), size, std::forward<Args>(args)...);
+    algo::contiguous_construct(blk.get_ptr(), size, std::forward<Args>(args)...);
   }
   
   template<typename T>
@@ -557,7 +557,7 @@ namespace colt
   {
     if (size == blk.getSize())
       reserve(blk.getSize() + 4);
-    new(blk.getPtr() + size) T(std::move(to_move));
+    new(blk.get_ptr() + size) T(std::move(to_move));
     ++size;
   }
     
@@ -567,7 +567,7 @@ namespace colt
   {
     if (size == blk.getSize())
       reserve(blk.getSize() + 4);
-    new(blk.getPtr() + size) T(std::forward<Args>(args)...);
+    new(blk.get_ptr() + size) T(std::forward<Args>(args)...);
     ++size;
   }
 
@@ -577,7 +577,7 @@ namespace colt
   {
     //make the allocation pointer active
     if (capacity == buff_count)
-      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).getPtr());
+      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).get_ptr());
   }
 
   template<typename T, size_t buff_count>
@@ -586,7 +586,7 @@ namespace colt
   {
     if (!is_stack_allocated())
     {
-      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).getPtr());
+      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).get_ptr());
       algo::contiguous_copy(to_copy.ptr, ptr, size);
     }
     else
@@ -752,12 +752,12 @@ namespace colt
     memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * (capacity + by_more) });
     T* const ptr_d = get_current_ptr();
     
-    algo::contiguous_destructive_move(ptr_d, blk.getPtr(), size);
+    algo::contiguous_destructive_move(ptr_d, blk.get_ptr(), size);
     
     if (!is_stack_allocated())
       memory::deallocate({ ptr_d, capacity * sizeof(T) });
     capacity += by_more;
-    ptr = blk.getPtr();
+    ptr = blk.get_ptr();
   }
 
   template<typename T, size_t buff_count>
