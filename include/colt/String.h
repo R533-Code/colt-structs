@@ -28,6 +28,9 @@ namespace colt
     using View = ContiguousView<CharT>;
 
   public:
+    /// @brief Constructs an empty StringViewOf
+    constexpr StringViewOf() noexcept
+      : View(nullptr, nullptr) {}
     /// @brief Range constructor
     /// @param begin The beginning of the view
     /// @param end The end of the view
@@ -48,6 +51,9 @@ namespace colt
     /// @brief Move constructor
     /// @param  The StringView to move
     constexpr StringViewOf(StringViewOf&&) noexcept = default;
+
+    constexpr StringViewOf& operator=(const StringViewOf&) noexcept = default;
+    constexpr StringViewOf& operator=(StringViewOf&&) noexcept = default;
 
     /// @brief Pops all spaces from the beginning and the end of the StringView.
     /// The characters that are considered spaces are '\n', ' ', '\v', '\t'.
@@ -171,7 +177,7 @@ namespace colt
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;
 
-    constexpr friend bool operator==(const String& strv1, const String& strv2) noexcept
+    constexpr friend bool operator==(const String& strv1, const StringViewOf<CharT>& strv2) noexcept
     {
       if (strv1.get_size() != strv2.get_size())
         return false;
@@ -183,7 +189,7 @@ namespace colt
       return true;
     }
 
-    constexpr friend bool operator!=(const String& strv1, const String& strv2) noexcept
+    constexpr friend bool operator!=(const String& strv1, const StringViewOf<CharT>& strv2) noexcept
     {
       return !(strv1 == strv2);
     }
@@ -410,6 +416,37 @@ namespace colt
   }
 
 #endif
+
 }
+
+#ifdef COLT_USE_FMT
+
+template<>
+struct fmt::formatter<colt::StringView>
+{
+  template<typename ParseContext>
+  constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+
+  template<typename FormatContext>
+  auto format(const colt::StringView& str, FormatContext& ctx)
+  {
+    return fmt::format_to(ctx.out(), "{:.{}}", str.get_data(), str.get_size());
+  }
+};
+
+template<>
+struct fmt::formatter<colt::String<char>>
+{
+  template<typename ParseContext>
+  constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
+
+  template<typename FormatContext>
+  auto format(const colt::String<char>& str, FormatContext& ctx)
+  {
+    return fmt::format_to(ctx.out(), "{:.{}}", str.get_data(), str.get_size());
+  }
+};
+
+#endif
 
 #endif //!HG_COLT_STRING
