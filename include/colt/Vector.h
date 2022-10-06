@@ -484,6 +484,9 @@ namespace colt
     constexpr bool is_empty() const noexcept { return size == 0; }
     constexpr bool is_not_empty() const noexcept { return size != 0; }
 
+    constexpr bool is_full() const noexcept { return size == max_size; }
+    constexpr bool is_not_full() const noexcept { return size == max_size; }
+
     constexpr size_t get_size() const noexcept { return size; }
     constexpr size_t get_capacity() const noexcept { return max_size; }
 
