@@ -521,44 +521,6 @@ namespace colt
           }
         }
       };
-      
-      template<bool is_noexcept, typename T, typename... Args>
-      struct delete_t_impl {};
-
-      template<typename T, typename... Args>
-      struct delete_t_impl<true, T, Args...>
-      {
-        static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
-        {
-          reinterpret_cast<T*>(blk.get_ptr())->~T();
-          deallocate(blk);
-          //On debug, make the block empty to ensure that the user
-          //does not use a deleted block
-          COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
-        }
-      };
-
-      template<typename T, typename... Args>
-      struct delete_t_impl<false, T, Args...>
-      {
-        static inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept
-        {
-          try
-          {
-            reinterpret_cast<T*>(blk.get_ptr())->~T();
-            deallocate(blk);
-            //On debug, make the block empty to ensure that the user
-            //does not use a deleted block
-            COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
-          }
-          catch (...)
-          {
-            deallocate(blk);
-            COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
-            throw;
-          }
-        }
-      };
     }
 
     template<typename T, typename... Args>
@@ -586,7 +548,32 @@ namespace colt
     inline void delete_t(MemBlock COLT_REF_ON_DEBUG blk) noexcept(std::is_nothrow_destructible_v<T>)
     {
       static_assert(!std::is_array_v<T>, "Use delete_array_t for array types!");
-      return details::delete_t_impl<std::is_nothrow_destructible_v<T>, T>::delete_t(blk);
+
+      if constexpr (std::is_nothrow_destructible_v<T>)
+      {
+        reinterpret_cast<T*>(blk.get_ptr())->~T();
+        deallocate(blk);
+        //On debug, make the block empty to ensure that the user
+        //does not use a deleted block
+        COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+      }
+      else
+      {
+        try
+        {
+          reinterpret_cast<T*>(blk.get_ptr())->~T();
+          deallocate(blk);
+          //On debug, make the block empty to ensure that the user
+          //does not use a deleted block
+          COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+        }
+        catch (...)
+        {
+          deallocate(blk);
+          COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+          throw;
+        }
+      }
     }
 
     template<typename T>
@@ -596,7 +583,32 @@ namespace colt
     inline void delete_t(TypedBlock<T> COLT_REF_ON_DEBUG blk) noexcept(std::is_nothrow_destructible_v<T>)
     {
       static_assert(!std::is_array_v<T>, "Use delete_array_t for array types!");
-      return details::delete_t_impl<std::is_nothrow_destructible_v<T>, T>::delete_t(blk);
+      
+      if constexpr (std::is_nothrow_destructible_v<T>)
+      {
+        blk.get_ptr()->~T();
+        deallocate(blk);
+        //On debug, make the block empty to ensure that the user
+        //does not use a deleted block
+        COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+      }
+      else
+      {
+        try
+        {
+          blk.get_ptr()->~T();
+          deallocate(blk);
+          //On debug, make the block empty to ensure that the user
+          //does not use a deleted block
+          COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+        }
+        catch (...)
+        {
+          deallocate(blk);
+          COLT_ON_DEBUG(blk.impl_get_ptr() = nullptr);
+          throw;
+        }
+      }
     }
 
     /************* FALLBACK ALLOCATOR *************/
