@@ -4,6 +4,8 @@
 #include <cassert>
 #include <cstring>
 
+#include <cstdlib>
+
 #include <mutex>
 #include <atomic>
 
