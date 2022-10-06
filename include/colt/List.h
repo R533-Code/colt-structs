@@ -21,6 +21,70 @@ namespace colt
       StaticVector<T, obj_per_node> data;
     };
 
+    template<typename Node_t>
+    class Iterator
+    {
+      size_t node_index;
+      Node_t* current_node;
+
+    public:
+      constexpr Iterator(Node_t* node, size_t index = 0) noexcept
+        : node_index(index), current_node(node) { assert(index < obj_per_node); }
+
+      constexpr Iterator& operator++() noexcept
+      {
+        if (node_index + 1 == obj_per_node)
+        {
+          current_node = current_node->after;
+          node_index = 0;
+        }
+        else
+          ++node_index;
+        return *this;
+      }
+
+      constexpr Iterator operator++(int) noexcept
+      {
+        auto copy = *this;
+        ++(*this);
+        return copy;
+      }
+
+      constexpr Iterator& operator--() noexcept
+      {
+        if (node_index - 1 == 0)
+        {
+          current_node = current_node->before;
+          node_index = obj_per_node - 1;
+        }
+        else
+          --node_index;
+        return *this;
+      }
+
+      constexpr Iterator operator--(int) noexcept
+      {
+        auto copy = *this;
+        --(*this);
+        return copy;
+      }
+
+      constexpr T* operator->() noexcept { return current_node->data.get_data() + node_index; }
+      constexpr const T* operator->() const noexcept { return current_node->data.get_data() + node_index; }
+      constexpr T& operator*() noexcept { return current_node->data[node_index]; }
+      constexpr const T& operator*() const noexcept { return current_node->data[node_index]; }
+
+      friend constexpr bool operator==(const Iterator& i1, const Iterator& i2) noexcept
+      {
+        return i1.node_index == i2.node_index && i1.current_node == i2.current_node;
+      }
+
+      friend constexpr bool operator!=(const Iterator& i1, const Iterator& i2) noexcept
+      {
+        return !(i1 == i2);
+      }
+    };
+
     /// @brief Owning pointer to the head of the list, never null
     Node* head = memory::new_t<Node>().get_ptr();
     /// @brief Pointer to the tail of the list
@@ -79,6 +143,22 @@ namespace colt
     /// Precondition: is_not_empty().
     /// @return The first object in the list
     constexpr T& get_back() noexcept;
+
+    constexpr Iterator<Node> begin() noexcept { return { head, 0 }; }
+    constexpr Iterator<const Node> begin() const noexcept { return { head, 0 }; }
+
+    constexpr Iterator<Node> end() noexcept
+    {
+      if (last_active_node->data.is_full())
+        return { last_active_node->after, 0 };
+      return { last_active_node, last_active_node->data.get_size() };
+    }
+    constexpr Iterator<const Node> end() const noexcept
+    {
+      if (last_active_node->data.is_full())
+        return { last_active_node->after, 0 };
+      return { last_active_node, last_active_node->data.get_size() };
+    }
 
     /// @brief Appends an item to the end of the list
     /// @param to_copy The item to append
