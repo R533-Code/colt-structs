@@ -19,7 +19,12 @@ int main()
   hello.push_back(10);
   hello.push_back(100);
   hello.push_back(1000);
-  hello.push_back(10000);
+
+  auto end = hello.end();
+  for (auto it = hello.begin(); it != end; ++it)
+  {
+    *it = 0;
+  }
 
   std::cout << hello;
 }
