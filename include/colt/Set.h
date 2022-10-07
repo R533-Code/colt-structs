@@ -56,6 +56,18 @@ namespace colt
     /// @return True if not empty
     constexpr bool is_not_empty() const noexcept { return list.get_size() != 0; }
 
+    /// @brief Returns const iterators to the beginning of the StableSet
+    /// @return Iterator to the beginning of the set
+    constexpr auto begin() const noexcept -> decltype(list.begin()) { return list.begin(); }
+    /// @brief Returns const iterators to the end of the StableSet
+    /// @return Iterator to the end of the set
+    constexpr auto end() const noexcept -> decltype(list.begin()) { return list.end(); }
+
+    /// @brief Return the nth value inserted (with n being index)
+    /// @param index The insertion number
+    /// @return The nth value inserted (with n being index)
+    constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;    
+
     /// @brief Check if the internal hash map used by the StableSet will rehash on the next insertion
     /// @return True if the next insert will rehash the internal map of the StableSet
     constexpr bool will_reallocate() const noexcept;    
@@ -68,6 +80,10 @@ namespace colt
     /// @param nload_factor The new load factor
     constexpr void set_load_factor(float nload_factor) noexcept;    
 
+    /// @brief Returns a const reference to the internal list used by the StableSet
+    /// @return Const reference to the list
+    constexpr const FlatList<T, obj_per_node>& get_internal_list() const noexcept { return list; }
+
     /// @brief Inserts a new value if it does not already exist.
     /// Returns an InsertionResult SUCCESS (if the insertion was performed) or EXISTS (if the key already exists).
     /// The returned pointer is to the newly inserted value on SUCCESS.
@@ -78,11 +94,14 @@ namespace colt
     constexpr std::pair<T*, InsertionResult> insert(traits::copy_if_trivial_t<const T&> key)
       noexcept(std::is_nothrow_copy_constructible_v<T>);
 
+    template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     /// @brief Inserts a new value if it does not already exist.
     /// Returns an InsertionResult SUCCESS (if the insertion was performed) or EXISTS (if the key already exists).
     /// The returned pointer is to the newly inserted value on SUCCESS.
     /// The returned pointer is to the existing value on EXISTS.
     /// The returned pointer is never null.
+    /// @tparam T_ SFINAE helper
+    /// @tparam  SFINAE helper
     /// @param key The value to insert
     /// @return Pair of pointer to the inserted slot or the existent one, and SUCESS on insertion or EXISTS if the key already exists
     constexpr std::pair<T*, InsertionResult> insert(T&& key)
@@ -137,6 +156,13 @@ namespace colt
   }
   
   template<typename T, size_t obj_per_node>
+  constexpr traits::copy_if_trivial_t<const T&> StableSet<T, obj_per_node>::operator[](size_t index) const noexcept
+  {
+    assert(index < size && "Invalid index!");
+    return list[index];
+  }
+
+  template<typename T, size_t obj_per_node>
   constexpr bool StableSet<T, obj_per_node>::will_reallocate() const noexcept
   {
     return float(get_size() + 1) > load_factor * get_capacity();
@@ -171,6 +197,7 @@ namespace colt
   }
 
   template<typename T, size_t obj_per_node>
+  template<typename T_, typename>
   constexpr std::pair<T*, InsertionResult> StableSet<T, obj_per_node>::insert(T&& key) noexcept(std::is_nothrow_move_constructible_v<T>)
   {
     if (will_reallocate())
@@ -180,7 +207,7 @@ namespace colt
     size_t prob_index;
     if (find_key(key_hash, key, prob_index, sentinel_metadata, slots))
     {
-      list.push_back(key);
+      list.push_back(std::move(key));
       T* to_ret = &list[list.get_size() - 1]; // always safe as push_backed the value
       new(slots.get_ptr() + prob_index) Slot(key_hash, to_ret);
       //Set the slot to ACTIVE
@@ -248,6 +275,17 @@ namespace colt
     memory::deallocate(slots);
     slots = new_slot;
   }
+
+#ifdef COLT_USE_IOSTREAMS
+
+  template<typename T, size_t size>
+  static std::ostream& operator<<(std::ostream& os, const StableSet<T, size>& var)
+  {
+    os << var.get_internal_list();
+    return os;
+  }
+
+#endif
 }
 
 #endif //!HG_COLT_SET
