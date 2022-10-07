@@ -6,7 +6,7 @@
 #define HG_COLT_UNIQUE_PTR
 
 #include "details/allocator.h"
-#include "colt/Hash.h"
+#include "Hash.h"
 
 namespace colt
 {
@@ -177,11 +177,11 @@ namespace colt
   }
 
   template<typename T>
-  size_t hash(const UniquePtr<T>& ptr) noexcept
+  std::size_t hash(const UniquePtr<T>& ptr) noexcept
   {
     static_assert(traits::is_hashable_v<T>, "Type of UniquePtr should be hashable!");
     if (ptr)
-      return hash(*ptr);
+      return GetHash(*ptr);
     return 18446744073709548283;
   }
 
