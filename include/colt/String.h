@@ -92,83 +92,83 @@ namespace colt
   /// @brief Contiguous array of characters.
   /// Possesses a small buffer of 16 characters.
   template<typename CharT = char>
-  class String
+  class StringOf
     : public SmallVector<CharT, 16>
   {
-    static_assert(std::is_same_v<CharT, char>, "String only supports char for now!");
+    static_assert(std::is_same_v<CharT, char>, "StringOf only supports char for now!");
     
     using Str = SmallVector<CharT, 16>;
 
   public:    
 
     /// @brief Default constructor
-    constexpr String() noexcept = default;
+    constexpr StringOf() noexcept = default;
     /// @brief Copy constructor
-    /// @param  The String to copy
-    constexpr String(const String&) noexcept = default;
+    /// @param  The StringOf to copy
+    constexpr StringOf(const StringOf&) noexcept = default;
     /// @brief Move constructor
-    /// @param  The String to move
-    constexpr String(String&&) noexcept = default;
-    /// @brief Constructs a String from a StringView
+    /// @param  The StringOf to move
+    constexpr StringOf(StringOf&&) noexcept = default;
+    /// @brief Constructs a StringOf from a StringView
     /// @param strv The StringView to copy
-    constexpr String(StringViewOf<CharT> strv) noexcept;
+    explicit constexpr StringOf(StringViewOf<CharT> strv) noexcept;
     /// @brief Constructs a StringView over a NUL terminated string
     /// @param cstr The NUL terminated string to span over
-    constexpr String(const CharT* cstr) noexcept;
+    explicit constexpr StringOf(const CharT* cstr) noexcept;
     /// @brief Constructs a StringView over a NUL terminated string
     /// @param cstr The NUL terminated string to span over
     /// @param  Tag object (WithNUL)
-    constexpr String(const CharT* cstr, traits::WithNULT) noexcept;     
+    constexpr StringOf(const CharT* cstr, traits::WithNULT) noexcept;     
     /// @brief Destructor
-    ~String() noexcept = default;
+    ~StringOf() noexcept = default;
 
-    /// @brief NUL terminates the String
-    /// @return Pointer to the NUL terminated String
+    /// @brief NUL terminates the StringOf
+    /// @return Pointer to the NUL terminated StringOf
     constexpr const CharT* c_str() noexcept;
 
-    /// @brief Appends a character to the end of the String
+    /// @brief Appends a character to the end of the StringOf
     /// @param chr The character to append
     constexpr void append(CharT chr) noexcept;
-    /// @brief Appends a StringView to the end of the String
+    /// @brief Appends a StringView to the end of the StringOf
     /// @param strv The view to append
     constexpr void append(StringViewOf<CharT> strv) noexcept;
 
-    /// @brief Appends a character to the end of the String
+    /// @brief Appends a character to the end of the StringOf
     /// @param strv The view to append
     /// @return Self
-    constexpr String& operator+=(StringViewOf<CharT> strv) noexcept;
-    /// @brief Appends a character to the end of the String
+    constexpr StringOf& operator+=(StringViewOf<CharT> strv) noexcept;
+    /// @brief Appends a character to the end of the StringOf
     /// @param chr The character to append
     /// @return Self
-    constexpr String& operator+=(CharT chr) noexcept;    
+    constexpr StringOf& operator+=(CharT chr) noexcept;    
 
     /// @brief Get a line from a file (by default 'stdin').
-    /// This returns a non NUL-terminated String.
+    /// This returns a non NUL-terminated StringOf.
     /// The new-line is not included, but is consumed.
     /// @param from The FILE from which to read the characters
-    /// @return String over the line
-    static Expected<String, StringError> getLine(FILE* from = stdin) noexcept;
-    /// /// @brief Get a line from a file (by default 'stdin'), and NUL terminates the String.
+    /// @return StringOf over the line
+    static Expected<StringOf, StringError> getLine(FILE* from = stdin) noexcept;
+    /// /// @brief Get a line from a file (by default 'stdin'), and NUL terminates the StringOf.
     /// The new-line is not included, but is consumed.
     /// @param  Tag object (WithNUL)
     /// @param from The FILE from which to read the characters
-    /// @return String over the line 
-    static Expected<String, StringError> getLine(traits::WithNULT, FILE* from = stdin) noexcept;
+    /// @return StringOf over the line 
+    static Expected<StringOf, StringError> getLine(traits::WithNULT, FILE* from = stdin) noexcept;
     
-    /// @brief Returns a String containing the content of the file at path 'path'.
+    /// @brief Returns a StringOf containing the content of the file at path 'path'.
     /// This functions is faster than getFileContent for large file sizes, as it checks
     /// the size of the file to allocate once.
     /// Returns StringError::INVALID_PATH if the path is not valid or the OS was not able to open the file.
     /// Returns StringError::CANNOT_READ_ALL if a call to 'ftell/fseek' fails.
     /// @param path The file path
-    /// @return String containing the content of 'from' or StringError
-    static Expected<String, StringError> getFileContent(const char* path) noexcept;
-    /// @brief Returns a String containing the content of the file 'from'.
-    /// Repeatedly calls 'fgetc' on from and appends to the String.
+    /// @return StringOf containing the content of 'from' or StringError
+    static Expected<StringOf, StringError> getFileContent(const char* path) noexcept;
+    /// @brief Returns a StringOf containing the content of the file 'from'.
+    /// Repeatedly calls 'fgetc' on from and appends to the StringOf.
     /// Can return a StringError::EOF_HIT if 'feof(from)' returns true before the first 'fgetc' call.
     /// @param from The file on which to repeatedly call 'fgetc'
-    /// @return String containing the content of 'from' or StringError::EOF_HIT
-    static Expected<String, StringError> getFileContent(FILE* from) noexcept;
+    /// @return StringOf containing the content of 'from' or StringError::EOF_HIT
+    static Expected<StringOf, StringError> getFileContent(FILE* from) noexcept;
 
     /// @brief Conversion operator
     /// @return StringViewOf
@@ -177,7 +177,7 @@ namespace colt
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;
 
-    constexpr friend bool operator==(const String& strv1, const StringViewOf<CharT>& strv2) noexcept
+    friend constexpr bool operator==(const StringOf& strv1, const StringViewOf<CharT>& strv2) noexcept
     {
       if (strv1.get_size() != strv2.get_size())
         return false;
@@ -189,14 +189,33 @@ namespace colt
       return true;
     }
 
-    constexpr friend bool operator!=(const String& strv1, const StringViewOf<CharT>& strv2) noexcept
+    friend constexpr bool operator!=(const StringOf& strv1, const StringViewOf<CharT>& strv2) noexcept
+    {
+      return !(strv1 == strv2);
+    }
+
+    friend constexpr bool operator==(const StringOf& strv1, const StringOf& strv2) noexcept
+    {
+      if (strv1.get_size() != strv2.get_size())
+        return false;
+      for (size_t i = 0; i < strv1.get_size(); i++)
+      {
+        if (strv1[i] != strv2[i])
+          return false;
+      }
+      return true;
+    }
+
+    friend constexpr bool operator!=(const StringOf& strv1, const StringOf& strv2) noexcept
     {
       return !(strv1 == strv2);
     }
   };
+
+  using String = StringOf<char>;
   
   template<typename CharT>
-  constexpr String<CharT>::String(StringViewOf<CharT> strv) noexcept
+  constexpr StringOf<CharT>::StringOf(StringViewOf<CharT> strv) noexcept
     : Str(strv.get_size())
   {
     for (auto& i : strv)
@@ -204,7 +223,7 @@ namespace colt
   }
 
   template<typename CharT>
-  constexpr String<CharT>::String(const CharT* cstr) noexcept
+  constexpr StringOf<CharT>::StringOf(const CharT* cstr) noexcept
     : Str()
   {
     size_t strl = details::strlen(cstr);
@@ -214,7 +233,7 @@ namespace colt
   }
 
   template<typename CharT>
-  constexpr String<CharT>::String(const CharT* cstr, traits::WithNULT) noexcept
+  constexpr StringOf<CharT>::StringOf(const CharT* cstr, traits::WithNULT) noexcept
     : Str()
   {
     size_t strl = details::strlen(cstr) + 1;
@@ -224,7 +243,7 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr const CharT* String<CharT>::c_str() noexcept
+  constexpr const CharT* StringOf<CharT>::c_str() noexcept
   {
     if (Str::is_not_empty())
       if (Str::get_back() == '\0')
@@ -233,36 +252,36 @@ namespace colt
   }
   
   template<typename CharT>
-  constexpr void String<CharT>::append(CharT chr) noexcept
+  constexpr void StringOf<CharT>::append(CharT chr) noexcept
   {
     Str::push_back(chr);
   }
   
   template<typename CharT>
-  constexpr void String<CharT>::append(StringViewOf<CharT> strv) noexcept
+  constexpr void StringOf<CharT>::append(StringViewOf<CharT> strv) noexcept
   {
     for (auto& i : strv)
       Str::push_back(i);
   }
   
   template<typename CharT>
-  constexpr String<CharT>& String<CharT>::operator+=(StringViewOf<CharT> strv) noexcept
+  constexpr StringOf<CharT>& StringOf<CharT>::operator+=(StringViewOf<CharT> strv) noexcept
   {
     append(strv);
     return *this;
   }
   
   template<typename CharT>
-  constexpr String<CharT>& String<CharT>::operator+=(CharT chr) noexcept
+  constexpr StringOf<CharT>& StringOf<CharT>::operator+=(CharT chr) noexcept
   {
     append(chr);
     return *this;
   }
 
   template<typename CharT>
-  Expected<String<CharT>, StringError> String<CharT>::getLine(FILE* from) noexcept
+  Expected<StringOf<CharT>, StringError> StringOf<CharT>::getLine(FILE* from) noexcept
   {
-    String<CharT> str;
+    StringOf<CharT> str;
 
     for (;;)
     {
@@ -278,9 +297,9 @@ namespace colt
   }
 
   template<typename CharT>
-  Expected<String<CharT>, StringError> String<CharT>::getLine(traits::WithNULT, FILE* from) noexcept
+  Expected<StringOf<CharT>, StringError> StringOf<CharT>::getLine(traits::WithNULT, FILE* from) noexcept
   {    
-    if (auto estr = String::getLine(from); estr.isError())
+    if (auto estr = StringOf::getLine(from); estr.isError())
       return estr; //Propagate the error
     else
     {
@@ -290,9 +309,9 @@ namespace colt
   }
 
   template<typename CharT>
-  inline Expected<String<CharT>, StringError> String<CharT>::getFileContent(const char* path) noexcept
+  inline Expected<StringOf<CharT>, StringError> StringOf<CharT>::getFileContent(const char* path) noexcept
   {
-    String<CharT> content;
+    StringOf<CharT> content;
     FILE* file = std::fopen(path, "rb");
     if (file == nullptr)
       return { Error, StringError::INVALID_PATH };
@@ -320,14 +339,14 @@ namespace colt
   }
 
   template<typename CharT>
-  inline Expected<String<CharT>, StringError> String<CharT>::getFileContent(FILE* from) noexcept
+  inline Expected<StringOf<CharT>, StringError> StringOf<CharT>::getFileContent(FILE* from) noexcept
   {
     assert(from && "FILE* cannot be NULL!");
     
     if (std::feof(from))
       return { Error, StringError::EOF_HIT };
 
-    String<CharT> content;
+    StringOf<CharT> content;
 
     while (!std::feof(from))
       content.append(static_cast<char>(std::fgetc(from)));
@@ -336,13 +355,13 @@ namespace colt
   }
 
   template<typename CharT>
-  constexpr String<CharT>::operator ContiguousView<CharT>() const noexcept
+  constexpr StringOf<CharT>::operator ContiguousView<CharT>() const noexcept
   {
     return { Str::begin(), Str::end() };
   }
   
   template<typename CharT>
-  constexpr String<CharT>::operator StringViewOf<CharT>() const noexcept
+  constexpr StringOf<CharT>::operator StringViewOf<CharT>() const noexcept
   {
     return { Str::begin(), Str::end() };
   }
@@ -385,7 +404,7 @@ namespace colt
   }
 
   template<>
-  std::size_t hash(const String<char>& str) noexcept
+  std::size_t hash(const StringOf<char>& str) noexcept
   {
     auto size = str.get_size();
     size = size > 64 ? 64 : size;
@@ -409,7 +428,7 @@ namespace colt
   }
 
   template<typename CharT>
-  std::ostream& operator<<(std::ostream& os, const String<CharT>& var)
+  std::ostream& operator<<(std::ostream& os, const StringOf<CharT>& var)
   {
     os.write(var.begin(), var.get_size());
     return os;
@@ -435,13 +454,13 @@ struct fmt::formatter<colt::StringView>
 };
 
 template<>
-struct fmt::formatter<colt::String<char>>
+struct fmt::formatter<colt::StringOf<char>>
 {
   template<typename ParseContext>
   constexpr auto parse(ParseContext& ctx) { return ctx.begin(); }
 
   template<typename FormatContext>
-  auto format(const colt::String<char>& str, FormatContext& ctx)
+  auto format(const colt::StringOf<char>& str, FormatContext& ctx)
   {
     return fmt::format_to(ctx.out(), "{:.{}}", str.get_data(), str.get_size());
   }
