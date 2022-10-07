@@ -281,7 +281,6 @@ namespace colt
   template<typename Key, typename Value>
   constexpr void Map<Key, Value>::realloc_map(size_t new_capacity) noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>&& std::is_nothrow_move_constructible_v<Key>&& std::is_nothrow_move_constructible_v<Value>)
   {
-    //Grow by twice the capacity
     auto new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
 
     Vector<details::KeySentinel> new_metadata = { new_capacity, InPlace, details::EMPTY };
