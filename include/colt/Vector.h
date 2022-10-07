@@ -1118,7 +1118,7 @@ namespace colt
   {
     if (size == max_size)
       return false;
-    new(get_ptr() + size++) T(to_move);
+    new(get_ptr() + size++) T(std::move(to_move));
     return true;
   }
 
