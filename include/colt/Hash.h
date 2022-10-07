@@ -22,7 +22,8 @@ namespace colt
   template<>
   std::size_t hash(const uint16_t& i) noexcept
   {
-    return i;
+    const auto in = static_cast<uint64_t>(i);
+    return hash(in);
   }
 
   template<>
@@ -48,7 +49,8 @@ namespace colt
   template<>
   std::size_t hash(const int16_t& i) noexcept
   {
-    return static_cast<size_t>(i);
+    const auto in = static_cast<uint64_t>(i);
+    return hash(in);
   }
 
   template<>
