@@ -243,8 +243,8 @@ namespace colt
     static constexpr bool find_key(size_t key_hash, traits::copy_if_trivial_t<const Key&> key, size_t& prob,
       const Vector<details::KeySentinel>& metadata, memory::TypedBlock<Slot> blk) noexcept;
 
-    /// @brief Doubles the Map's capacity, rehashing in the process
-    /// @param new_capacity The new capacity of the Map
+    /// @brief Augments the capacity of the Map, rehashing in the process
+    /// @param new_capacity The new capacity of the map
     constexpr void realloc_map(size_t new_capacity)
       noexcept(std::is_nothrow_destructible_v<Key>
         && std::is_nothrow_destructible_v<Value>
