@@ -20,13 +20,6 @@ namespace colt
   }  
 
   template<>
-  std::size_t hash(const uint16_t& i) noexcept
-  {
-    const auto in = static_cast<uint64_t>(i);
-    return hash(in);
-  }
-
-  template<>
   std::size_t hash(const uint32_t& i) noexcept
   {
     size_t x = i;
@@ -44,10 +37,17 @@ namespace colt
     x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
     x = x ^ (x >> 31);
     return x;
-  }  
+  }
 
   template<>
   std::size_t hash(const int16_t& i) noexcept
+  {
+    const auto in = static_cast<uint64_t>(i);
+    return hash(in);
+  }
+
+  template<>
+  std::size_t hash(const uint16_t& i) noexcept
   {
     const auto in = static_cast<uint64_t>(i);
     return hash(in);
