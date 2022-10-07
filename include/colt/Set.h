@@ -158,7 +158,7 @@ namespace colt
   template<typename T, size_t obj_per_node>
   constexpr traits::copy_if_trivial_t<const T&> StableSet<T, obj_per_node>::operator[](size_t index) const noexcept
   {
-    assert(index < size && "Invalid index!");
+    assert(index < list.get_size() && "Invalid index!");
     return list[index];
   }
 
@@ -260,7 +260,7 @@ namespace colt
         const size_t key_hash = GetHash(ptr->first);
         size_t prob_index;
         //Rehash the key to get its new index in the new array
-        if (find_key(key_hash, ptr->first, prob_index, sentinel_metadata, slots))
+        if (find_key(key_hash, *ptr->second, prob_index, sentinel_metadata, slots))
         {
           //Move destruct
           new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
