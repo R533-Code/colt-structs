@@ -263,7 +263,7 @@ namespace colt
   template<typename T, size_t obj_per_node>
   constexpr void FlatList<T, obj_per_node>::push_back(traits::copy_if_trivial_t<const T&> to_copy) noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
-    if (last_active_node->data.get_size() == last_active_node->data.get_capacity())
+    if (last_active_node->data.is_full())
       advance_active_node();
     last_active_node->data.push_back(to_copy);
     ++size;
@@ -322,7 +322,7 @@ namespace colt
   template<typename T_, typename>
   constexpr void FlatList<T, obj_per_node>::push_back(T&& to_move) noexcept(std::is_nothrow_move_constructible_v<T>)
   {
-    if (last_active_node->data.get_size() == last_active_node->data.get_capacity())
+    if (last_active_node->data.is_full())
       advance_active_node();
     last_active_node->data.push_back(std::move(to_move));
     ++size;
@@ -332,7 +332,7 @@ namespace colt
   template<typename ...Args>
   constexpr void FlatList<T, obj_per_node>::push_back(traits::InPlaceT, Args && ...args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
   {
-    if (last_active_node->data.get_size() == last_active_node->data.get_capacity())
+    if (last_active_node->data.is_full())
       advance_active_node();
     last_active_node->data.push_back(InPlace, std::forward<Args>(args)...);
     ++size;
