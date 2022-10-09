@@ -122,6 +122,30 @@ namespace colt {
     /// @param range The range to use for splicing
     /// @return Spliced view
     constexpr ContiguousView<T> splice_range(Range range) const noexcept;
+
+    friend constexpr bool operator==(const ContiguousView& a, const ContiguousView& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return false;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return false;
+      }
+      return true;
+    }
+
+    friend constexpr bool operator!=(const ContiguousView& a, const ContiguousView& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return true;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return true;
+      }
+      return false;
+    }
   };
   
   template<typename T>

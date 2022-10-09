@@ -204,6 +204,30 @@ namespace colt
     /// @brief Converts a Vector to a view implicitly
     /// @return ContiguousView over the whole Vector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { blk.get_ptr(), size }; }
+
+    friend constexpr bool operator==(const Vector& a, const Vector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return false;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return false;
+      }
+      return true;
+    }
+
+    friend constexpr bool operator!=(const Vector& a, const Vector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return true;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return true;
+      }
+      return false;
+    }
   };
 
   template<typename T, size_t buff_count = 5>
@@ -419,6 +443,30 @@ namespace colt
     /// @brief Converts a Vector to a view implicitly
     /// @return ContiguousView over the whole Vector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { get_current_ptr(), size }; }  
+
+    friend constexpr bool operator==(const SmallVector& a, const SmallVector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return false;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return false;
+      }
+      return true;
+    }
+
+    friend constexpr bool operator!=(const SmallVector& a, const SmallVector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return true;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return true;
+      }
+      return false;
+    }
   };
 
   template<typename T, size_t max_size>
@@ -522,6 +570,30 @@ namespace colt
     constexpr ContiguousView<T> to_view(Range range) const noexcept;
 
     constexpr explicit operator ContiguousView<T>() const noexcept { return { get_ptr(), size }; }
+
+    friend constexpr bool operator==(const StaticVector& a, const StaticVector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return false;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return false;
+      }
+      return true;
+    }
+
+    friend constexpr bool operator!=(const StaticVector& a, const StaticVector& b) noexcept
+    {
+      if (a.get_size() != b.get_size())
+        return true;
+      for (size_t i = 0; i < a.get_size(); i++)
+      {
+        if (a[i] != b[i])
+          return true;
+      }
+      return false;
+    }
   };
 
   template<typename T>
