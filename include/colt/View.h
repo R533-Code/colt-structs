@@ -233,7 +233,7 @@ namespace colt {
 
     std::size_t seed = view.get_size();
     for (size_t i = 0; i < size; i++)
-      seed ^= get_hash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= GetHash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     
     return seed;
   }
