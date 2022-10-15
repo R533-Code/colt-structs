@@ -103,7 +103,7 @@ namespace colt
     constexpr size_t get_size() const noexcept { return size; }
     /// @brief Returns the capacity of the current allocation
     /// @return The capacity of the current allocation
-    constexpr size_t get_capacity() const noexcept { return blk.getSize(); }
+    constexpr size_t get_capacity() const noexcept { return blk.get_size(); }
     
     /// @brief Returns the byte size of the allocation
     /// @return ByteSize of the allocation
@@ -122,12 +122,12 @@ namespace colt
     constexpr T& operator[](size_t index) noexcept;
 
     /// @brief Check if the Vector does not contain any object.
-    /// Same as: getSize() == 0
+    /// Same as: get_size() == 0
     /// @return True if the Vector is empty
     constexpr bool is_empty() const noexcept { return size == 0; }
 
     /// @brief Check if the Vector does not contain any object.
-    /// Same as: getSize() != 0
+    /// Same as: get_size() != 0
     /// @return True if the Vector is not empty
     constexpr bool is_not_empty() const noexcept { return size != 0; }
 
@@ -164,7 +164,7 @@ namespace colt
       noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Pops N item from the back of the Vector.
-    /// Precondition: N <= getSize()
+    /// Precondition: N <= get_size()
     /// @param N The number of item to pop from the back
     constexpr void pop_back_n(size_t N)
       noexcept(std::is_nothrow_destructible_v<T>);
@@ -395,7 +395,7 @@ namespace colt
       noexcept(std::is_nothrow_destructible_v<T>);    
 
     /// @brief Pops N item from the back of the Vector.
-    /// Precondition: N <= getSize()
+    /// Precondition: N <= get_size()
     /// @param N The number of item to pop from the back
     constexpr void pop_back_n(size_t N)
       noexcept(std::is_nothrow_destructible_v<T>);    
@@ -610,7 +610,7 @@ namespace colt
 
   template<typename T>
   constexpr Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
-    : blk(memory::allocate({ view.getSize() * sizeof(T) })), size(view.getSize())
+    : blk(memory::allocate({ view.get_size() * sizeof(T) })), size(view.get_size())
   {
     algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
   }
@@ -618,7 +618,7 @@ namespace colt
   template<typename T>
   constexpr Vector<T>::Vector(const Vector& to_copy)
     noexcept(std::is_nothrow_copy_constructible_v<T>)
-    : blk(memory::allocate(to_copy.blk.get_byte_size())), size(to_copy.getSize())
+    : blk(memory::allocate(to_copy.blk.get_byte_size())), size(to_copy.get_size())
   {
     algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
   }
@@ -692,8 +692,8 @@ namespace colt
   constexpr void Vector<T>::push_back(traits::copy_if_trivial_t<const T&> to_copy)
     noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
-    if (size == blk.getSize())
-      reserve(blk.getSize() + 4);
+    if (size == blk.get_size())
+      reserve(blk.get_size() + 4);
     new(blk.get_ptr() + size) T(to_copy);
     ++size;
   }
@@ -777,8 +777,8 @@ namespace colt
   constexpr void Vector<T>::push_back(T&& to_move)
     noexcept(std::is_nothrow_move_constructible_v<T>)
   {
-    if (size == blk.getSize())
-      reserve(blk.getSize() + 4);
+    if (size == blk.get_size())
+      reserve(blk.get_size() + 4);
     new(blk.get_ptr() + size) T(std::move(to_move));
     ++size;
   }
@@ -788,8 +788,8 @@ namespace colt
   constexpr void Vector<T>::push_back(traits::InPlaceT, Args&&... args)
     noexcept(std::is_nothrow_constructible_v<T, Args ...>)
   {
-    if (size == blk.getSize())
-      reserve(blk.getSize() + 4);
+    if (size == blk.get_size())
+      reserve(blk.get_size() + 4);
     new(blk.get_ptr() + size) T(std::forward<Args>(args)...);
     ++size;
   }
