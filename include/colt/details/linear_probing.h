@@ -79,8 +79,9 @@ namespace colt
     /// @return The incremented index
     constexpr size_t advance_prob(size_t prob, size_t mod) noexcept
     {
-      assert(prob / mod < 2);
-      return  (prob + 1) * (prob == mod - 1);
+      //If this asserts then the optimization should be checked
+      assert((prob + 1) % mod == ((prob + 1) * (prob != mod)));
+      return  (prob + 1) * (prob != mod);
     }
   }
 
