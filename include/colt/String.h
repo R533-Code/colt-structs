@@ -389,8 +389,7 @@ namespace colt
     return { View::begin(), View::end() };
   }
 
-  template<>
-  std::size_t hash(const StringViewOf<char>& str) noexcept
+  static std::size_t hash(const StringViewOf<char>& str) noexcept
   {
     auto size = str.get_size();
     size = size > 64 ? 64 : size;
@@ -404,8 +403,7 @@ namespace colt
     return hash;
   }
 
-  template<>
-  std::size_t hash(const StringOf<char>& str) noexcept
+  static std::size_t hash(const StringOf<char>& str) noexcept
   {
     auto size = str.get_size();
     size = size > 64 ? 64 : size;

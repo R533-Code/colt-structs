@@ -1205,13 +1205,13 @@ namespace colt
   }
 
   template<typename T>
-  std::size_t hash(const Vector<T>& view) noexcept
+  static std::size_t hash(const Vector<T>& view) noexcept
   {
     return get_hash(ContiguousView<T>(view));
   }
 
   template<typename T, size_t sz>
-  std::size_t hash(const SmallVector<T, sz>& view) noexcept
+  static std::size_t hash(const SmallVector<T, sz>& view) noexcept
   {
     return get_hash(ContiguousView<T>(view));
   }

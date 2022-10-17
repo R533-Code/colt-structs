@@ -223,7 +223,7 @@ namespace colt {
   }
 
   template<typename T>
-  std::size_t hash(const ContiguousView<T>& view) noexcept
+  static std::size_t hash(const ContiguousView<T>& view) noexcept
   {
     static_assert(traits::is_hashable_v<T>,
       "Type of ContiguousView should be hashable!");
