@@ -347,7 +347,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<typename Map<Key, Value>::Slot> Map<Key, Value>::begin() noexcept
+  constexpr Map<Key, Value>::MapIterator<std::pair<const Key, Value>> Map<Key, Value>::begin() noexcept
   {
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
@@ -358,13 +358,13 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<typename Map<Key, Value>::Slot> Map<Key, Value>::end() noexcept
+  constexpr Map<Key, Value>::MapIterator<std::pair<const Key, Value>> Map<Key, Value>::end() noexcept
   {
     return { slots.get_ptr() + slots.get_size(), this };
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<typename const Map<Key, Value>::Slot> Map<Key, Value>::begin() const noexcept
+  constexpr Map<Key, Value>::MapIterator<const std::pair<const Key, Value>> Map<Key, Value>::begin() const noexcept
   {
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
@@ -375,7 +375,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr Map<Key, Value>::MapIterator<typename const Map<Key, Value>::Slot> Map<Key, Value>::end() const noexcept
+  constexpr Map<Key, Value>::MapIterator<const std::pair<const Key, Value>> Map<Key, Value>::end() const noexcept
   {
     return { slots.get_ptr() + slots.get_size(), this };
   }
@@ -401,7 +401,7 @@ namespace colt
   }
 
   template<typename Key, typename Value>
-  constexpr typename const Map<Key, Value>::Slot* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) const noexcept
+  constexpr const std::pair<const Key, Value>* Map<Key, Value>::find(traits::copy_if_trivial_t<const Key&> key) const noexcept
   {
     const size_t key_hash = GetHash(key);
     size_t prob_index = key_hash % slots.get_size();

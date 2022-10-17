@@ -90,14 +90,14 @@ namespace colt
     constexpr Expected(ExpectedTy&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T_>);    
 
-    template<typename... Args, typename = std::enable_if_t<!std::is_same_v<traits::get_first_t<Args...>, traits::ErrorT>>>
+    template<typename... Args, typename Ty, typename = std::enable_if_t<!std::is_same_v<Ty, traits::ErrorT>>>
     /// @brief Constructs an expected value in place in the Expected
     /// @tparam ...Args Parameter pack
     /// @param  InPlaceT tag
     /// @param  ErrorT tag
     /// @param ...args Argument pack forwarded to the constructor
-    constexpr Expected(traits::InPlaceT, Args&&... args)
-      noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args...>);      
+    constexpr Expected(traits::InPlaceT, Ty&& arg, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<ExpectedTy, Ty, Args...>);
 
     /// @brief Copy constructs an Expected
     /// @param copy The Expected to copy
@@ -369,12 +369,12 @@ namespace colt
   }
 
   template<typename ExpectedTy, typename ErrorTy>
-  template<typename ...Args, typename>
-  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, Args&&... args)
-    noexcept(std::is_nothrow_constructible_v<ExpectedTy, Args ...>)
+  template<typename ...Args, typename Ty, typename>
+  constexpr Expected<ExpectedTy, ErrorTy>::Expected(traits::InPlaceT, Ty&& arg, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<ExpectedTy, Ty, Args ...>)
     : is_error_v(false)
   {
-    new(&expected) ExpectedTy(std::forward<Args>(args)...);
+    new(&expected) ExpectedTy(std::forward<Args>(arg), std::forward<Args>(args)...);
   }
 
   template<typename ExpectedTy, typename ErrorTy>

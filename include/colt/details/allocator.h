@@ -205,9 +205,9 @@ namespace colt
 
     public:
       /// @brief Allocates a MemBlock
-      /// @param size The size of the allocation
+      /// @param sze The size of the allocation
       /// @return Allocated MemBlock or an empty MemBlock on failure
-      MemBlock allocate(sizes::ByteSize size) noexcept;
+      MemBlock allocate(sizes::ByteSize sze) noexcept;
 
       /// @brief Deallocates a MemBlock that was allocated using the current allocator
       /// @param to_free The block whose resources to free
@@ -639,14 +639,14 @@ namespace colt
     /************* STACK ALLOCATOR *************/
 
     template<size_t bsize>
-    MemBlock StackAllocator<bsize>::allocate(sizes::ByteSize size) noexcept
+    MemBlock StackAllocator<bsize>::allocate(sizes::ByteSize sze) noexcept
     {
-      size_t aligned_size = align_up(size.size);
+      size_t aligned_size = align_up(sze.size);
       if (!can_allocate(aligned_size))
-        return { nullptr, size.size };
+        return { nullptr, sze.size };
       auto ptr = top;
       top += aligned_size;
-      return { ptr, size.size };
+      return { ptr, sze.size };
     }
 
     template<size_t size>

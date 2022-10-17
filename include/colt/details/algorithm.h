@@ -43,7 +43,7 @@ namespace colt::algo
   /// @param count The count of objects to construct
   /// @param ...args The argument pack
   inline void contiguous_construct(T* where, size_t count, Args&&... args)
-    noexcept(std::is_nothrow_constructible_v<T, Args>)
+    noexcept(std::is_nothrow_constructible_v<T, Args...>)
   {
     for (size_t i = 0; i < count; i++)
       new(where + i) T(std::forward<Args>(args)...);
