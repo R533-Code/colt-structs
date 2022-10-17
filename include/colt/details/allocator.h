@@ -364,7 +364,7 @@ namespace colt
       /// @brief Allocates a MemBlock
       /// @param size The size of the allocation
       /// @return Allocated MemBlock or empty MemBlock
-      MemBlock allocate(sizes::ByteSize size) noexcept;
+      MemBlock allocate(sizes::ByteSize sze) noexcept;
     
       /// @brief Deallocates a MemBlock that was allocated using the current allocator
       /// @param to_free The block whose resources to free
@@ -690,12 +690,12 @@ namespace colt
 
     /************* SEGREGATOR ALLOCATOR *************/
 
-    template<size_t bsize, typename Primary, typename Secondary>
-    MemBlock Segregator<bsize, Primary, Secondary>::allocate(sizes::ByteSize size) noexcept
+    template<size_t size, typename Primary, typename Secondary>
+    MemBlock Segregator<size, Primary, Secondary>::allocate(sizes::ByteSize sze) noexcept
     {
-      if (size.size <= bsize)
-        return Primary::allocate(size);
-      return Secondary::allocate(size);
+      if (sze.size <= size)
+        return Primary::allocate(sze);
+      return Secondary::allocate(sze);
     }
 
     template<size_t size, typename Primary, typename Secondary>

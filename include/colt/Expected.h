@@ -374,7 +374,7 @@ namespace colt
     noexcept(std::is_nothrow_constructible_v<ExpectedTy, Ty, Args ...>)
     : is_error_v(false)
   {
-    new(&expected) ExpectedTy(std::forward<Args>(arg), std::forward<Args>(args)...);
+    new(&expected) ExpectedTy(std::forward<Ty>(arg), std::forward<Args>(args)...);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
