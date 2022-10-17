@@ -177,7 +177,7 @@ namespace colt
   }
 
   template<typename T>
-  std::size_t hash(const UniquePtr<T>& ptr) noexcept
+  static std::size_t hash(const UniquePtr<T>& ptr) noexcept
   {
     static_assert(traits::is_hashable_v<T>, "Type of UniquePtr should be hashable!");
     if (ptr)
