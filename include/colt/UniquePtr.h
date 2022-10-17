@@ -134,13 +134,13 @@ namespace colt
     /// to a UniquePtr of base class. If both do not have the same size, this information
     /// is retained through the owned block's byte size.
     /// @return True if get_byte_size() == sizeof(T)
-    constexpr bool is_true_type_hint() const noexcept { return blk.get_byte_size() == sizeof(T); }
+    constexpr bool is_true_type_hint() const noexcept { return blk.get_byte_size().size == sizeof(T); }
     /// @brief Check if the current block has the size of the UniquePtr type.
     /// This is a hint: in inheritance, a UniquePtr of child class can be assigned
     /// to a UniquePtr of base class. If both do not have the same size, this information
     /// is retained through the owned block's byte size.
     /// @return True if get_byte_size() != sizeof(T)
-    constexpr bool is_not_true_type_hint() const noexcept { return blk.get_byte_size() != sizeof(T); }
+    constexpr bool is_not_true_type_hint() const noexcept { return blk.get_byte_size().size != sizeof(T); }
 
     /// @brief Releases ownership of the owned TypedBlock.
     /// Precondition: hintTrueType() == true.

@@ -20,8 +20,10 @@ namespace colt
     static_assert(traits::is_hashable_v<Key>, "Key of a Map should be hashable!");
     static_assert(traits::is_equal_comparable_v<Key>, "Key of a Map should implement operator==!");
 
+  public:
     using Slot = typename std::pair<const Key, Value>;
 
+  private:
     /// @brief Contains meta-data information about the slots of the map
     Vector<details::KeySentinel> sentinel_metadata = {};
     /// @brief Memory block of the key/value pair

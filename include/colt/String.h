@@ -247,9 +247,9 @@ namespace colt
   {
     if (Str::is_not_empty())
       if (Str::get_back() == '\0')
-        return get_data();
+        return Str::get_data();
     append('\0');
-    return get_data();
+    return Str::get_data();
   }
   
   template<typename CharT>

@@ -612,7 +612,7 @@ namespace colt
   constexpr Vector<T>::Vector(ContiguousView<T> view) noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate({ view.get_size() * sizeof(T) })), size(view.get_size())
   {
-    algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
+    algo::contiguous_copy(view.begin(), blk.get_ptr(), size);
   }
 
   template<typename T>
@@ -620,7 +620,7 @@ namespace colt
     noexcept(std::is_nothrow_copy_constructible_v<T>)
     : blk(memory::allocate(to_copy.blk.get_byte_size())), size(to_copy.get_size())
   {
-    algo::contiguous_copy(list.begin(), blk.get_ptr(), size);
+    algo::contiguous_copy(to_copy.begin(), blk.get_ptr(), size);
   }
 
   template<typename T>
@@ -760,7 +760,7 @@ namespace colt
     assert(begin < size && "Invalid begin offset for Range!");
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);
-    return { begin_ptr + begin, end - begin };
+    return { get_data() + begin, end - begin };
   }
   
   template<typename T>
@@ -1126,7 +1126,7 @@ namespace colt
   {
     assert(!is_empty() && "Vector was empty!");
     --size;
-    get_current_ptr()[size].~T();
+    get_ptr()[size].~T();
   }
 
   template<typename T, size_t max_size>

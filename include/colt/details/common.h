@@ -51,7 +51,7 @@
   {	\
     using one = char; \
     struct two {char x[2]; }; \
-    template <typename C> static one test(decltype(&C::##member)); \
+    template <typename C> static one test(decltype(&C::member)); \
     template <typename C> static two test(...); \
   public: \
     enum { value = sizeof(test<T>(0)) == sizeof(char) }; \
@@ -80,7 +80,7 @@ namespace colt {
     /// @brief User defined literal to convert a value to a ByteSize
     /// @param size The size to convert
     /// @return ByteSize of size 'size'
-    constexpr ByteSize operator"" _B(size_t size) noexcept { return { size }; }
+    constexpr ByteSize operator"" _B(unsigned long long int size) noexcept { return { size }; }
 
 #ifdef COLT_USE_IOSTREAMS
     static std::ostream& operator<<(std::ostream& os, const ByteSize& var)
@@ -104,7 +104,7 @@ namespace colt {
     /// @brief User defined literal to convert a value to a KibiByteSize
     /// @param size The size to convert
     /// @return KibiByteSize of size 'size'
-    constexpr KibiByteSize operator"" _kiB(size_t size) noexcept { return { size }; }
+    constexpr KibiByteSize operator"" _kiB(unsigned long long int size) noexcept { return { size }; }
 
 #ifdef COLT_USE_IOSTREAMS
     static std::ostream& operator<<(std::ostream& os, const KibiByteSize& var)
@@ -131,7 +131,7 @@ namespace colt {
     /// @brief User defined literal to convert a value to a MebiByteSize
     /// @param size The size to convert
     /// @return MebiByteSize of size 'size'
-    constexpr MebiByteSize operator"" _MiB(size_t size) noexcept { return { size }; }
+    constexpr MebiByteSize operator"" _MiB(unsigned long long int size) noexcept { return { size }; }
 
 #ifdef COLT_USE_IOSTREAMS
     static std::ostream& operator<<(std::ostream& os, const MebiByteSize& var)
@@ -161,7 +161,7 @@ namespace colt {
     /// @brief User defined literal to convert a value to a GibiByteSize
     /// @param size The size to convert
     /// @return GibiByteSize of size 'size'
-    constexpr GibiByteSize operator"" _GiB(size_t size) noexcept { return { size }; }
+    constexpr GibiByteSize operator"" _GiB(unsigned long long int size) noexcept { return { size }; }
 
 #ifdef COLT_USE_IOSTREAMS
     static std::ostream& operator<<(std::ostream& os, const GibiByteSize& var)

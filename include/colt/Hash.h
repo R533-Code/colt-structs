@@ -11,16 +11,16 @@
 namespace colt
 {
   template<typename T>
-  static std::size_t hash(const T&) noexcept = delete;
+  std::size_t hash(const T&) noexcept = delete;
 
   template<>
-  static std::size_t hash(const bool& b) noexcept
+  std::size_t hash(const bool& b) noexcept
   {
     return b ? 1231 : 1237;
   }
 
   template<>
-  static std::size_t hash(const uint32_t& i) noexcept
+  std::size_t hash(const uint32_t& i) noexcept
   {
     size_t x = i;
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -30,7 +30,7 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const uint64_t& i) noexcept
+  std::size_t hash(const uint64_t& i) noexcept
   {
     size_t x = i;
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
@@ -40,21 +40,21 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const int16_t& i) noexcept
+  std::size_t hash(const int16_t& i) noexcept
   {
     const auto in = static_cast<uint64_t>(i);
     return hash(in);
   }
 
   template<>
-  static std::size_t hash(const uint16_t& i) noexcept
+  std::size_t hash(const uint16_t& i) noexcept
   {
     const auto in = static_cast<uint64_t>(i);
     return hash(in);
   }
 
   template<>
-  static std::size_t hash(const int32_t& i) noexcept
+  std::size_t hash(const int32_t& i) noexcept
   {
     auto x = static_cast<size_t>(i);
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -64,7 +64,7 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const int64_t& i) noexcept
+  std::size_t hash(const int64_t& i) noexcept
   {
     auto x = static_cast<size_t>(i);
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
@@ -74,21 +74,21 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const char& chr) noexcept
+  std::size_t hash(const char& chr) noexcept
   {
     const auto i = static_cast<uint64_t>(chr);
     return hash(i);
   }
 
   template<>
-  static std::size_t hash(const uint8_t& i) noexcept
+  std::size_t hash(const uint8_t& i) noexcept
   {
     const auto in = static_cast<uint64_t>(i);
     return hash(in);
   }
 
   template<>
-  static std::size_t hash(const int8_t& i) noexcept
+  std::size_t hash(const int8_t& i) noexcept
   {
     const auto in = static_cast<uint64_t>(i);
     return hash(in);
@@ -128,7 +128,7 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const details::cstr& str) noexcept
+  std::size_t hash(const details::cstr& str) noexcept
   {
     auto size = std::strlen(str);
     size = size > 64 ? 64 : size;
@@ -143,7 +143,7 @@ namespace colt
   }
 
   template<typename PtrT>
-  static std::size_t hash(const details::ptr<PtrT>& ptr) noexcept
+  std::size_t hash(const details::ptr<PtrT>& ptr) noexcept
   {
     auto x = reinterpret_cast<std::uintptr_t>(ptr);
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
@@ -153,7 +153,7 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const float& flt) noexcept
+  std::size_t hash(const float& flt) noexcept
   {
     auto x = static_cast<size_t>(bit_cast<uint32_t>(flt));
     x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -163,7 +163,7 @@ namespace colt
   }
 
   template<>
-  static std::size_t hash(const double& dbl) noexcept
+  std::size_t hash(const double& dbl) noexcept
   {
     auto x = bit_cast<size_t>(dbl);
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
