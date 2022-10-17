@@ -15,6 +15,9 @@ namespace colt
   /// @tparam T The type to store
   class StableSet
   {
+    static_assert(traits::is_hashable_v<T>, "'T' should be hashable!");
+    static_assert(traits::is_equal_comparable_v<T>, "'T' should implement operator==!");
+    
     using Slot = std::pair<size_t, T*>;
 
     /// @brief Contains meta-data information about the slots of the map
@@ -30,7 +33,7 @@ namespace colt
 
     /// @brief Constructor
     /// @param load_factor The load factor (> 0.0f && < 1.0f)
-    constexpr StableSet(float load_factor = 0.70f) noexcept;      
+    constexpr StableSet(float load_factor = 0.70f) noexcept;
 
     /// @brief Constructor, which reserves 'reserve_size' capacity for objects
     /// @param reserve_size The capacity to reserve

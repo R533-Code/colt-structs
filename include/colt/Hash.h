@@ -5,6 +5,7 @@
 #include <limits>
 #include <cstdint>
 #include <type_traits>
+#include <utility>
 
 #include "details/common.h"
 
@@ -262,6 +263,15 @@ namespace colt
   constexpr std::size_t HashCombine(std::size_t seed, std::size_t v)
   {
     return details::rotl(seed, std::numeric_limits<size_t>::digits / 3) ^ details::distribute(v);
+  }
+
+  template<typename T1, typename T2, typename = std::enable_if_t<traits::is_hashable_v<T1> && traits::is_hashable_v<T2>>>
+  std::size_t hash(const std::pair<T1, T2>& dbl) noexcept
+  {
+    size_t seed = 0;
+    seed = HashCombine(seed, GetHash(dbl.first));
+    seed = HashCombine(seed, GetHash(dbl.second));
+    return seed;
   }
 }
 
