@@ -1207,13 +1207,19 @@ namespace colt
   template<typename T>
   static std::size_t hash(const Vector<T>& view) noexcept
   {
-    return get_hash(ContiguousView<T>(view));
+    return GetHash(view.to_view());
   }
 
   template<typename T, size_t sz>
   static std::size_t hash(const SmallVector<T, sz>& view) noexcept
   {
-    return get_hash(ContiguousView<T>(view));
+    return GetHash(view.to_view());
+  }
+
+  template<typename T, size_t sz>
+  static std::size_t hash(const StaticVector<T, sz>& view) noexcept
+  {
+    return GetHash(view.to_view());
   }
 
 #ifdef COLT_USE_IOSTREAMS
