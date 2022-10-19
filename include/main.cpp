@@ -9,22 +9,17 @@
 #include <colt/Expected.h>
 #include <colt/Map.h>
 #include <colt/List.h>
+#include <colt/Set.h>
 
 using namespace colt;
 
 int main()
 {
-  FlatList<int, 2> hello;
-  hello.push_back(1);
-  hello.push_back(10);
-  hello.push_back(100);
-  hello.push_back(1000);
-
-  auto end = hello.end();
-  for (auto it = hello.begin(); it != end; ++it)
-  {
-    *it = 0;
-  }
-
-  std::cout << hello;
+  StableSet<String> hello;
+  auto a = hello.insert(String{ "Hello" });
+  if (a.first == hello.insert(String{ "Hello" }).first)
+    std::cout << "Working!";
+  else
+    std::cout << "Not Working!";
+  std::cout << '\n' << hello;
 }
