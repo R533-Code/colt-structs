@@ -16,10 +16,12 @@ using namespace colt;
 int main()
 {
   StableSet<String> hello;
-  auto a = hello.insert(String{ "Hello" });
-  if (a.first == hello.insert(String{ "Hello" }).first)
-    std::cout << "Working!";
-  else
-    std::cout << "Not Working!";
+  while (!feof(stdin))
+  {
+    auto str = String::getLine();
+    if (str.is_error())
+      break;
+    hello.insert(str.get_value());
+  }
   std::cout << '\n' << hello;
 }
