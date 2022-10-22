@@ -395,11 +395,11 @@ namespace colt
       /// @brief Register function to call on exit
       /// @param func The function to register
       /// @return True if registering was successful, false if there is no more capacity for registering
-      bool registerOnNullFn(void(*func)(void) noexcept) noexcept
+      bool register_on_null(void(*func)(void) noexcept) noexcept
       {
-        if (register_count.load(std::memory_order_acquire) < register_size)
+        if (auto index = register_count.fetch_add(1) < register_size)
         {
-          reg_array[register_count.fetch_add(1, std::memory_order_release)] = func;
+          reg_array[index] = func;
           return true;
         }
         return false;
@@ -484,7 +484,7 @@ namespace colt
     /// @return True if registering was successful, false if there is no more capacity for registering
     inline bool RegisterOnNULLFn(void(*fn)(void) noexcept) noexcept
     {
-      return details::global_allocator.registerOnNullFn(fn);
+      return details::global_allocator.register_on_null(fn);
     }
 
     namespace details
