@@ -80,8 +80,8 @@ namespace colt
     constexpr size_t advance_prob(size_t prob, size_t mod) noexcept
     {
       //If this asserts then the optimization should be checked
-      assert((prob + 1) % mod == ((prob + 1) * (prob != mod)));
-      return  (prob + 1) * (prob != mod);
+      assert((prob + 1) % mod == ((prob + 1) * (prob + 1 != mod)));
+      return  (prob + 1) * (prob + 1 != mod);
     }
   }
 
