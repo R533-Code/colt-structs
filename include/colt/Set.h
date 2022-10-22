@@ -260,17 +260,16 @@ namespace colt
       {
         //find the key
         Slot* ptr = slots.get_ptr() + i;
-        const size_t key_hash = GetHash(ptr->first);
         size_t prob_index;
         //Rehash the key to get its new index in the new array
-        if (find_key(key_hash, *ptr->second, prob_index, sentinel_metadata, slots))
+        if (find_key(ptr->first, *ptr->second, prob_index, sentinel_metadata, slots))
         {
+          //Set the slot to ACTIVE
+          new_metadata[prob_index] = details::create_active_sentinel(ptr->first);
+          
           //Move destruct
           new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
           ptr->~Slot();
-
-          //Set the slot to ACTIVE
-          new_metadata[prob_index] = details::create_active_sentinel(key_hash);
         }
       }
     }
