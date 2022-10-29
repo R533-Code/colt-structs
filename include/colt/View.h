@@ -123,6 +123,19 @@ namespace colt {
     /// @return Spliced view
     constexpr ContiguousView<T> splice_range(Range range) const noexcept;
 
+    /// @brief Checks if the view contains an object
+    /// @param what The object to search for
+    /// @return True if found
+    constexpr bool contains(traits::copy_if_trivial_t<const T&> what) const noexcept
+    {
+      for (size_t i = 0; i < size; i++)
+      {
+        if (begin_ptr[i] == what)
+          return true;
+      }
+      return false;
+    }
+
     friend constexpr bool operator==(const ContiguousView& a, const ContiguousView& b) noexcept
     {
       if (a.get_size() != b.get_size())
