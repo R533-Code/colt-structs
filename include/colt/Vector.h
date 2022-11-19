@@ -1205,22 +1205,31 @@ namespace colt
   }
 
   template<typename T>
-  static std::size_t hash(const Vector<T>& view) noexcept
+  struct hash<Vector<T>>
   {
-    return GetHash(view.to_view());
-  }
+    constexpr size_t operator()(const Vector<T>& view) const noexcept
+    {
+      return GetHash(view.to_view());
+    }
+  };
+
+  template<typename T>
+  struct hash<SmallVector<T>>
+  {
+    constexpr size_t operator()(const SmallVector<T>& view) const noexcept
+    {
+      return GetHash(view.to_view());
+    }
+  };
 
   template<typename T, size_t sz>
-  static std::size_t hash(const SmallVector<T, sz>& view) noexcept
+  struct hash<StaticVector<T, sz>>
   {
-    return GetHash(view.to_view());
-  }
-
-  template<typename T, size_t sz>
-  static std::size_t hash(const StaticVector<T, sz>& view) noexcept
-  {
-    return GetHash(view.to_view());
-  }
+    constexpr size_t operator()(const StaticVector<T>& view) const noexcept
+    {
+      return GetHash(view.to_view());
+    }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>

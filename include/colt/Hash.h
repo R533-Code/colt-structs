@@ -11,84 +11,122 @@
 
 namespace colt
 {
-  static std::size_t hash(const bool& b) noexcept
-  {
-    return b ? 1231 : 1237;
-  }
+  template<typename T>
+  struct hash {};
 
-  static std::size_t hash(const uint32_t& i) noexcept
+  template<>
+  struct hash<bool>
   {
-    size_t x = i;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-  }
+    constexpr size_t operator()(bool b) const noexcept
+    {
+      return b ? 1231 : 1237;
+    }
+  };
 
-  static std::size_t hash(const uint64_t& i) noexcept
+  template<>
+  struct hash<uint32_t>
   {
-    size_t x = i;
-    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-    x = x ^ (x >> 31);
-    return x;
-  }
+    constexpr size_t operator()(uint32_t i) const noexcept
+    {
+      size_t x = i;
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = (x >> 16) ^ x;
+      return x;
+    }
+  };
 
-  static std::size_t hash(const int16_t& i) noexcept
+  template<>
+  struct hash<uint64_t>
   {
-    const auto in = static_cast<uint64_t>(i);
-    return hash(in);
-  }
+    constexpr size_t operator()(uint64_t i) const noexcept
+    {
+      size_t x = i;
+      x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+      x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+      x = x ^ (x >> 31);
+      return x;      
+    }
+  };
 
-  static std::size_t hash(const uint16_t& i) noexcept
+  template<>
+  struct hash<int16_t>
   {
-    const auto in = static_cast<uint64_t>(i);
-    return hash(in);
-  }
+    constexpr size_t operator()(int16_t i) const noexcept
+    {
+      const auto in = static_cast<uint64_t>(i);
+      return colt::hash<uint64_t>{}(in);
+    }
+  };
 
-  static std::size_t hash(const int32_t& i) noexcept
+  template<>
+  struct hash<uint16_t>
   {
-    auto x = static_cast<size_t>(i);
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-  }
+    constexpr size_t operator()(uint16_t i) const noexcept
+    {
+      const auto in = static_cast<uint64_t>(i);
+      return hash<uint64_t>{}(in);
+    }
+  };
 
-  static std::size_t hash(const int64_t& i) noexcept
+  template<>
+  struct hash<int32_t>
   {
-    auto x = static_cast<size_t>(i);
-    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-    x = x ^ (x >> 31);
-    return x;
-  }
+    constexpr size_t operator()(int32_t i) const noexcept
+    {
+      auto x = static_cast<size_t>(i);
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = (x >> 16) ^ x;
+      return x;
+    }
+  };
 
-  static std::size_t hash(const char& chr) noexcept
+  template<>
+  struct hash<int64_t>
   {
-    const auto i = static_cast<uint64_t>(chr);
-    return hash(i);
-  }
+    constexpr size_t operator()(int64_t i) const noexcept
+    {
+      auto x = static_cast<size_t>(i);
+      x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+      x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+      x = x ^ (x >> 31);
+      return x;
+    }
+  };
 
-  static std::size_t hash(const uint8_t& i) noexcept
+  template<>
+  struct hash<char>
   {
-    const auto in = static_cast<uint64_t>(i);
-    return hash(in);
-  }
+    constexpr size_t operator()(char i) const noexcept
+    {
+      const auto in = static_cast<uint64_t>(i);
+      return hash<uint64_t>{}(in);
+    }
+  };
 
-  static std::size_t hash(const int8_t& i) noexcept
+  template<>
+  struct hash<uint8_t>
   {
-    const auto in = static_cast<uint64_t>(i);
-    return hash(in);
-  }
+    constexpr size_t operator()(uint8_t i) const noexcept
+    {
+      const auto in = static_cast<uint64_t>(i);
+      return hash<uint64_t>{}(in);
+    }
+  };
+
+  template<>
+  struct hash<int8_t>
+  {
+    constexpr size_t operator()(int8_t i) const noexcept
+    {
+      const auto in = static_cast<uint64_t>(i);
+      return hash<uint64_t>{}(in);
+    }
+  };
 
   namespace details
   {
-    using cstr = const char*;
-
-    template<typename T>
-    using ptr = T*;
-
     template<typename T>
     constexpr T xorshift(T n, int i) {
       return n ^ (n >> i);
@@ -115,47 +153,62 @@ namespace colt
     }       
   }
 
-  static std::size_t hash(const details::cstr& str) noexcept
+  template<>
+  struct hash<const char*>
   {
-    auto size = std::strlen(str);
-    size = size > 64 ? 64 : size;
-    
-    uint64_t hash = 0xCBF29CE484222325;
-    for (size_t i = 0; i < size; i++)
+    constexpr size_t operator()(const char* str) const noexcept
     {
-      hash ^= (uint8_t)str[i];
-      hash *= 0x100000001B3; //FNV prime
+      auto size = std::strlen(str);
+      size = size > 64 ? 64 : size;
+
+      uint64_t hash = 0xCBF29CE484222325;
+      for (size_t i = 0; i < size; i++)
+      {
+        hash ^= (uint8_t)str[i];
+        hash *= 0x100000001B3; //FNV prime
+      }
+      return hash;
     }
-    return hash;
-  }
+  };
 
-  template<typename PtrT>
-  static std::size_t hash(const details::ptr<PtrT>& ptr) noexcept
+  template<typename T>
+  struct hash<T*>
   {
-    auto x = reinterpret_cast<std::uintptr_t>(ptr);
-    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-    x = x ^ (x >> 31);
-    return x;
-  }
+    constexpr size_t operator()(T* ptr) const noexcept
+    {
+      auto x = reinterpret_cast<std::uintptr_t>(ptr);
+      x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+      x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+      x = x ^ (x >> 31);
+      return x;
+    }
+  };
 
-  static std::size_t hash(const float& flt) noexcept
+  template<>
+  struct hash<float>
   {
-    auto x = static_cast<size_t>(bit_cast<uint32_t>(flt));
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = ((x >> 16) ^ x) * 0x45d9f3b;
-    x = (x >> 16) ^ x;
-    return x;
-  }
+    constexpr size_t operator()(float flt) const noexcept
+    {
+      auto x = static_cast<size_t>(bit_cast<uint32_t>(flt));
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = ((x >> 16) ^ x) * 0x45d9f3b;
+      x = (x >> 16) ^ x;
+      return x;
+    }
+  };
 
-  static std::size_t hash(const double& dbl) noexcept
+  template<>
+  struct hash<double>
   {
-    auto x = bit_cast<size_t>(dbl);
-    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
-    x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
-    x = x ^ (x >> 31);
-    return x;
-  }  
+    constexpr size_t operator()(double dbl) const noexcept
+    {
+      auto x = bit_cast<size_t>(dbl);
+      x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
+      x = (x ^ (x >> 27)) * 0x94d049bb133111eb;
+      x = x ^ (x >> 31);
+      return x;
+    }
+  };
 
   namespace traits
   {
@@ -195,7 +248,7 @@ namespace colt
     /// @brief Check if a type implements a colt::hash specialization
     /// @tparam T The type to check for
     /// @tparam  SFINAE helper
-    struct is_colt_hashable<T, std::void_t<decltype(colt::hash(std::declval<T>()))>>
+    struct is_colt_hashable<T, std::void_t<decltype(std::declval<colt::hash<T>>()(std::declval<T>()))>>
     {
       static constexpr bool value = true;
     };
@@ -229,7 +282,7 @@ namespace colt
     static_assert(traits::is_hashable_v<T>,
       "Type does not implement colt::hash or std::hash!");
     if constexpr (traits::is_colt_hashable_v<T>)
-      return hash(obj);
+      return colt::hash<T>{}(obj);
     else
       return std::hash<T>{}(obj);
   }
@@ -249,14 +302,17 @@ namespace colt
     return details::rotl(seed, std::numeric_limits<size_t>::digits / 3) ^ details::distribute(v);
   }
 
-  template<typename T1, typename T2, typename = std::enable_if_t<traits::is_hashable_v<T1> && traits::is_hashable_v<T2>>>
-  static std::size_t hash(const std::pair<T1, T2>& dbl) noexcept
+  template<typename T1, typename T2>
+  struct hash<std::pair<T1, T2>>
   {
-    size_t seed = 0;
-    seed = HashCombine(seed, GetHash(dbl.first));
-    seed = HashCombine(seed, GetHash(dbl.second));
-    return seed;
-  }
+    constexpr size_t operator()(const std::pair<T1, T2>& dbl) const noexcept
+    {
+      size_t seed = 0;
+      seed = HashCombine(seed, GetHash(dbl.first));
+      seed = HashCombine(seed, GetHash(dbl.second));
+      return seed;
+    }
+  };
 }
 
 #endif //!HG_COLT_HASH

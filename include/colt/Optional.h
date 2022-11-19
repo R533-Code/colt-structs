@@ -282,13 +282,16 @@ namespace colt
   }
 
   template<typename T>
-  std::size_t hash(const Optional<T>& opt) noexcept
+  struct hash<Optional<T>>
   {
-    static_assert(traits::is_hashable_v<T>,
-      "Type of Optional should be hashable!");
+    constexpr size_t operator()(const Optional<T>& opt) const noexcept
+    {
+      static_assert(traits::is_hashable_v<T>,
+        "Type of Optional should be hashable!");
 
-    return opt.is_none() ? 18446744073709548283 : get_hash(opt.get_value());
-  }
+      return opt.is_none() ? 18446744073709548283 : GetHash(opt.get_value());
+    }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>

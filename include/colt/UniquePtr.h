@@ -177,13 +177,16 @@ namespace colt
   }
 
   template<typename T>
-  static std::size_t hash(const UniquePtr<T>& ptr) noexcept
+  struct hash<UniquePtr<T>>
   {
-    static_assert(traits::is_hashable_v<T>, "Type of UniquePtr should be hashable!");
-    if (ptr)
-      return GetHash(*ptr);
-    return 18446744073709548283;
-  }
+    constexpr size_t operator()(const UniquePtr<T>& ptr) const noexcept
+    {
+      static_assert(traits::is_hashable_v<T>, "Type of UniquePtr should be hashable!");
+      if (ptr)
+        return GetHash(*ptr);
+      return 18446744073709548283;
+    }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>

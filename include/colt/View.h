@@ -236,20 +236,23 @@ namespace colt {
   }
 
   template<typename T>
-  static std::size_t hash(const ContiguousView<T>& view) noexcept
+  struct hash<ContiguousView<T>>
   {
-    static_assert(traits::is_hashable_v<T>,
-      "Type of ContiguousView should be hashable!");
+    constexpr size_t operator()(const ContiguousView<T>& view) const noexcept
+    {
+      static_assert(traits::is_hashable_v<T>,
+        "Type of ContiguousView should be hashable!");
 
-    auto size = view.get_size();
-    size = size > 64 ? 64 : size;
+      auto size = view.get_size();
+      size = size > 64 ? 64 : size;
 
-    std::size_t seed = view.get_size();
-    for (size_t i = 0; i < size; i++)
-      seed ^= GetHash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    
-    return seed;
-  }
+      std::size_t seed = view.get_size();
+      for (size_t i = 0; i < size; i++)
+        seed ^= GetHash(view[i]) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+      return seed;
+    }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   template<typename T>

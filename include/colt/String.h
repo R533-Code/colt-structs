@@ -391,33 +391,41 @@ namespace colt
     return { View::begin(), View::end() };
   }
 
-  static std::size_t hash(const StringViewOf<char>& str) noexcept
+  template<>
+  struct hash<StringViewOf<char>>
   {
-    auto size = str.get_size();
-    size = size > 64 ? 64 : size;
-
-    uint64_t hash = 0xCBF29CE484222325;
-    for (size_t i = 0; i < size; i++)
+    constexpr size_t operator()(StringViewOf<char> str) const noexcept
     {
-      hash ^= (uint8_t)str[i];
-      hash *= 0x100000001B3; //FNV prime
-    }
-    return hash;
-  }
+      auto size = str.get_size();
+      size = size > 64 ? 64 : size;
 
-  static std::size_t hash(const StringOf<char>& str) noexcept
+      uint64_t hash = 0xCBF29CE484222325;
+      for (size_t i = 0; i < size; i++)
+      {
+        hash ^= (uint8_t)str[i];
+        hash *= 0x100000001B3; //FNV prime
+      }
+      return hash;
+    }
+  };
+
+  template<>
+  struct hash<StringOf<char>>
   {
-    auto size = str.get_size();
-    size = size > 64 ? 64 : size;
-
-    uint64_t hash = 0xCBF29CE484222325;
-    for (size_t i = 0; i < size; i++)
+    size_t operator()(StringOf<char> str) const noexcept
     {
-      hash ^= (uint8_t)str[i];
-      hash *= 0x100000001B3; //FNV prime
+      auto size = str.get_size();
+      size = size > 64 ? 64 : size;
+
+      uint64_t hash = 0xCBF29CE484222325;
+      for (size_t i = 0; i < size; i++)
+      {
+        hash ^= (uint8_t)str[i];
+        hash *= 0x100000001B3; //FNV prime
+      }
+      return hash;
     }
-    return hash;
-  }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
 

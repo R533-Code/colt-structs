@@ -540,15 +540,18 @@ namespace colt
   }
 
   template<typename Exp, typename Err>
-  std::size_t hash(const Expected<Exp, Err>& exp) noexcept
+  struct hash<Expected<Exp, Err>>
   {
-    static_assert(traits::is_hashable_v<Exp> && traits::is_hashable_v<Err>,
-      "Both types should be hashable in order to hash Expected!");
-    if (exp.is_error())
-      return get_hash(exp.get_error());
-    else
-      return get_hash(exp.get_value());
-  }
+    constexpr size_t operator()(const Expected<Exp, Err>& exp) const noexcept
+    {
+      static_assert(traits::is_hashable_v<Exp> && traits::is_hashable_v<Err>,
+        "Both types should be hashable in order to hash Expected!");
+      if (exp.is_error())
+        return get_hash(exp.get_error());
+      else
+        return get_hash(exp.get_value());
+    }
+  };
 
 #ifdef COLT_USE_IOSTREAMS
   template<typename ExpT, typename ErrT>
