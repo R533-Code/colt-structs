@@ -332,8 +332,9 @@ namespace colt
     if (file == nullptr)
       return { Error, StringError::INVALID_PATH };
     
-    while (!feof(file))
-      content.append(static_cast<char>(std::fgetc(file)));
+    char get_c;
+    while ((get_c = std::fgetc(file)) != EOF)
+      content.append(static_cast<char>(get_c));
     std::fclose(file);
 
     return content;
@@ -349,8 +350,9 @@ namespace colt
 
     StringOf<CharT> content;
 
-    while (!std::feof(from))
-      content.append(static_cast<char>(std::fgetc(from)));
+    char get_c;
+    while ((get_c = std::fgetc(from)) != EOF)
+      content.append(static_cast<char>(get_c));
 
     return content;
   }
