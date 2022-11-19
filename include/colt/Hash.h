@@ -156,7 +156,7 @@ namespace colt
   template<>
   struct hash<const char*>
   {
-    constexpr size_t operator()(const char* str) const noexcept
+    size_t operator()(const char* str) const noexcept
     {
       auto size = std::strlen(str);
       size = size > 64 ? 64 : size;
@@ -174,7 +174,7 @@ namespace colt
   template<typename T>
   struct hash<T*>
   {
-    constexpr size_t operator()(T* ptr) const noexcept
+    size_t operator()(T* ptr) const noexcept
     {
       auto x = reinterpret_cast<std::uintptr_t>(ptr);
       x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;
@@ -187,7 +187,7 @@ namespace colt
   template<>
   struct hash<float>
   {
-    constexpr size_t operator()(float flt) const noexcept
+    size_t operator()(float flt) const noexcept
     {
       auto x = static_cast<size_t>(bit_cast<uint32_t>(flt));
       x = ((x >> 16) ^ x) * 0x45d9f3b;
@@ -200,7 +200,7 @@ namespace colt
   template<>
   struct hash<double>
   {
-    constexpr size_t operator()(double dbl) const noexcept
+    size_t operator()(double dbl) const noexcept
     {
       auto x = bit_cast<size_t>(dbl);
       x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9;

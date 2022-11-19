@@ -1225,7 +1225,7 @@ namespace colt
   template<typename T, size_t sz>
   struct hash<StaticVector<T, sz>>
   {
-    constexpr size_t operator()(const StaticVector<T>& view) const noexcept
+    constexpr size_t operator()(const StaticVector<T, sz>& view) const noexcept
     {
       return GetHash(view.to_view());
     }
