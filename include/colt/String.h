@@ -282,7 +282,7 @@ namespace colt
   template<typename CharT>
   Expected<StringOf<CharT>, StringError> StringOf<CharT>::getLine(FILE* from) noexcept
   {
-    StringOf<CharT> str;
+    StringOf<CharT> str;    
 
     for (;;)
     {
@@ -292,15 +292,16 @@ namespace colt
       else
         break;
     }
-    if (std::feof(from))
+    if (std::feof(from) && str.is_empty())
       return { Error, StringError::EOF_HIT };
+
     return str;
   }
 
   template<typename CharT>
   Expected<StringOf<CharT>, StringError> StringOf<CharT>::getLine(traits::WithNULT, FILE* from) noexcept
   {    
-    if (auto estr = StringOf::getLine(from); estr.isError())
+    if (auto estr = StringOf::getLine(from); estr.is_error())
       return estr; //Propagate the error
     else
     {
@@ -335,6 +336,11 @@ namespace colt
     char get_c;
     while ((get_c = std::fgetc(file)) != EOF)
       content.append(static_cast<char>(get_c));
+    if (std::feof(file) && content.is_empty())
+    {
+      std::fclose(file);
+      return { Error, StringError::EOF_HIT };
+    }
     std::fclose(file);
 
     return content;
@@ -344,15 +350,14 @@ namespace colt
   inline Expected<StringOf<CharT>, StringError> StringOf<CharT>::getFileContent(FILE* from) noexcept
   {
     assert(from && "FILE* cannot be NULL!");
-    
-    if (std::feof(from))
-      return { Error, StringError::EOF_HIT };
-
     StringOf<CharT> content;
 
     char get_c;
     while ((get_c = std::fgetc(from)) != EOF)
       content.append(static_cast<char>(get_c));
+
+    if (std::feof(from) && content.is_empty())
+      return { Error, StringError::EOF_HIT };
 
     return content;
   }
