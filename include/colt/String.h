@@ -144,12 +144,14 @@ namespace colt
 
     /// @brief Get a line from a file (by default 'stdin').
     /// This returns a non NUL-terminated StringOf.
+    /// Returns StringError::EOF_HIT if opened file was EOF.
     /// The new-line is not included, but is consumed.
     /// @param from The FILE from which to read the characters
     /// @return StringOf over the line
     static Expected<StringOf, StringError> getLine(FILE* from = stdin) noexcept;
     /// /// @brief Get a line from a file (by default 'stdin'), and NUL terminates the StringOf.
     /// The new-line is not included, but is consumed.
+    /// Returns StringError::EOF_HIT if opened file was EOF.
     /// @param  Tag object (WithNUL)
     /// @param from The FILE from which to read the characters
     /// @return StringOf over the line 
@@ -160,12 +162,13 @@ namespace colt
     /// the size of the file to allocate once.
     /// Returns StringError::INVALID_PATH if the path is not valid or the OS was not able to open the file.
     /// Returns StringError::CANNOT_READ_ALL if a call to 'ftell/fseek' fails.
+    /// Returns StringError::EOF_HIT if opened file was EOF.
     /// @param path The file path
     /// @return StringOf containing the content of 'from' or StringError
     static Expected<StringOf, StringError> getFileContent(const char* path) noexcept;
     /// @brief Returns a StringOf containing the content of the file 'from'.
     /// Repeatedly calls 'fgetc' on from and appends to the StringOf.
-    /// Can return a StringError::EOF_HIT if 'feof(from)' returns true before the first 'fgetc' call.
+    /// Can return a StringError::EOF_HIT if 'feof(from)' returns true.
     /// @param from The file on which to repeatedly call 'fgetc'
     /// @return StringOf containing the content of 'from' or StringError::EOF_HIT
     static Expected<StringOf, StringError> getFileContent(FILE* from) noexcept;
