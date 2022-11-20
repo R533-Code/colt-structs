@@ -2,6 +2,7 @@
 #define HG_COLT_VIEW
 
 #include "details/common.h"
+#include "Hash.h"
 #include "Iterators.h"
 
 namespace colt {
