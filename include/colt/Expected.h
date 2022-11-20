@@ -450,29 +450,29 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy& Expected<ExpectedTy, ErrorTy>::get_error() & noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
-    return expected;
+    assert(!is_error_v && "Expected did not contain an error!");
+    return error;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&> Expected<ExpectedTy, ErrorTy>::get_error() const& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
-    return expected;
+    assert(!is_error_v && "Expected did not contain an error!");
+    return error;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy&& Expected<ExpectedTy, ErrorTy>::get_error() && noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
-    return std::move(expected);
+    assert(!is_error_v && "Expected did not contain an error!");
+    return std::move(error);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&&> Expected<ExpectedTy, ErrorTy>::get_error() const&& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
-    return expected;
+    assert(!is_error_v && "Expected did not contain an error!");
+    return error;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
