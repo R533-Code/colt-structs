@@ -16,7 +16,7 @@ namespace colt
   /// @tparam Value The Value that is accessed through the Key
   class Map
   {
-    static_assert(!traits::is_tag_v<Key> && traits::is_tag_v<Value>, "Cannot use tag struct as typename!");
+    static_assert(!traits::is_tag_v<Key> && !traits::is_tag_v<Value>, "Cannot use tag struct as typename!");
     static_assert(traits::is_hashable_v<Key>, "Key of a Map should be hashable!");
     static_assert(traits::is_equal_comparable_v<Key>, "Key of a Map should implement operator==!");
 
