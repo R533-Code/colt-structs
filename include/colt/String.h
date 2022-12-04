@@ -28,6 +28,7 @@ namespace colt
     using View = ContiguousView<CharT>;
 
   public:
+
     /// @brief Constructs an empty StringViewOf
     constexpr StringViewOf() noexcept
       : View(nullptr, nullptr) {}
@@ -59,6 +60,22 @@ namespace colt
     /// The characters that are considered spaces are '\n', ' ', '\v', '\t'.
     constexpr void strip_spaces() noexcept;    
     
+    static constexpr size_t npos = std::numeric_limits<size_t>::max();
+
+    /// @brief Finds first occurrence of 'chr' and returns its index, or npos if not found
+    /// @param chr The character to search for
+    /// @param offset The offset from which to begin to search
+    /// @return The index of 'chr' or npos if not found
+    constexpr size_t find(CharT chr, size_t offset = 0) const noexcept
+    {
+      for (size_t i = offset; i < this->get_size(); i++)
+      {
+        if (this->get_data()[i] == chr)
+          return i;
+      }
+      return npos;
+    }
+
     /// @brief Conversion operator
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;
