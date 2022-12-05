@@ -40,6 +40,12 @@ namespace colt
     /// @param load_factor The load factor (> 0.0f && < 1.0f)
     constexpr StableSet(size_t reserve_size, float load_factor = 0.70f) noexcept;      
 
+    constexpr StableSet(const StableSet&) = delete;
+
+    /// @brief Move constructor
+    /// @param set The set to move
+    constexpr StableSet(StableSet&& set) noexcept;
+
     /// @brief Destructor of the StableSet
     ~StableSet()
       noexcept(std::is_nothrow_destructible_v<T>);    
@@ -145,6 +151,14 @@ namespace colt
   {
     assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
   }
+
+  template<typename T, size_t obj_per_node>
+  constexpr StableSet<T, obj_per_node>::StableSet(StableSet&& set) noexcept
+    : sentinel_metadata(std::move(set.sentinel_metadata))
+    , slots(exchange(set.slots, {}))
+    , list(std::move(set.list))
+    , load_factor(set.load_factor)
+  {}
 
   template<typename T, size_t obj_per_node>
   StableSet<T, obj_per_node>::~StableSet()

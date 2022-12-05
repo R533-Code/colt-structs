@@ -104,6 +104,12 @@ namespace colt
     /// @param node_reserve_count The count of nodes to preallocate
     constexpr FlatList(size_t node_reserve_count) noexcept;    
 
+    constexpr FlatList(const FlatList&) = delete;
+
+    /// @brief Move constructor
+    /// @param list To move
+    constexpr FlatList(FlatList&& list) noexcept;
+
     /// @brief Destructor, frees any used resources
     ~FlatList()
       noexcept(std::is_nothrow_destructible_v<T>);    
@@ -210,6 +216,12 @@ namespace colt
     for (size_t i = 0; i < node_reserve_count; i++)
       create_and_append_node();
   }
+
+  template<typename T, size_t obj_per_node>
+  constexpr FlatList<T, obj_per_node>::FlatList(FlatList&& list) noexcept
+    : head(exchange(list.head, nullptr)), tail(exchange(list.tail, nullptr))
+    , last_active_node(exchange(list.last_active_node, nullptr)), size(exchange(list.size, 0))
+  {}
 
   template<typename T, size_t obj_per_node>
   FlatList<T, obj_per_node>::~FlatList() noexcept(std::is_nothrow_destructible_v<T>)

@@ -102,6 +102,12 @@ namespace colt
     /// @param reserve_size The count of object to reserve for
     constexpr Map(size_t reserve_size, float load_factor = 0.70f) noexcept;
 
+    constexpr Map(const Map&) = delete;
+
+    /// @brief Move constructs a map
+    /// @param mp The map to move
+    constexpr Map(Map&& mp) noexcept;
+
     /// @brief Destructs a Map and its active elements
     ~Map()
       noexcept(std::is_nothrow_destructible_v<Key>
@@ -327,6 +333,13 @@ namespace colt
   {
     assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
   }
+
+  template<typename Key, typename Value>
+  constexpr Map<Key, Value>::Map(Map&& mp) noexcept
+    : sentinel_metadata(std::move(mp.sentinel_metadata))
+    , slots(exchange(mp.slots, {}))
+    , load_factor(load_factor)
+  {}
 
   template<typename Key, typename Value>
   Map<Key, Value>::~Map() noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>)
