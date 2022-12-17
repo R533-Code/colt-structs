@@ -337,7 +337,7 @@ namespace colt
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::Map(Map&& mp) noexcept
     : sentinel_metadata(std::move(mp.sentinel_metadata))
-    , slots(exchange(mp.slots, {}))
+    , slots(colt::exchange(mp.slots, {}))
     , load_factor(load_factor)
   {}
 
