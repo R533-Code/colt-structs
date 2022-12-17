@@ -10,18 +10,18 @@
 #include <colt/Map.h>
 #include <colt/List.h>
 #include <colt/Set.h>
+#include <colt/Iterators.h>
+#include <colt/Enum.h>
 
 using namespace colt;
 
+ #define OS_ENUM(XX) XX(Windows, 10)XX(Linux, 30)XX(MacOs, 32)XX(Android, 40)
+ 
+DECLARE_VALUE_ENUM(OsEnum, uint8_t, OS_ENUM);
+
 int main()
 {
-  StableSet<String> hello;
-  while (!feof(stdin))
-  {
-    auto str = String::getLine();
-    if (str.is_error())
-      break;
-    hello.insert(str.get_value());
-  }
-  std::cout << '\n' << hello;
+	String a = String{ "Hello world!" };
+	for (auto i : a.to_iter() | iter::adapt)
+		std::cout << i << ' ';
 }
