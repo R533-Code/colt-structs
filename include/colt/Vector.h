@@ -91,6 +91,10 @@ namespace colt
     /// @return Const iterator to the end
     constexpr ContiguousIterator<const T> end() const noexcept { return blk.get_ptr() + size; }
 
+    /// @brief Returns a colt iterator over the view
+    /// @return Iterator over the whole view
+    constexpr iter::ContiguousView<const T> to_iter() const noexcept { return { blk.get_ptr(), size }; }
+
     /// @brief Returns a pointer to the beginning of the data
     /// @return Const pointer to the beginning of the data
     constexpr const T* get_data() const noexcept { return blk.get_ptr(); }
@@ -326,6 +330,10 @@ namespace colt
     /// @return Const iterator to the end
     constexpr ContiguousIterator<const T> end() const noexcept { return get_current_ptr() + size; }
 
+    /// @brief Returns a colt iterator over the view
+    /// @return Iterator over the whole view
+    constexpr iter::ContiguousView<const T> to_iter() const noexcept { return { get_current_ptr(), size }; }
+
     /// @brief Returns a pointer to the beginning of the data
     /// @return Const pointer to the beginning of the data
     constexpr const T* get_data() const noexcept { return get_current_ptr(); }
@@ -525,6 +533,10 @@ namespace colt
 
     constexpr ContiguousIterator<const T> begin() const noexcept { return get_ptr(); }
     constexpr ContiguousIterator<const T> end() const noexcept { return get_ptr() + size; }
+
+    /// @brief Returns a colt iterator over the view
+    /// @return Iterator over the whole view
+    constexpr iter::ContiguousView<const T> to_iter() const noexcept { return { get_ptr(), size }; }
 
     constexpr const T* get_data() const noexcept { return get_ptr(); }
     constexpr T* get_data() noexcept { return get_ptr(); }
