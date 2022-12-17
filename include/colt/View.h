@@ -65,6 +65,10 @@ namespace colt {
     /// @return Iterator to the end of the view
     constexpr ContiguousIterator<const T> end() const noexcept { return begin_ptr + size; }
 
+    /// @brief Returns a colt iterator over the view
+    /// @return Iterator over the whole view
+    constexpr iter::ContiguousView<const T> to_iter() const noexcept { return { begin_ptr, size }; }
+
     /// @brief Returns a pointer to the beginning of the view.
     /// @return Pointer to the beginning of the view
     constexpr const T* get_data() const noexcept { return begin_ptr; }
