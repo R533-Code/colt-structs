@@ -14,6 +14,8 @@
 #include <limits>
 #include <memory>
 
+#include <algorithm>
+
 #ifndef COLT_NO_DEBUG
   #if defined(NDEBUG) || defined(_DEBUG)
     /// @brief Defined if the library is compiled with assertions on.
@@ -307,7 +309,7 @@ namespace colt {
     COLT_HAS_MEMBER(get_data);
     COLT_HAS_MEMBER(get_size);
     COLT_HAS_MEMBER(is_empty);
-    COLT_HAS_MEMBER(end);    
+    COLT_HAS_MEMBER(end);   
     COLT_HAS_MEMBER(begin);
     COLT_HAS_MEMBER(allocate);
     COLT_HAS_MEMBER(deallocate);
@@ -409,21 +411,6 @@ namespace colt {
     /// @brief Short hand for is_owning_allocator<T>::value
     /// @tparam T The type to check
     static constexpr bool is_owning_allocator_v = is_owning_allocator<T>::value;
-
-    /********** ITERATORS **********/
-
-    template<typename T>
-    /// @brief Check if a type provides a 'begin' and 'end' method
-    /// @tparam T The type to check
-    struct is_iterable
-    {
-      static constexpr bool value = has_begin_v<T> && has_end_v<T>;
-    };
-
-    template<typename T>
-    /// @brief Short hand for is_iterable<T>::value
-    /// @tparam T The type to check
-    static constexpr bool is_iterable_v = is_iterable<T>::value;
     
     /********** BY VALUE **********/
 
