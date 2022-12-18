@@ -283,6 +283,7 @@ using members_type = type_list<void>;\
 
 namespace colt
 {
+  DECLARE_BUILTIN(bool);
   DECLARE_BUILTIN(char);
   DECLARE_BUILTIN(i8);
   DECLARE_BUILTIN(u8);
