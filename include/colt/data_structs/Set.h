@@ -1,9 +1,9 @@
 #ifndef HG_COLT_SET
 #define HG_COLT_SET
 
-#include "colt/details/linear_probing.h"
-#include "colt/Hash.h"
-#include "colt/List.h"
+#include "../details/linear_probing.h"
+#include "../utility/Hash.h"
+#include "../data_structs/List.h"
 
 namespace colt
 {

@@ -4,8 +4,8 @@
 #include <utility>
 #include <iterator>
 
-#include "colt/details/linear_probing.h"
-#include "Hash.h"
+#include "../details/linear_probing.h"
+#include "../utility/Hash.h"
 #include "Vector.h"
 
 namespace colt

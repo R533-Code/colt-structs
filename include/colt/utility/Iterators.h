@@ -1,8 +1,8 @@
 #ifndef HG_COLT_ITERATORS
 #define HG_COLT_ITERATORS
 
-#include "details/common.h"
-#include "Optional.h"
+#include "../details/common.h"
+#include "../data_structs/Optional.h"
 
 namespace colt
 {

@@ -5,7 +5,7 @@
 #ifndef HG_COLT_CHAR
 #define HG_COLT_CHAR
 
-#include "../View.h"
+#include "../data_structs/View.h"
 
 /// @brief Contains character usage helpers
 namespace colt

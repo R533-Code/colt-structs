@@ -1,8 +1,8 @@
 #ifndef HG_COLT_ENUM
 #define HG_COLT_ENUM
 
-#include "Iterators.h"
-#include "View.h"
+#include "../utility/Iterators.h"
+#include "../data_structs/View.h"
 #include "Reflection.h"
 
 namespace colt::iter

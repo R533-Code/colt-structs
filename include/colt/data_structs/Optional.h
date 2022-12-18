@@ -1,7 +1,7 @@
 #ifndef HG_COLT_OPTIONAL
 #define HG_COLT_OPTIONAL
 
-#include "details/common.h"
+#include "../details/common.h"
 
 namespace colt
 {

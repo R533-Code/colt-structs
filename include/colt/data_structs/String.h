@@ -1,10 +1,10 @@
 #ifndef HG_COLT_STRING
 #define HG_COLT_STRING
 
-#include "details/char.h"
+#include "../details/char.h"
 #include "Vector.h"
 #include "Expected.h"
-#include "Hash.h"
+#include "../utility/Hash.h"
 
 namespace colt
 {

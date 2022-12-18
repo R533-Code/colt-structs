@@ -1,7 +1,7 @@
 #ifndef HG_COLT_LIST
 #define HG_COLT_LIST
 
-#include <colt/Vector.h>
+#include "Vector.h"
 
 namespace colt
 {

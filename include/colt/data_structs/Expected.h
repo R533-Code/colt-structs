@@ -1,8 +1,8 @@
 #ifndef HG_COLT_EXPECTED
 #define HG_COLT_EXPECTED
 
-#include "details/common.h"
-#include "Hash.h"
+#include "../details/common.h"
+#include "../utility/Hash.h"
 
 namespace colt
 {

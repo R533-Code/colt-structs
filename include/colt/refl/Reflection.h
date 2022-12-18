@@ -1,8 +1,8 @@
 #ifndef HG_COLT_REFLECTION
 #define HG_COLT_REFLECTION
 
-#include "details/common.h"
-#include "Typedefs.h"
+#include "../details/common.h"
+#include "../utility/Typedefs.h"
 
 namespace colt::traits
 {

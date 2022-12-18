@@ -1,17 +1,17 @@
 #include <cstdlib>
 
 #define COLT_USE_IOSTREAMS
-#include <colt/View.h>
-#include <colt/Vector.h>
-#include <colt/UniquePtr.h>
-#include <colt/String.h>
-#include <colt/Optional.h>
-#include <colt/Expected.h>
-#include <colt/Map.h>
-#include <colt/List.h>
-#include <colt/Set.h>
-#include <colt/Iterators.h>
-#include <colt/Enum.h>
+#include <colt/data_structs/View.h>
+#include <colt/data_structs/Vector.h>
+#include <colt/data_structs/UniquePtr.h>
+#include <colt/data_structs/String.h>
+#include <colt/data_structs/Optional.h>
+#include <colt/data_structs/Expected.h>
+#include <colt/data_structs/Map.h>
+#include <colt/data_structs/List.h>
+#include <colt/data_structs/Set.h>
+#include <colt/utility/Iterators.h>
+#include <colt/refl/Enum.h>
 
 using namespace colt;
 using namespace colt::refl;

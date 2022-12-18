@@ -7,7 +7,7 @@
 #include <type_traits>
 #include <utility>
 
-#include "details/common.h"
+#include "../details/common.h"
 
 namespace colt
 {

@@ -1,9 +1,9 @@
 #ifndef HG_COLT_VIEW
 #define HG_COLT_VIEW
 
-#include "details/common.h"
-#include "Hash.h"
-#include "Iterators.h"
+#include "../details/common.h"
+#include "../utility/Hash.h"
+#include "../utility/Iterators.h"
 
 namespace colt {
   
