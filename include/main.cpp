@@ -25,4 +25,5 @@ int main()
 	std::cout << info<const u32&>::name << '\n';
 	std::cout << info<const u32* const>::name << '\n';
 	std::cout << info<u32>::name << '\n';
+	std::cout << info<OsEnum>::name;
 }
