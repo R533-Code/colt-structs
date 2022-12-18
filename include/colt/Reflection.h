@@ -6,12 +6,13 @@
 #include <array>
 #include "Typedefs.h"
 
-namespace colt
+namespace colt::traits
 {
   template <StringView const&... Strs>
+  /// @brief Concatenates StringView at compile time
   struct join
   {
-    // Join all strings into a single std::array of chars
+    /// @brief Concatenate all the StringView and returns an array storing the result
     static constexpr auto impl() noexcept
     {
       constexpr std::size_t len = (Strs.get_size() + ... + 0);
@@ -23,13 +24,14 @@ namespace colt
       arr[len] = 0;
       return arr;
     }
-    // Give the joined string static storage
+    /// @brief Array of characters representing concatenated string
     static constexpr auto arr = impl();
-    // View as a std::string_view
+    /// @brief Concatenation result
     static constexpr StringView value{ arr.data(), arr.data() + arr.size() - 1 };
-  };
-  // Helper to get the value out
+  };  
+
   template <StringView const&... Strs>
+  /// @brief Short-hand for join<...>::value
   static constexpr auto join_v = join<Strs...>::value;
 
 }
@@ -97,6 +99,9 @@ namespace colt::refl
     /// @brief True if the reflected data is describing a pointer
     /// @return false (non-specialized info)
     static constexpr bool is_pointer() noexcept { return std::is_pointer_v<T>; }
+    /// @brief True if the reflected data is describing a pointer
+    /// @return false (non-specialized info)
+    static constexpr bool is_ref() noexcept { return std::is_reference_v<T>; }
   };
 
   template<typename T>
@@ -109,11 +114,11 @@ namespace colt::refl
     static constexpr StringView _1 = StringView{ "PTR<" };
     static constexpr StringView _2 = StringView{ ">" };
   public:
-    static constexpr StringView name = join_v<_1, info<std::remove_reference_t<decltype(*std::declval<T>())>>::name, _2>;
+    static constexpr StringView name = traits::join_v<_1, info<std::remove_reference_t<decltype(*std::declval<T>())>>::name, _2>;
   };
 
   template<typename T>
-  /// @brief Overload responsible of adding 'PTR<...>' for pointer types
+  /// @brief Overload responsible of adding '&' for reference types
   /// @tparam T The type on which to apply the transformation
   struct info<T, std::enable_if_t<std::is_reference_v<T> && !std::is_const_v<T>>>
     : public class_info<T>
@@ -122,7 +127,7 @@ namespace colt::refl
     static constexpr StringView _1 = StringView{ "&" };
 
   public:
-    static constexpr StringView name = join_v<info<std::remove_reference_t<T>>::name, _1>;
+    static constexpr StringView name = traits::join_v<info<std::remove_reference_t<T>>::name, _1>;
   };
 
   template<typename T>
@@ -134,7 +139,7 @@ namespace colt::refl
   private:
     static constexpr StringView _1 = StringView{ "const " };
   public:
-    static constexpr StringView name = join_v<_1, info<std::decay_t<decltype(std::declval<T>())>>::name>;
+    static constexpr StringView name = traits::join_v<_1, info<std::decay_t<decltype(std::declval<T>())>>::name>;
   };
 }
 
