@@ -3,31 +3,7 @@
 
 #include "Iterators.h"
 #include "View.h"
-
-namespace colt::refl
-{
-  template<typename T>
-  struct info
-  {
-    static constexpr bool exist() noexcept { return false; }
-    static constexpr bool is_enum() noexcept { return false; }
-    static constexpr bool is_class() noexcept { return false; }
-  };
-
-  struct enum_info
-  {
-    static constexpr bool exist() noexcept { return true; }
-    static constexpr bool is_enum() noexcept { return true; }
-    static constexpr bool is_class() noexcept { return false; }
-  };
-
-  struct class_info
-  {
-    static constexpr bool exist() noexcept { return true; }
-    static constexpr bool is_enum() noexcept { return false; }
-    static constexpr bool is_class() noexcept { return true; }
-  };
-}
+#include "Reflection.h"
 
 namespace colt::iter
 {
@@ -90,7 +66,7 @@ namespace colt::iter
     ENUM_DEF(ENUM_NAME_S) \
   }; \
   template<>\
-  class colt::refl::info<EnumType> : public colt::refl::enum_info {\
+  class colt::refl::info<EnumType, void> : public colt::refl::enum_info {\
 public:\
   enum : type { \
     ENUM_DEF(ENUM_NAME_S) \
