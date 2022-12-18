@@ -133,7 +133,7 @@ namespace colt::refl
   /// @brief Overload responsible of adding 'const' to class name
   /// @tparam T The type on which to apply the transformation
   struct info<T, std::enable_if_t<std::is_const_v<T> && info<std::decay_t<T>>::exist()>>
-    : public class_info<T>
+    : public class_info<T>, public info<std::decay_t<T>>
   {
   private:
     static constexpr StringView _1 = StringView{ "const " };
