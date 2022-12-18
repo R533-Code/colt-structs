@@ -20,10 +20,41 @@ using namespace colt::refl;
 
 DECLARE_VALUE_ENUM(OsEnum, uint8_t, OS_ENUM);
 
+template<typename... Args>
+void print(Args&&... args) noexcept
+{
+  for_each(
+    [](auto&& a)
+    {
+      using t = std::decay_t<decltype(a)>;
+
+      //Print type name 
+      std::cout << info<t>::name << ": "
+        << std::forward<decltype(a)>(a) << '\n';
+    },
+    std::forward<Args>(args)...);
+}
+
+struct Point
+{
+  u32 x;
+  u32 y;
+  u32 z;
+  PTR<u32> a = &z;
+};
+
+#define POINT_MEMBERS(XX) XX(Point::x)XX(Point::y)XX(Point::z)XX(Point::a)
+DECLARE_TYPE(Point, POINT_MEMBERS);
+
 int main()
 {
-	std::cout << info<const u32&>::name << '\n';
-	std::cout << info<const u32* const>::name << '\n';
-	std::cout << info<u32>::name << '\n';
-	std::cout << info<OsEnum>::name;
+  Point a = { 10, 20, 30 };
+  print(a);
+
+  std::cout << "----------------------------\n";
+  print(10, 20, 1.0, "Hello world!");
+  std::cout << "----------------------------\n";
+
+  for (auto i : info<Point>::to_member_str_iter() | iter::adapt)
+    std::cout << i << "\n";
 }
