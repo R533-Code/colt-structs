@@ -110,23 +110,49 @@ namespace colt::refl
     : public class_info<T>
   {
   private:
+    /// @brief Name helper
     static constexpr StringView _1 = StringView{ "PTR<" };
+    /// @brief Name helper
     static constexpr StringView _2 = StringView{ ">" };
   public:
+    /// @brief Name of the type
     static constexpr StringView name = traits::join_v<_1, info<std::remove_reference_t<decltype(*std::declval<T>())>>::name, _2>;
+    /// @brief Accesses the pointed to type
+    using ptr_to = info<std::remove_reference_t<decltype(*std::declval<T>())>>;
   };
 
   template<typename T>
   /// @brief Overload responsible of adding '&' for reference types
   /// @tparam T The type on which to apply the transformation
-  struct info<T, std::enable_if_t<std::is_reference_v<T> && !std::is_const_v<T>>>
+  struct info<T, std::enable_if_t<std::is_lvalue_reference_v<T> && !std::is_const_v<T>>>
     : public class_info<T>
   {
   private:
+    /// @brief Name helper
     static constexpr StringView _1 = StringView{ "&" };
 
   public:
+    /// @brief Name of the type
     static constexpr StringView name = traits::join_v<info<std::remove_reference_t<T>>::name, _1>;
+    /// @brief Accesses the referenced type
+    using ref_to = info<std::remove_reference_t<T>>;
+  };
+
+  template<typename T>
+  /// @brief Overload responsible of adding '&' for reference types
+  /// @tparam T The type on which to apply the transformation
+  struct info<T, std::enable_if_t<std::is_rvalue_reference_v<T> && !std::is_const_v<T>>>
+    : public class_info<T>
+  {
+  private:
+    /// @brief Name helper
+    static constexpr StringView _1 = StringView{ "&&" };
+
+  public:
+    /// @brief Name of the type
+    static constexpr StringView name = traits::join_v<info<std::remove_reference_t<T>>::name, _1>;
+    /// @brief Accesses the referenced type
+    using ref_to = info<std::remove_reference_t<T>>;
   };
 
   template<typename T>
@@ -138,8 +164,23 @@ namespace colt::refl
   private:
     static constexpr StringView _1 = StringView{ "const " };
   public:
+    /// @brief Name of the type
     static constexpr StringView name = traits::join_v<_1, info<std::decay_t<decltype(std::declval<T>())>>::name>;
   };
+
+
+  template <typename F, typename... Ts, typename =
+    std::enable_if_t<std::conjunction_v<std::is_invocable<F, Ts>...>>>
+  /// @brief Calls 'f' with each arguments
+  /// @tparam F The lambda type
+  /// @tparam ...Ts The parameter pack
+  /// @tparam  SFINAE helper
+  /// @param f The lambda to call
+  /// @param ...args The arguments to pass to the lambda
+  constexpr void for_each(F&& f, Ts&&... args) noexcept
+  {
+    (f(std::forward<Ts>(args)), ...);
+  }
 }
 
 #define DECLARE_BUILTIN(type) \
