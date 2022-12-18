@@ -48,7 +48,7 @@ namespace colt::refl
   template<typename T>
   /// @brief Contains reflected data of a type
   /// @tparam T The type for which the information are provided
-  struct info<T, std::enable_if_t<!std::is_pointer_v<T> && !(std::is_const_v<T> && info<std::decay_t<T>>::exist())>>
+  struct info<T, std::enable_if_t<!std::is_pointer_v<T> && !std::is_reference_v<T> && !(std::is_const_v<T> && info<std::decay_t<T>>::exist())>>
   {
     /// @brief True if the type has reflected data
     /// @return false (non-specialized info)
@@ -110,6 +110,19 @@ namespace colt::refl
     static constexpr StringView _2 = StringView{ ">" };
   public:
     static constexpr StringView name = join_v<_1, info<std::remove_reference_t<decltype(*std::declval<T>())>>::name, _2>;
+  };
+
+  template<typename T>
+  /// @brief Overload responsible of adding 'PTR<...>' for pointer types
+  /// @tparam T The type on which to apply the transformation
+  struct info<T, std::enable_if_t<std::is_reference_v<T> && !std::is_const_v<T>>>
+    : public class_info<T>
+  {
+  private:
+    static constexpr StringView _1 = StringView{ "&" };
+
+  public:
+    static constexpr StringView name = join_v<info<std::remove_reference_t<T>>::name, _1>;
   };
 
   template<typename T>
