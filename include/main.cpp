@@ -14,14 +14,15 @@
 #include <colt/Enum.h>
 
 using namespace colt;
+using namespace colt::refl;
 
- #define OS_ENUM(XX) XX(Windows, 10)XX(Linux, 30)XX(MacOs, 32)XX(Android, 40)
- 
+#define OS_ENUM(XX) XX(Windows, 10)XX(Linux, 30)XX(MacOs, 32)XX(Android, 40)
+
 DECLARE_VALUE_ENUM(OsEnum, uint8_t, OS_ENUM);
 
 int main()
 {
-	String a = String{ "Hello world!" };
-	for (auto i : a.to_iter() | iter::adapt)
-		std::cout << i << ' ';
+	std::cout << info<const u32&>::name << '\n';
+	std::cout << info<const u32* const>::name << '\n';
+	std::cout << info<u32>::name << '\n';
 }
