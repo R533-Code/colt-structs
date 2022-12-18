@@ -6,6 +6,11 @@
 
 namespace colt
 {
+  /// @brief Expected should contain a value
+#define colt_expected_is_expected this->is_expected()
+  /// @brief Expected should contain an error
+#define colt_expected_is_error this->is_error()
+
   template<typename ExpectedTy, typename ErrorTy>
   /// @brief A helper class that can hold either a valid value or an error.
   /// This class can be seen as an Optional, that carries error informations.
@@ -380,98 +385,98 @@ namespace colt
   template<typename ExpectedTy, typename ErrorTy>
   constexpr const ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() const noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return &expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy* Expected<ExpectedTy, ErrorTy>::operator->() noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return &expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::operator*() & noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&> Expected<ExpectedTy, ErrorTy>::operator*() const& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::operator*() && noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return std::move(expected);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&&> Expected<ExpectedTy, ErrorTy>::operator*() const&& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy& Expected<ExpectedTy, ErrorTy>::get_value() & noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&> Expected<ExpectedTy, ErrorTy>::get_value() const& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ExpectedTy&& Expected<ExpectedTy, ErrorTy>::get_value() && noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return std::move(expected);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ExpectedTy&&> Expected<ExpectedTy, ErrorTy>::get_value() const&& noexcept
   {
-    assert(!is_error_v && "Expected contained an error!");
+    CHECK_REQUIREMENT(colt_expected_is_expected);
     return expected;
   }
   
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy& Expected<ExpectedTy, ErrorTy>::get_error() & noexcept
   {
-    assert(is_error_v && "Expected did not contain an error!");
+    CHECK_REQUIREMENT(colt_expected_is_error);
     return error;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&> Expected<ExpectedTy, ErrorTy>::get_error() const& noexcept
   {
-    assert(is_error_v && "Expected did not contain an error!");
+    CHECK_REQUIREMENT(colt_expected_is_error);
     return error;
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr ErrorTy&& Expected<ExpectedTy, ErrorTy>::get_error() && noexcept
   {
-    assert(is_error_v && "Expected did not contain an error!");
+    CHECK_REQUIREMENT(colt_expected_is_error);
     return std::move(error);
   }
 
   template<typename ExpectedTy, typename ErrorTy>
   constexpr traits::copy_if_trivial_t<const ErrorTy&&> Expected<ExpectedTy, ErrorTy>::get_error() const&& noexcept
   {
-    assert(is_error_v && "Expected did not contain an error!");
+    CHECK_REQUIREMENT(colt_expected_is_error);
     return error;
   }
 

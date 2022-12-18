@@ -2,9 +2,13 @@
 #define HG_COLT_OPTIONAL
 
 #include "../details/common.h"
+#include "../utility/Assert.h"
 
 namespace colt
 {
+  /// @brief Optional should contain a value
+#define colt_optional_is_value this->is_value()
+
   template<typename T>
   /// @brief Manages an optionally contained value.
   /// @tparam T The optional type to hold
@@ -175,68 +179,70 @@ namespace colt
   template<typename T>
   constexpr const T* Optional<T>::operator->() const noexcept
   {
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
   
   template<typename T>
   constexpr T* Optional<T>::operator->() noexcept
   {
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return std::launder(reinterpret_cast<T*>(opt_buffer));
   }
 
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Optional<T>::operator*() const& noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
   
   template<typename T>
   constexpr T& Optional<T>::operator*() & noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
   
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::operator*() const&& noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
   
   template<typename T>
   constexpr T&& Optional<T>::operator*() && noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
   }
 
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Optional<T>::get_value() const& noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
 
   template<typename T>
   constexpr T& Optional<T>::get_value() & noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<T*>(opt_buffer));
   }
 
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&&> Optional<T>::get_value() const&& noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return *std::launder(reinterpret_cast<const T*>(opt_buffer));
   }
 
   template<typename T>
   constexpr T&& Optional<T>::get_value() && noexcept
   {
-    assert(!is_none_v && "Optional does not contain a value!");
+    CHECK_REQUIREMENT(colt_optional_is_value);
     return std::move(*std::launder(reinterpret_cast<T*>(opt_buffer)));
   }
 
