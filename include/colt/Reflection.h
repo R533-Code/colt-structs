@@ -40,21 +40,14 @@ namespace colt::traits
 namespace colt::refl
 {
   template<typename, typename = void>
+  /// @brief Result of reflection over types
+  /// @tparam  Type reflected on
+  /// @tparam  SFINAE helper
   struct info
   {
     /// @brief True if the type has reflected data
     /// @return false (non-specialized info)
-    static constexpr bool exist() noexcept { return false; }
-  };
-
-  template<typename T>
-  /// @brief Contains reflected data of a type
-  /// @tparam T The type for which the information are provided
-  struct info<T, std::enable_if_t<!std::is_pointer_v<T> && !std::is_reference_v<T> && !(std::is_const_v<T> && info<std::decay_t<T>>::exist())>>
-  {
-    /// @brief True if the type has reflected data
-    /// @return false (non-specialized info)
-    static constexpr bool exist() noexcept { return false; }
+    static constexpr bool exist() noexcept { return false; }    
     /// @brief True if the reflected data is describing an enum
     /// @return false (non-specialized info)
     static constexpr bool is_enum() noexcept { return false; }
@@ -64,6 +57,9 @@ namespace colt::refl
     /// @brief True if the reflected data is describing a pointer
     /// @return false (non-specialized info)
     static constexpr bool is_pointer() noexcept { return false; }
+    /// @brief True if the reflected data is describing a pointer
+    /// @return false (non-specialized info)
+    static constexpr bool is_ref() noexcept { return false; }
   };
 
   /// @brief Helper from which to inherit publicly for enums
@@ -81,6 +77,9 @@ namespace colt::refl
     /// @brief True if the reflected data is describing a pointer
     /// @return false (non-specialized info)
     static constexpr bool is_pointer() noexcept { return false; }
+    /// @brief True if the reflected data is describing a pointer
+    /// @return false (non-specialized info)
+    static constexpr bool is_ref() noexcept { return false; }
   };
 
   template<typename T>
