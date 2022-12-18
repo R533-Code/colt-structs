@@ -192,14 +192,14 @@ namespace colt::iter
     size_t current;
 
   public:
-    constexpr Iota(size_t begin) noexcept
+    constexpr Iota(size_t begin = 0) noexcept
       : current(begin) {}
 
     Optional<size_t> next() noexcept
     {
       return current++;
     }
-  };
+  };  
 
   /// @brief Reverse IOTA
   class IotaR
@@ -232,7 +232,7 @@ namespace colt::iter
         return current++;
       return None;
     }
-  };
+  };  
 
   /// @brief Range between [current, end), advancing by a 'step'
   class SteppedRange
