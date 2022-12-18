@@ -15,7 +15,7 @@ namespace colt::iter
     size_t end;
 
   public:
-    template<typename = std::enable_if_t<colt::refl::info<T>::exist()>>
+    template<typename = std::enable_if_t<colt::refl::info<T>::is_enum()>>
     constexpr EnumRange() noexcept
       : current(colt::refl::info<T>::get_min()), end(colt::refl::info<T>::get_max() + 1) {}
 
@@ -68,6 +68,7 @@ namespace colt::iter
   template<>\
   class colt::refl::info<EnumType, void> : public colt::refl::enum_info {\
 public:\
+  static constexpr StringView name = #EnumType;\
   enum : type { \
     ENUM_DEF(ENUM_NAME_S) \
   }; \
@@ -115,6 +116,7 @@ public:\
     ENUM_DEF(ENUM_NAME_N) \
   }; \
 public:\
+  static constexpr StringView name = #EnumType;\
   enum : type { \
     ENUM_DEF(ENUM_NAME) \
   }; \
