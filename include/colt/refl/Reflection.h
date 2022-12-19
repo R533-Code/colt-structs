@@ -3,6 +3,7 @@
 
 #include "../details/common.h"
 #include "../utility/Typedefs.h"
+#include "../data_structs/String.h"
 
 namespace colt::traits
 {
@@ -278,7 +279,11 @@ static std::ostream& operator<<(std::ostream& os, const T& obj) noexcept
 template<> \
 struct colt::refl::info<std::decay_t<type>, void> : public colt::refl::class_info<std::decay_t<type>> {\
 static constexpr StringView name = #type; \
-using members_type = type_list<void>;\
+using members_type = type_list<std::decay_t<type>>;\
+template<typename On, typename F, typename = std::enable_if_t<std::is_same_v<std::decay_t<On>, std::decay_t<type>>>>\
+static constexpr void apply_for_members(On&& obj, F&& fn) {\
+    fn(obj);\
+}\
 }
 
 namespace colt
