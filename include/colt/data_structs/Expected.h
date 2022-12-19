@@ -3,6 +3,7 @@
 
 #include "../details/common.h"
 #include "../utility/Hash.h"
+#include "../utility/Assert.h"
 
 namespace colt
 {
