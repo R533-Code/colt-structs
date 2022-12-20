@@ -69,7 +69,7 @@ namespace colt
     constexpr bool is_sentinel_equal(KeySentinel key, size_t hash) noexcept
     {
       assert(is_sentinel_active(key));
-      return hash & (key & 0b01111111);
+      return (hash & 0b01111111) == (key & 0b01111111);
     }
 
     /// @brief Increments a probing index, faster than a modulo operation.

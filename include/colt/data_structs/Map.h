@@ -320,7 +320,9 @@ namespace colt
 
   template<typename Key, typename Value>
   constexpr Map<Key, Value>::Map(float load_factor) noexcept
-    : load_factor(load_factor)
+    : sentinel_metadata(16, InPlace, details::EMPTY)
+    , slots(memory::allocate({ 16 * sizeof(Slot) }))
+    , load_factor(load_factor)
   {
     assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
   }
@@ -338,7 +340,7 @@ namespace colt
   constexpr Map<Key, Value>::Map(Map&& mp) noexcept
     : sentinel_metadata(std::move(mp.sentinel_metadata))
     , slots(colt::exchange(mp.slots, {}))
-    , load_factor(load_factor)
+    , load_factor(mp.load_factor)
   {}
 
   template<typename Key, typename Value>
