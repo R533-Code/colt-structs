@@ -76,6 +76,25 @@ namespace colt
       return npos;
     }
 
+    constexpr bool begins_with(CharT chr) const noexcept
+    {
+      if (this->is_empty() || *begin != chr)
+        return false;
+      return true;
+    }
+
+    constexpr bool begins_with(StringViewOf str) const noexcept
+    {
+      if (str.get_size() > this->get_size())
+        return false;
+      for (size_t i = 0; i < str.get_size(); i++)
+      {
+        if (str[i] != (*this)[i])
+          return false;
+      }
+      return true;
+    }
+
     /// @brief Conversion operator
     /// @return ContiguousView
     constexpr operator ContiguousView<CharT>() const noexcept;
@@ -302,11 +321,11 @@ namespace colt
   template<typename CharT>
   Expected<StringOf<CharT>, StringError> StringOf<CharT>::getLine(FILE* from) noexcept
   {
-    StringOf<CharT> str;    
+    StringOf<CharT> str;
 
     for (;;)
     {
-      auto gchar = static_cast<char>(std::fgetc(stdin));
+      auto gchar = static_cast<char>(std::fgetc(from));
       if (gchar != '\n' && gchar != EOF)
         str.append(gchar);
       else
@@ -399,13 +418,13 @@ namespace colt
   {
     while (View::is_not_empty())
       if (isSpace(*View::begin()))
-        View::popFront();
+        View::pop_front();
       else
         break;
 
     while (View::is_not_empty())
       if (isSpace(*(View::begin() + View::get_size() - 1)))
-        View::popFront();
+        View::pop_front();
       else
         break;
   }
