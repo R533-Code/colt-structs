@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "../details/common.h"
+#include "../utility/Typedefs.h"
 
 namespace colt
 {

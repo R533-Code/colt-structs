@@ -6,9 +6,24 @@
 #define HG_COLT_TYPEDEFS
 
 #include <cstdint>
+#include <limits>
 
 namespace colt
 {
+	template <class To, class From>
+	inline To bit_cast(const From& src) noexcept
+	{
+		static_assert(sizeof(To) == sizeof(From), "sizeof of both types should be equal!");
+		static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
+			"Both type should be trivially copyable!");
+		static_assert(std::is_trivially_constructible_v<To>,
+			"This implementation additionally requires destination type to be trivially constructible");
+
+		To dst;
+		std::memcpy(&dst, &src, sizeof(To));
+		return dst;
+	}	
+
 	template<typename T>
 	/// @brief Pointer
 	/// @tparam T The type pointed to by the pointer
@@ -37,149 +52,178 @@ namespace colt
 	/// @brief 64-bit floating point
 	using f64 = double;
 
-	/// @brief Undiscriminated union over a byte
-	union BYTE
+	namespace traits
 	{
-		/// @brief i8
-		i8 i8_v;
-		/// @brief u8
-		u8 u8_v;
-		/// @brief bool
-		bool bool_v;
-		/// @brief char
-		char char_v;
+		template<size_t sz>
+		class get_uint_of_sizeof
+		{
+			static auto impl()
+			{
+				static_assert(sz == 1 || sz == 2 || sz == 4 || sz == 8);
+				if constexpr (sz == 1)
+					return u8{ 0 };
+				else if constexpr (sz == 2)
+					return u16{ 0 };
+				else if constexpr (sz == 4)
+					return u32{ 0 };
+				else if constexpr (sz == 8)
+					return u64{ 0 };
+			}
 
-		constexpr BYTE() noexcept : u8_v(0) {}
-		constexpr BYTE(i8 i8_v) noexcept : i8_v(i8_v) {}
-		constexpr BYTE(u8 u8_v) noexcept : u8_v(u8_v) {}
-		constexpr BYTE(bool bool_v) noexcept : bool_v(bool_v) {}
-		constexpr BYTE(char char_v) noexcept : char_v(char_v) {}
+		public:
+			using type = decltype(impl());
+		};
+
+		template<size_t sz>
+		using get_uint_of_sizeof_t = typename get_uint_of_sizeof<sz>::type;
+	}
+
+	class BYTE
+	{
+		u8 bits;
+
+	public:
+		constexpr BYTE() noexcept
+			: bits(0) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 1)>>
+		constexpr BYTE(T value)
+			: bits(static_cast<u8>(colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(value))) {}
+
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 1)>>
+		constexpr BYTE& operator=(T val) noexcept
+		{
+			bits = static_cast<decltype(bits)>(
+				colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(val)
+				);
+			return *this;
+		}
+
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 1)>>
+		constexpr T as() noexcept
+		{
+			return colt::bit_cast<T>(static_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(bits));
+		}
+
+		constexpr void reset_all() noexcept
+		{
+			bits = 0;
+		}
+
+		constexpr void set_all() noexcept
+		{
+			bits = std::numeric_limits<decltype(bits)>::max();
+		}
 	};
 
-	/// @brief Undiscriminated union over a word (2-bytes)
-	union WORD
+	class WORD
 	{
-		/// @brief i8
-		i8 i8_v;
-		/// @brief u8
-		u8 u8_v;
-		/// @brief bool
-		bool bool_v;
-		/// @brief char
-		char char_v;
-		/// @brief BYTE
-		BYTE BYTE_v;
+		u16 bits;
 
-		/// @brief i16
-		i16 i16_v;
-		/// @brief u16
-		u16 u16_v;
+	public:
+		constexpr WORD() noexcept
+			: bits(0) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 2)>>
+		constexpr WORD(T value)
+			: bits(static_cast<u16>(colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(value))) {}
 
-		constexpr WORD() noexcept : u8_v(0) {}
-		constexpr WORD(i8 i8_v) noexcept : i8_v(i8_v) {}
-		constexpr WORD(u8 u8_v) noexcept : u8_v(u8_v) {}
-		constexpr WORD(bool bool_v) noexcept : bool_v(bool_v) {}
-		constexpr WORD(char char_v) noexcept : char_v(char_v) {}
-		constexpr WORD(BYTE BYTE_v) noexcept : BYTE_v(BYTE_v) {}
-		constexpr WORD(i16 i16_v) noexcept : i16_v(i16_v) {}
-		constexpr WORD(u16 u16_v) noexcept : u16_v(u16_v) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 2)>>
+		constexpr WORD& operator=(T val) noexcept
+		{
+			bits = static_cast<decltype(bits)>(
+				colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(val)
+				);
+			return *this;
+		}
+
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 2)>>
+		constexpr T as() noexcept
+		{
+			return colt::bit_cast<T>(static_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(bits));
+		}
+		
+		constexpr void reset_all() noexcept
+		{
+			bits = 0;
+		}
+
+		constexpr void set_all() noexcept
+		{
+			bits = std::numeric_limits<decltype(bits)>::max();
+		}
 	};
 
-	/// @brief Undiscriminated union over a double word (4-bytes)
-	union DWORD
+	class DWORD
 	{
-		/// @brief i8
-		i8 i8_v;
-		/// @brief u8
-		u8 u8_v;
-		/// @brief bool
-		bool bool_v;
-		/// @brief char
-		char char_v;
-		/// @brief BYTE
-		BYTE BYTE_v;
+		u32 bits;
 
-		/// @brief i16
-		i16 i16_v;
-		/// @brief u16
-		u16 u16_v;
-		/// @brief WORD
-		WORD WORD_v;
+	public:
+		constexpr DWORD() noexcept
+			: bits(0) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 4)>>
+		constexpr DWORD(T value)
+			: bits(static_cast<u32>(colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(value))) {}
 
-		/// @brief i32
-		i32 i32_v;
-		/// @brief u32
-		u32 u32_v;
-		/// @brief float
-		float float_v;
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 4)>>
+		constexpr DWORD& operator=(T val) noexcept
+		{
+			bits = static_cast<decltype(bits)>(
+				colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(val)
+				);
+			return *this;
+		}
 
-		constexpr DWORD() noexcept : u32_v(0) {}
-		constexpr DWORD(i8 i8_v) noexcept : i8_v(i8_v) {}
-		constexpr DWORD(u8 u8_v) noexcept : u8_v(u8_v) {}
-		constexpr DWORD(bool bool_v) noexcept : bool_v(bool_v) {}
-		constexpr DWORD(char char_v) noexcept : char_v(char_v) {}
-		constexpr DWORD(BYTE BYTE_v) noexcept : BYTE_v(BYTE_v) {}
-		constexpr DWORD(i16 i16_v) noexcept : i16_v(i16_v) {}
-		constexpr DWORD(u16 u16_v) noexcept : u16_v(u16_v) {}
-		constexpr DWORD(WORD WORD_v) noexcept : WORD_v(WORD_v) {}
-		constexpr DWORD(i32 i32_v) noexcept : i32_v(i32_v) {}
-		constexpr DWORD(u32 u32_v) noexcept : u32_v(u32_v) {}
-		constexpr DWORD(float float_v) noexcept : float_v(float_v) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 4)>>
+		constexpr T as() noexcept
+		{
+			return colt::bit_cast<T>(static_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(bits));
+		}
+
+		constexpr void reset_all() noexcept
+		{
+			bits = 0;
+		}
+
+		constexpr void set_all() noexcept
+		{
+			bits = std::numeric_limits<decltype(bits)>::max();
+		}
 	};
 
-	/// @brief Undiscriminated union over a quadruple word (8-bytes)
-	union QWORD
+	class QWORD
 	{
-		/// @brief i8
-		i8 i8_v;
-		/// @brief u8
-		u8 u8_v;
-		/// @brief bool
-		bool bool_v;
-		/// @brief char
-		char char_v;
-		/// @brief BYTE
-		BYTE BYTE_v;
+		u64 bits;
 
-		/// @brief i16
-		i16 i16_v;
-		/// @brief u16
-		u16 u16_v;
-		/// @brief WORD
-		WORD WORD_v;
+	public:
+		constexpr QWORD() noexcept
+			: bits(0) {}
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 8)>>
+		constexpr QWORD(T value)
+			: bits(static_cast<u64>(colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(value))) {}
 
-		/// @brief i32
-		i32 i32_v;
-		/// @brief u32
-		u32 u32_v;
-		/// @brief float
-		float float_v;
-		/// @brief DWORD
-		DWORD DWORD_v;
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 8)>>
+		constexpr QWORD& operator=(T val) noexcept
+		{
+			bits = static_cast<decltype(bits)>(
+				colt::bit_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(val)
+				);
+			return *this;
+		}
 
-		/// @brief i64
-		i64 i64_v;
-		/// @brief u64
-		u64 u64_v;
-		/// @brief double
-		double double_v;
+		template<typename T, typename = std::enable_if_t<(sizeof(T) <= 8)>>
+		constexpr T as() noexcept
+		{
+			return colt::bit_cast<T>(static_cast<traits::get_uint_of_sizeof_t<sizeof(T)>>(bits));
+		}
 
-		constexpr QWORD() noexcept : u64_v(0) {}
-		constexpr QWORD(i8 i8_v) noexcept : i8_v(i8_v) {}
-		constexpr QWORD(u8 u8_v) noexcept : u8_v(u8_v) {}
-    constexpr QWORD(bool bool_v) noexcept : bool_v(bool_v) {}
-    constexpr QWORD(char char_v) noexcept : char_v(char_v) {}
-    constexpr QWORD(BYTE BYTE_v) noexcept : BYTE_v(BYTE_v) {}
-    constexpr QWORD(i16 i16_v) noexcept : i16_v(i16_v) {}
-    constexpr QWORD(u16 u16_v) noexcept : u16_v(u16_v) {}
-    constexpr QWORD(WORD WORD_v) noexcept : WORD_v(WORD_v) {}
-    constexpr QWORD(i32 i32_v) noexcept : i32_v(i32_v) {}
-    constexpr QWORD(u32 u32_v) noexcept : u32_v(u32_v) {}
-    constexpr QWORD(float float_v) noexcept : float_v(float_v) {}
-    constexpr QWORD(DWORD DWORD_v) noexcept : DWORD_v(DWORD_v) {}
-    constexpr QWORD(i64 i64_v) noexcept : i64_v(i64_v) {}
-    constexpr QWORD(u64 u64_v) noexcept : u64_v(u64_v) {}
-    constexpr QWORD(double double_v) noexcept : double_v(double_v) {}
+		constexpr void reset_all() noexcept
+		{
+			bits = 0;
+		}
+
+		constexpr void set_all() noexcept
+		{
+			bits = std::numeric_limits<decltype(bits)>::max();
+		}
 	};
 }
 

@@ -644,21 +644,7 @@ namespace colt {
     T old_value = std::move(obj);
     obj = std::forward<U>(new_value);
     return old_value;
-  }
-
-  template <class To, class From>
-  inline To bit_cast(const From& src) noexcept
-  {
-    static_assert(sizeof(To) == sizeof(From), "sizeof of both types should be equal!");
-    static_assert(std::is_trivially_copyable_v<To> && std::is_trivially_copyable_v<From>,
-      "Both type should be trivially copyable!");
-    static_assert(std::is_trivially_constructible_v<To>,
-      "This implementation additionally requires destination type to be trivially constructible");
-    
-    To dst;
-    std::memcpy(&dst, &src, sizeof(To));
-    return dst;
-  }
+  }  
 }
 
 #endif //!HG_COLT_COMMON
