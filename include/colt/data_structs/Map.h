@@ -289,7 +289,7 @@ namespace colt
   template<typename Key, typename Value>
   constexpr void Map<Key, Value>::realloc_map(size_t new_capacity) noexcept(std::is_nothrow_destructible_v<Key>&& std::is_nothrow_destructible_v<Value>&& std::is_nothrow_move_constructible_v<Key>&& std::is_nothrow_move_constructible_v<Value>)
   {
-    auto new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
+    memory::TypedBlock<Slot> new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
 
     Vector<details::KeySentinel> new_metadata = { new_capacity, InPlace, details::EMPTY };
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
@@ -305,7 +305,7 @@ namespace colt
         if (find_key(key_hash, ptr->first, prob_index, new_metadata, new_slot))
         {
           //Move destruct
-          new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
+          new(new_slot.get_ptr() + prob_index) Slot(std::move(*ptr));
           ptr->~Slot();
 
           //Set the slot to ACTIVE

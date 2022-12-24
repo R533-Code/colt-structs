@@ -264,7 +264,7 @@ namespace colt
   template<typename T, size_t obj_per_node>
   constexpr void StableSet<T, obj_per_node>::realloc_map(size_t new_capacity) noexcept
   {
-    auto new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
+    memory::TypedBlock<Slot> new_slot = memory::allocate({ new_capacity * sizeof(Slot) });
 
     Vector<details::KeySentinel> new_metadata = { new_capacity, InPlace, details::EMPTY };
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
@@ -276,13 +276,13 @@ namespace colt
         Slot* ptr = slots.get_ptr() + i;
         size_t prob_index;
         //Rehash the key to get its new index in the new array
-        if (find_key(ptr->first, *ptr->second, prob_index, sentinel_metadata, slots))
+        if (find_key(ptr->first, *ptr->second, prob_index, new_metadata, new_slot))
         {
           //Set the slot to ACTIVE
           new_metadata[prob_index] = details::create_active_sentinel(ptr->first);
           
           //Move destruct
-          new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
+          new(new_slot.get_ptr() + prob_index) Slot(std::move(*ptr));
           ptr->~Slot();
         }
       }
