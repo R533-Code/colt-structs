@@ -78,9 +78,9 @@ namespace colt
 
     constexpr bool begins_with(CharT chr) const noexcept
     {
-      if (this->is_empty() || *begin != chr)
+      if (this->is_empty())
         return false;
-      return true;
+      return this->get_front() == chr;
     }
 
     constexpr bool begins_with(StringViewOf str) const noexcept

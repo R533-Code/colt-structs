@@ -302,7 +302,7 @@ namespace colt
         const size_t key_hash = GetHash(ptr->first);
         size_t prob_index;
         //Rehash the key to get its new index in the new array
-        if (find_key(key_hash, ptr->first, prob_index, sentinel_metadata, slots))
+        if (find_key(key_hash, ptr->first, prob_index, new_metadata, new_slot))
         {
           //Move destruct
           new(slots.get_ptr() + prob_index) Slot(std::move(*ptr));
