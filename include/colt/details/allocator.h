@@ -434,7 +434,7 @@ namespace colt
     /// @brief Allocator best suited for object of size smaller then 512
     using SmallAllocator_t =
       Segregator<256,
-        FallbackAllocator<StackAllocator<8192>, FreeList<Mallocator, 0, 256>>,
+        FallbackAllocator<StackAllocator<8192>, Mallocator>,
         FreeList<Mallocator, 256, 512>
       >;
 
