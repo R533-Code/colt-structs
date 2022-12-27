@@ -240,6 +240,7 @@ namespace colt
       : private allocator
     {
       static_assert(traits::is_allocator_v<allocator>, "'allocator' should be an allocator!");
+      static_assert(range_lower >= 8, "Lower bound of range should be greater or equal to 8!");
 
       /// @brief A Node contains a pointer to the next Node
       struct Node

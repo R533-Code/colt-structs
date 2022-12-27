@@ -356,7 +356,10 @@ namespace colt
     for (size_t i = 0; i < sentinel_metadata.get_size(); i++)
     {
       if (details::is_sentinel_active(sentinel_metadata[i]))
+      {
         slots.get_ptr()[i].~Slot(); //destroy active slots
+      }
+      sentinel_metadata[i] = details::EMPTY;
     }
     size = 0;
   }
