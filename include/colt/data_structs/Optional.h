@@ -317,12 +317,12 @@ namespace colt
   }
 
   template<typename T>
-  /// @brief Hash overload for ContiguousView
-  /// @tparam T The type of the ContiguousView
+  /// @brief Hash overload for Optional
+  /// @tparam T The type of the Optional
   struct hash<Optional<T>>
   {
     /// @brief Hashing operator
-    /// @param view The view to hash
+    /// @param opt The opt to hash
     /// @return Hash
     constexpr size_t operator()(const Optional<T>& opt) const noexcept
     {
