@@ -1,8 +1,12 @@
+/** @file Optional.h
+* Contains the Optional class.
+* Optional<T> can be either a value or None.
+*/
+
 #ifndef HG_COLT_OPTIONAL
 #define HG_COLT_OPTIONAL
 
 #include "../details/common.h"
-#include "../utility/Assert.h"
 
 namespace colt
 {
@@ -78,46 +82,46 @@ namespace colt
     constexpr bool is_none() const noexcept { return is_none_v; }
 
     /// @brief Returns the stored value.
-    /// Precondition: is_value().
     /// @return The value
+    /// @pre is_value() (colt_optional_is_value).
     constexpr const T* operator->() const noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value().
     /// @return The value
+    /// @pre is_value() (colt_optional_is_value).
     constexpr T* operator->() noexcept;
 
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr traits::copy_if_trivial_t<const T&> operator*() const& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value().
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr T& operator*() & noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr traits::copy_if_trivial_t<const T&&> operator*() const&& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr T&& operator*() && noexcept;
 
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr traits::copy_if_trivial_t<const T&> get_value() const& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value().
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr T& get_value() & noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr traits::copy_if_trivial_t<const T&&> get_value() const&& noexcept;
     /// @brief Returns the stored value.
-    /// Precondition: is_value()
     /// @return The value.
+    /// @pre is_value() (colt_optional_is_value).
     constexpr T&& get_value() && noexcept;
 
     /// @brief Returns the value if contained, else 'default_value'
@@ -264,7 +268,7 @@ namespace colt
   {
     if (!is_none_v)
     {
-      std::launder(reinterpret_cast<T*>(opt_buffer))->~T();
+      reinterpret_cast<T*>(opt_buffer)->~T();
       is_none_v = true;
     }
   }
@@ -288,8 +292,13 @@ namespace colt
   }
 
   template<typename T>
+  /// @brief Hash overload for ContiguousView
+  /// @tparam T The type of the ContiguousView
   struct hash<Optional<T>>
   {
+    /// @brief Hashing operator
+    /// @param view The view to hash
+    /// @return Hash
     constexpr size_t operator()(const Optional<T>& opt) const noexcept
     {
       static_assert(traits::is_hashable_v<T>,
