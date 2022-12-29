@@ -7,9 +7,13 @@
 
 #include "../details/allocator.h"
 #include "../utility/Hash.h"
+#include "../utility/Assert.h"
 
 namespace colt
 {
+  /// @brief `release_typed()` should not be used with inheritances
+#define colt_unique_ptr_is_true_type this->is_true_type_hint()
+
   template<typename T>
   /// @brief Unique pointer that automatically frees an allocation resources.
   /// A unique pointer is movable but not copyable, which makes it own its resource.
@@ -51,13 +55,13 @@ namespace colt
     /// @brief Move constructor
     /// @param to_move The UniquePtr whose resources to steal
     constexpr UniquePtr(UniquePtr&& to_move) noexcept
-      : blk(exchange(to_move.blk, { nullptr, 0 })) {}
+      : blk(colt::exchange(to_move.blk, { nullptr, 0 })) {}
     /// @brief Move assignment operator
     /// @param to_move The UniquePtr whose resources to steal
     /// @return Self
     constexpr UniquePtr& operator=(UniquePtr&& to_move) noexcept
     {
-      swap(to_move.blk, blk);
+      colt::swap(to_move.blk, blk);
       return *this;
     }
     
@@ -73,7 +77,7 @@ namespace colt
     /// @tparam T2 The type of the UniquePtr whose resources to steal
     /// @param to_move The UniquePtr whose resources to steal
     constexpr UniquePtr(UniquePtr<T2>&& to_move) noexcept
-      : blk(exchange(to_move.blk, { nullptr, 0 })) {}
+      : blk(colt::exchange(to_move.blk, { nullptr, 0 })) {}
     
     template<typename T2, typename = std::enable_if_t<std::is_convertible_v<T2*, T*>>>
     /// @brief Move assignment operator for inheritances
@@ -82,7 +86,7 @@ namespace colt
     /// @return Self
     constexpr UniquePtr& operator=(UniquePtr<T2>&& to_move) noexcept
     {
-      swap(to_move.blk, blk);
+      colt::swap(to_move.blk, blk);
       return *this;
     }
 
@@ -95,11 +99,11 @@ namespace colt
     }
 
     /// @brief Implicitly converts a block to a boolean, like a pointer
-      /// @return True if the block is not empty
-    constexpr explicit operator bool() const noexcept { return blk.operator bool(); }
+    /// @return True if the block is not empty
+    constexpr explicit operator bool() const noexcept { return static_cast<bool>(blk); }
     /// @brief Implicitly converts a block to a boolean, like a pointer
     /// @return True if the block is empty
-    constexpr bool operator!() const noexcept { return blk.operator!(); }
+    constexpr bool operator!() const noexcept { return !static_cast<bool>(blk); }
 
     /// @brief Dereferences the pointer to the memory block
     /// @return Const reference to the type of the block
@@ -143,13 +147,13 @@ namespace colt
     constexpr bool is_not_true_type_hint() const noexcept { return blk.get_byte_size().size != sizeof(T); }
 
     /// @brief Releases ownership of the owned TypedBlock.
-    /// Precondition: hintTrueType() == true.
+    /// Precondition: is_true_type_hint() == true.
     /// This method should not be used when inheritances are used.
     /// @return The owned TypedBlock
     constexpr memory::TypedBlock<T> release_typed() noexcept
     {
-      assert(is_true_type_hint() && "Use release() instead when dealing with inheritances!");
-      return exchange(blk, { nullptr, 0 });
+      CHECK_REQUIREMENT(colt_unique_ptr_is_true_type);
+      return colt::exchange(blk, { nullptr, 0 });
     }
 
     /// @brief Releases ownership of the owned MemBlock.
@@ -157,7 +161,7 @@ namespace colt
     /// @return The owned MemBlock
     constexpr memory::MemBlock release() noexcept
     {      
-      return exchange(blk, { nullptr, 0 });
+      return colt::exchange(blk, { nullptr, 0 });
     }
 
     /// @brief Returns the byte size of the allocation
@@ -177,8 +181,13 @@ namespace colt
   }
 
   template<typename T>
+  /// @brief Hash overload for UniquePtr
+  /// @tparam T The type of the UniquePtr
   struct hash<UniquePtr<T>>
   {
+    /// @brief Hashing operator
+    /// @param ptr The ptr to hash
+    /// @return Hash
     constexpr size_t operator()(const UniquePtr<T>& ptr) const noexcept
     {
       static_assert(traits::is_hashable_v<T>, "Type of UniquePtr should be hashable!");
