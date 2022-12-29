@@ -823,7 +823,7 @@ namespace colt
   {
     if (!is_stack_allocated())
     {
-      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).get_ptr());
+      ptr = reinterpret_cast<T*>(memory::allocate({ capacity * sizeof(T) }).get_ptr());
       algo::contiguous_copy(to_copy.ptr, ptr, size);
     }
     else

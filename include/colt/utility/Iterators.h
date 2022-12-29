@@ -289,6 +289,22 @@ namespace colt::iter
     }
   };
 
+  template<typename T, typename F, typename = std::enable_if_t<std::is_invocable_v<F, T>>>
+  class Generator
+  {
+    T obj;
+    F lmb;
+
+  public:
+    constexpr Generator(T&& value, F&& lmb) noexcept
+      : obj(std::forward<T>(value)), lmb(std::forward(lmb)) {}
+
+    Optional<decltype(std::declval<F>()(std::declval<T>()))> next()
+    {
+
+    }
+  };
+
   /// @brief Creates an iterable range between 'begin' and 'end' (non-inclusive).
   /// Similar to the python 'range' function.
   /// @param begin The beginning of the range

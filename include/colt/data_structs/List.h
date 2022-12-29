@@ -219,8 +219,8 @@ namespace colt
 
   template<typename T, size_t obj_per_node>
   constexpr FlatList<T, obj_per_node>::FlatList(FlatList&& list) noexcept
-    : head(exchange(list.head, nullptr)), tail(exchange(list.tail, nullptr))
-    , last_active_node(exchange(list.last_active_node, nullptr)), size(exchange(list.size, 0))
+    : head(exchange(list.head, memory::new_t<Node>().get_ptr())), tail(exchange(list.tail, list.head))
+    , last_active_node(exchange(list.last_active_node, list.head)), size(exchange(list.size, 0))
   {}
 
   template<typename T, size_t obj_per_node>

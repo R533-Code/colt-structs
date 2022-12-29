@@ -25,7 +25,7 @@ namespace colt
     /// @brief Memory block of the pointers
     memory::TypedBlock<Slot> slots = {};
     /// @brief The list containing the objects
-    FlatList<T, obj_per_node> list;
+    FlatList<T, obj_per_node> list = {};
     /// @brief The load factor before reallocation
     float load_factor = 0.70f;
 
@@ -137,7 +137,10 @@ namespace colt
   
   template<typename T, size_t obj_per_node>
   constexpr StableSet<T, obj_per_node>::StableSet(float load_factor) noexcept
-    : load_factor(load_factor)
+    : sentinel_metadata(16, InPlace, details::EMPTY)
+    , slots(memory::allocate({ 16 * sizeof(Slot) }))
+    , list(16 / obj_per_node)
+    , load_factor(load_factor)
   {
     assert(0.0f < load_factor && load_factor < 1.0f && "Invalid load factor!");
   }
@@ -155,7 +158,7 @@ namespace colt
   template<typename T, size_t obj_per_node>
   constexpr StableSet<T, obj_per_node>::StableSet(StableSet&& set) noexcept
     : sentinel_metadata(std::move(set.sentinel_metadata))
-    , slots(exchange(set.slots, {}))
+    , slots(colt::exchange(set.slots, {}))
     , list(std::move(set.list))
     , load_factor(set.load_factor)
   {}

@@ -436,7 +436,7 @@ namespace colt
     using SmallAllocator_t =
       Segregator<256,
         FallbackAllocator<StackAllocator<8192>, Mallocator>,
-        FreeList<Mallocator, 256, 512>
+        Mallocator
       >;
 
     /// @brief Global allocator type.
@@ -446,10 +446,8 @@ namespace colt
     /// use RegisterOnNullFn(), which can register up to 5 functions (by default).
     using GlobalAllocator_t =
       AbortOnNULLAllocator<
-      ThreadSafeAllocator<
-        Segregator<512,
-        SmallAllocator_t,
-        FreeList<Mallocator, 512, 1024>>
+      ThreadSafeAllocator<        
+        Mallocator
       >>;
     
     /************* GLOBAL ALLOCATOR *************/
