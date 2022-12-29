@@ -143,73 +143,85 @@ namespace colt
     constexpr bool is_expected() const noexcept { return !is_error_v; }
 
     /// @brief Check if the Expected contains an error.
-    /// Same as isError()
+    /// Same as is_error().
     /// @return True if the Expected contains an error
     constexpr bool operator!() const noexcept { return is_error_v; }
     /// @brief Check if the Expected contains an expected value.
-    /// Same as isExpected()
+    /// Same as is_expected().
     /// @return True if the Expected contains an expected value
     constexpr explicit operator bool() const noexcept { return !is_error_v; }
 
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected().
     /// @return The Expected value
+    /// @pre is_expected() (colt_expected_is_expected).
     constexpr const ExpectedTy* operator->() const noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected().
     /// @return The Expected value
+    /// @pre is_expected() (colt_expected_is_expected).
     constexpr ExpectedTy* operator->() noexcept;    
     
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ExpectedTy&> operator*() const& noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr traits::copy_if_trivial_t<const ExpectedTy&> operator*()
+      const& noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected().
     /// @return The Expected value.
-    constexpr ExpectedTy& operator*() & noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr ExpectedTy& operator*()
+      & noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ExpectedTy&&> operator*() const&& noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr traits::copy_if_trivial_t<const ExpectedTy&&> operator*()
+      const&& noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr ExpectedTy&& operator*() && noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr ExpectedTy&& operator*()
+      && noexcept;
 
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ExpectedTy&> get_value() const& noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr traits::copy_if_trivial_t<const ExpectedTy&> get_value()
+      const& noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected().
     /// @return The Expected value.
-    constexpr ExpectedTy& get_value() & noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr ExpectedTy& get_value()
+      & noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ExpectedTy&&> get_value() const&& noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr traits::copy_if_trivial_t<const ExpectedTy&&> get_value()
+      const&& noexcept;
     /// @brief Returns the stored Expected value.
-    /// Precondition: isExpected()
     /// @return The Expected value.
-    constexpr ExpectedTy&& get_value() && noexcept;
+    /// @pre is_expected() (colt_expected_is_expected).
+    constexpr ExpectedTy&& get_value()
+      && noexcept;
     
     /// @brief Returns the stored error.
-    /// Precondition: isError()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ErrorTy&> get_error() const& noexcept;
+    /// @pre is_error() (colt_expected_is_error).
+    constexpr traits::copy_if_trivial_t<const ErrorTy&> get_error()
+      const& noexcept;
     /// @brief Returns the stored error.
-    /// Precondition: isError().
     /// @return The Expected value.
-    constexpr ErrorTy& get_error() & noexcept;
+    /// @pre is_error() (colt_expected_is_error).
+    constexpr ErrorTy& get_error()
+      & noexcept;
     /// @brief Returns the stored error.
-    /// Precondition: isError()
     /// @return The Expected value.
-    constexpr traits::copy_if_trivial_t<const ErrorTy&&> get_error() const&& noexcept;
+    /// @pre is_error() (colt_expected_is_error).
+    constexpr traits::copy_if_trivial_t<const ErrorTy&&> get_error()
+      const&& noexcept;
     /// @brief Returns the stored error.
-    /// Precondition: isError()
     /// @return The Expected value.
-    constexpr ErrorTy&& get_error() && noexcept;
+    /// @pre is_error() (colt_expected_is_error).
+    constexpr ErrorTy&& get_error()
+      && noexcept;
 
     /// @brief Returns the Expected value if contained, else 'default_value'
     /// @param default_value The value to return if the Expected contains an error
@@ -276,7 +288,7 @@ namespace colt
       && std::is_nothrow_copy_constructible_v<ErrorTy>)
     : is_error_v(copy.is_error_v)
   {
-    if (is_error)
+    if (is_error_v)
       new(&error) ErrorTy(copy.error);
     else
       new(&expected) ExpectedTy(copy.expected);
@@ -287,7 +299,8 @@ namespace colt
     noexcept(std::is_nothrow_copy_constructible_v<ExpectedTy>
       && std::is_nothrow_copy_constructible_v<ErrorTy>)
   {
-    assert(this != &copy && "Self assignment is prohibited!");
+    if (this == &copy)
+      return *this;
 
     if (is_error_v)
       error.~ErrorTy();
@@ -320,9 +333,10 @@ namespace colt
     noexcept(std::is_nothrow_move_constructible_v<ExpectedTy>
       && std::is_nothrow_move_constructible_v<ErrorTy>)
   {
-    assert(this != &move && "Self assignment is prohibited!");
+    if (this == &move)
+      return *this;
 
-    if (is_error)
+    if (is_error_v)
       error.~ErrorTy();
     else
       expected.~ExpectedTy();
@@ -546,16 +560,21 @@ namespace colt
   }
 
   template<typename Exp, typename Err>
+  /// @brief Hash overload for Expected
+  /// @tparam T The type of the Expected
   struct hash<Expected<Exp, Err>>
   {
+    /// @brief Hashing operator
+    /// @param exp The expr to hash
+    /// @return Hash
     constexpr size_t operator()(const Expected<Exp, Err>& exp) const noexcept
     {
       static_assert(traits::is_hashable_v<Exp> && traits::is_hashable_v<Err>,
         "Both types should be hashable in order to hash Expected!");
       if (exp.is_error())
-        return get_hash(exp.get_error());
+        return GetHash(exp.get_error());
       else
-        return get_hash(exp.get_value());
+        return GetHash(exp.get_value());
     }
   };
 
