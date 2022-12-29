@@ -1,3 +1,7 @@
+/** @file common.h
+* Contains common utilities used throughout the library.
+*/
+
 #ifndef HG_COLT_COMMON
 #define HG_COLT_COMMON
 
@@ -16,6 +20,9 @@
 #include <memory>
 
 #include <algorithm>
+
+//For assertions
+#include "../utility/Assert.h"
 
 #ifndef COLT_NO_DEBUG
   #if defined(NDEBUG) || defined(_DEBUG)

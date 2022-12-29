@@ -1,3 +1,18 @@
+/** @file Hash.h
+* Contains hashing utilities used throughout the library.
+* Use GetHash to hash an object. To add hashing support for
+* an object, overload `std::hash` or `colt::hash`.
+* `colt::hash` can be overloaded in the same way as `std::hash`,
+* using operator().
+* If both a `std::hash` and `colt::hash` overload are found,
+* the `colt::hash` will take priority.
+* `colt::hash` has been overloaded for every fundamental type,
+* with `const char*` being treated as a NUL-terminated string:
+* hashing of `const char*` will read each character of the string.
+* This means that two identical strings not residing on the same address
+* will give the same hash.
+*/
+
 #ifndef HG_COLT_HASH
 #define HG_COLT_HASH
 
@@ -13,11 +28,17 @@
 namespace colt
 {
   template<typename T>
+  /// @brief Non-overloaded hash struct
+  /// @tparam T Non-overloaded type
   struct hash {};
 
   template<>
+  /// @brief colt::hash overload for bool
   struct hash<bool>
   {
+    /// @brief Hashing operator
+    /// @param b The value to hash
+    /// @return Hash
     constexpr size_t operator()(bool b) const noexcept
     {
       return b ? 1231 : 1237;
@@ -25,8 +46,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for uint32_t
   struct hash<uint32_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(uint32_t i) const noexcept
     {
       size_t x = i;
@@ -38,8 +63,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for uint64_t
   struct hash<uint64_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(uint64_t i) const noexcept
     {
       size_t x = i;
@@ -51,8 +80,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for int16_t
   struct hash<int16_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(int16_t i) const noexcept
     {
       const auto in = static_cast<uint64_t>(i);
@@ -61,8 +94,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for uint16_t
   struct hash<uint16_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(uint16_t i) const noexcept
     {
       const auto in = static_cast<uint64_t>(i);
@@ -71,8 +108,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for int32_t
   struct hash<int32_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(int32_t i) const noexcept
     {
       auto x = static_cast<size_t>(i);
@@ -84,8 +125,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for int64_t
   struct hash<int64_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(int64_t i) const noexcept
     {
       auto x = static_cast<size_t>(i);
@@ -97,8 +142,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for char
   struct hash<char>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(char i) const noexcept
     {
       const auto in = static_cast<uint64_t>(i);
@@ -107,8 +156,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for uint8_t
   struct hash<uint8_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(uint8_t i) const noexcept
     {
       const auto in = static_cast<uint64_t>(i);
@@ -117,8 +170,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for int8_t
   struct hash<int8_t>
   {
+    /// @brief Hashing operator
+    /// @param i The value to hash
+    /// @return Hash
     constexpr size_t operator()(int8_t i) const noexcept
     {
       const auto in = static_cast<uint64_t>(i);
@@ -155,12 +212,15 @@ namespace colt
   }
 
   template<>
+  /// @brief colt::hash overload for "const char*"
   struct hash<const char*>
   {
+    /// @brief Hashing operator
+    /// @param str The value to hash
+    /// @return Hash
     size_t operator()(const char* str) const noexcept
     {
       auto size = std::strlen(str);
-      size = size > 64 ? 64 : size;
 
       uint64_t hash = 0xCBF29CE484222325;
       for (size_t i = 0; i < size; i++)
@@ -173,8 +233,12 @@ namespace colt
   };
 
   template<typename T>
+  /// @brief colt::hash overload for pointer types
   struct hash<T*>
   {
+    /// @brief Hashing operator
+    /// @param ptr The value to hash
+    /// @return Hash
     size_t operator()(T* ptr) const noexcept
     {
       auto x = reinterpret_cast<std::uintptr_t>(ptr);
@@ -186,8 +250,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for float
   struct hash<float>
   {
+    /// @brief Hashing operator
+    /// @param flt The value to hash
+    /// @return Hash
     size_t operator()(float flt) const noexcept
     {
       auto x = static_cast<size_t>(bit_cast<uint32_t>(flt));
@@ -199,8 +267,12 @@ namespace colt
   };
 
   template<>
+  /// @brief colt::hash overload for double
   struct hash<double>
   {
+    /// @brief Hashing operator
+    /// @param dbl The value to hash
+    /// @return Hash
     size_t operator()(double dbl) const noexcept
     {
       auto x = bit_cast<size_t>(dbl);
@@ -304,13 +376,17 @@ namespace colt
   }
 
   template<typename T1, typename T2>
+  /// @brief colt::hash overload for std::pair
   struct hash<std::pair<T1, T2>>
   {
-    constexpr size_t operator()(const std::pair<T1, T2>& dbl) const noexcept
+    /// @brief Hashing operator
+    /// @param pair The value to hash
+    /// @return Hash
+    constexpr size_t operator()(const std::pair<T1, T2>& pair) const noexcept
     {
       size_t seed = 0;
-      seed = HashCombine(seed, GetHash(dbl.first));
-      seed = HashCombine(seed, GetHash(dbl.second));
+      seed = HashCombine(seed, GetHash(pair.first));
+      seed = HashCombine(seed, GetHash(pair.second));
       return seed;
     }
   };
