@@ -7,6 +7,7 @@
 #define HG_COLT_OPTIONAL
 
 #include "../details/common.h"
+#include "../utility/Hash.h"
 
 namespace colt
 {
@@ -43,7 +44,7 @@ namespace colt
     /// @param to_move The object to move
     template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
     constexpr Optional(T&& to_move)
-      noexcept(std::is_nothrow_move_constructible_v<T>);      
+      noexcept(std::is_nothrow_move_constructible_v<T>);
 
     template<typename... Args>
     /// @brief Constructs an object into the Optional directly.
@@ -51,21 +52,28 @@ namespace colt
     /// @param  InPlaceT, use InPlace
     /// @param ...args The argument pack
     constexpr Optional(traits::InPlaceT, Args&&... args)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>);      
-    
+      noexcept(std::is_nothrow_constructible_v<T, Args...>);
+
     /// @brief Copy constructor.
     /// @param to_copy The Optional to copy
     constexpr Optional(const Optional<T>& to_copy)
-      noexcept(std::is_nothrow_copy_constructible_v<T>);      
+      noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     /// @brief Move constructor.
     /// @param to_move The Optional to move
     constexpr Optional(Optional<T>&& to_move)
-      noexcept(std::is_nothrow_move_constructible_v<T>);      
+      noexcept(std::is_nothrow_move_constructible_v<T>);
+
+    /// @brief Resets the Optional.
+    /// Same as `reset()`.
+    /// @param  Error type (Error)
+    /// @return Reference to self
+    constexpr Optional& operator=(traits::ErrorT)
+      noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Destructor, destructs the value if it exist.
     ~Optional()
-      noexcept(std::is_nothrow_destructible_v<T>);    
+      noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Check if the Optional contains a value.
     /// @return True if the Optional contains a value
@@ -93,45 +101,55 @@ namespace colt
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr traits::copy_if_trivial_t<const T&> operator*() const& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> operator*()
+      const& noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr T& operator*() & noexcept;
+    constexpr T& operator*()
+      & noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr traits::copy_if_trivial_t<const T&&> operator*() const&& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&&> operator*()
+      const&& noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr T&& operator*() && noexcept;
+    constexpr T&& operator*()
+      && noexcept;
 
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr traits::copy_if_trivial_t<const T&> get_value() const& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&> get_value()
+      const& noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr T& get_value() & noexcept;
+    constexpr T& get_value()
+      & noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr traits::copy_if_trivial_t<const T&&> get_value() const&& noexcept;
+    constexpr traits::copy_if_trivial_t<const T&&> get_value()
+      const&& noexcept;
     /// @brief Returns the stored value.
     /// @return The value.
     /// @pre is_value() (colt_optional_is_value).
-    constexpr T&& get_value() && noexcept;
+    constexpr T&& get_value()
+      && noexcept;
 
     /// @brief Returns the value if contained, else 'default_value'
     /// @param default_value The value to return if the Optional is None
     /// @return The value or 'default_value'
-    constexpr T get_value_or(T&& default_value) const&;
+    constexpr T get_value_or(T&& default_value)
+      const&;
     /// @brief Returns the value if contained, else 'default_value'
     /// @param default_value The value to return if the Optional is None
     /// @return The value or 'default_value'
-    constexpr T get_value_or(T&& default_value) &&;
+    constexpr T get_value_or(T&& default_value)
+      &&;
 
     /// @brief Destroy the stored value if it exists, and sets the Optional to an empty one.
     /// Called automatically by the destructor.
@@ -171,6 +189,13 @@ namespace colt
   {
     if (!is_none_v)
       new(opt_buffer) T(std::move(*std::launder(reinterpret_cast<T*>(to_move.opt_buffer))));
+  }
+
+  template<typename T>
+  constexpr Optional<T>& Optional<T>::operator=(traits::ErrorT) noexcept(std::is_nothrow_destructible_v<T>)
+  {
+    this->reset();
+    return *this;
   }
 
   template<typename T>
