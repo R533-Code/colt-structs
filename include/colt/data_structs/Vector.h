@@ -1,3 +1,16 @@
+/** @file Vector.h
+* Contains Vector<>, SmallVector<> and StaticVector<>.
+* A Vector<> is a dynamic contiguous array of object that supports
+* pushing and popping items at its end.
+* A Vector makes use of the global allocator to request memory.
+* A SmallVector is a Vector that provides an in-place (stack allocated)
+* buffer of small capacity. SmallVectors can be faster than Vectors
+* as they can avoid memory allocations for small counts of elements.
+* A StaticVector is a Vector that never allocates, storing all its
+* items in-place (on the stack). As such, it has a finite capacity,
+* and will not be able to store more elements.
+*/
+
 #ifndef HG_COLT_VECTOR
 #define HG_COLT_VECTOR
 
@@ -9,6 +22,13 @@
 
 namespace colt
 {
+  /// @brief ContiguousView should at least contain an item
+#define colt_vector_is_not_empty this->is_not_empty()
+  /// @brief ContigousView should contain at least N items
+#define colt_vector_contains_N_item N <= size
+  /// @brief 'index' was greater or equal to size of ContiguousView
+#define colt_vector_index_smaller_size index < size
+
   template<typename T>
   /// @brief Contiguous dynamic array
   /// @tparam T The type to store
@@ -36,7 +56,7 @@ namespace colt
     /// @param  InPlaceT tag
     /// @param ...args The argument pack
     constexpr Vector(size_t fill_size, traits::InPlaceT, Args&&... args)
-      noexcept(std::is_nothrow_constructible_v<T, Args...>);      
+      noexcept(std::is_nothrow_constructible_v<T, Args...>);
 
     /// @brief Constructs a Vector from an initializer list.
     /// Only works for copyable T.
@@ -57,7 +77,6 @@ namespace colt
 
     /// @brief Copy assignment operator.
     /// Only works for copyable T.
-    /// Precondition: &to_copy != this (no self assignment)
     /// @param to_copy Vector whose resources to copy
     /// @return Self
     constexpr Vector& operator=(const Vector& to_copy)
@@ -68,7 +87,6 @@ namespace colt
     constexpr Vector(Vector&& to_move) noexcept;      
 
     /// @brief Move assignment operator.
-    /// Precondition: &to_move != this (no self assignment)
     /// @param to_move Vector whose resources to steal
     /// @return Self
     constexpr Vector& operator=(Vector&& to_move) noexcept;    
@@ -114,15 +132,15 @@ namespace colt
     constexpr sizes::ByteSize get_byte_size() const noexcept { return blk.get_byte_size(); }
 
     /// @brief Returns the object at index 'index' of the Vector.
-    /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size)
     constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;    
 
     /// @brief Returns a reference to the object at index 'index' of the Vector.
-    /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size)
     constexpr T& operator[](size_t index) noexcept;
 
     /// @brief Check if the Vector does not contain any object.
@@ -163,13 +181,13 @@ namespace colt
       noexcept(std::is_nothrow_constructible_v<T, Args...>);
 
     /// @brief Pops an item from the back of the Vector.
-    /// Precondition: is_not_empty()
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr void pop_back()
       noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Pops N item from the back of the Vector.
-    /// Precondition: N <= get_size()
     /// @param N The number of item to pop from the back
+    /// @pre N <= get_size() (colt_vector_contains_N_item)
     constexpr void pop_back_n(size_t N)
       noexcept(std::is_nothrow_destructible_v<T>);
 
@@ -179,21 +197,21 @@ namespace colt
       noexcept(std::is_nothrow_destructible_v<T>);
 
     /// @brief Returns the first item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The first item in the Vector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_front() const noexcept;
     /// @brief Returns the first item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The first item in the Vector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr T& get_front() noexcept;
 
     /// @brief Returns the last item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The last item in the Vector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_back() const noexcept;
     /// @brief Returns the last item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The last item in the Vector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr T& get_back() noexcept;
 
     /// @brief Obtains a view over the whole Vector
@@ -209,28 +227,21 @@ namespace colt
     /// @return ContiguousView over the whole Vector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { blk.get_ptr(), size }; }
 
+    /// @brief Check if two Vectors are equal
+    /// @param a The first Vector
+    /// @param b The Second Vector
+    /// @return True if both Vectors are equal
     friend constexpr bool operator==(const Vector& a, const Vector& b) noexcept
     {
-      if (a.get_size() != b.get_size())
-        return false;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return false;
-      }
-      return true;
+      return a.to_view() == b.to_view();
     }
-
+    /// @brief Check if two Vectors are not equal
+    /// @param a The first Vector
+    /// @param b The Second Vector
+    /// @return True if both Vectors are not equal
     friend constexpr bool operator!=(const Vector& a, const Vector& b) noexcept
     {
-      if (a.get_size() != b.get_size())
-        return true;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return true;
-      }
-      return false;
+      return a.to_view() != b.to_view();
     }
   };
 
@@ -242,6 +253,8 @@ namespace colt
   /// This can be a pessimization if the SmallVector regularly contains more
   /// than 'buff_count' elements: the internal stack buffer occupies memory
   /// that will not be used.
+  /// Using a SmallVector also adds a branch for every operation done on it:
+  /// it needs to check if the SmallVector is using its internal buffer.
   /// @tparam T The type to store
   class SmallVector
   {
@@ -284,7 +297,21 @@ namespace colt
     /// If 'reserve_size' is smaller than 'buff_count', then the capacity
     /// is set to 'buff_count'
     /// @param reserve_size The capacity of the SmallVector
-    constexpr SmallVector(size_t reserve_size) noexcept;      
+    explicit constexpr SmallVector(size_t reserve_size) noexcept;      
+
+    template<typename... Args>
+    /// @brief Constructs and fills a Vector of 'fill_size' by forwarding 'args' to the constructor
+    /// @tparam ...Args The parameter pack
+    /// @param fill_size The count of object to reserve
+    /// @param  InPlaceT tag
+    /// @param ...args The argument pack
+    constexpr SmallVector(size_t fill_size, traits::InPlaceT, Args&&... args)
+      noexcept(std::is_nothrow_constructible_v<T, Args...>);
+
+    /// @brief Initializer list constructor
+    /// @param list The list whose items to copy
+    constexpr SmallVector(std::initializer_list<T> list)
+      noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     /// @brief Copy constructor
     /// @param to_copy The SmallVector whose data to copy
@@ -365,15 +392,15 @@ namespace colt
     constexpr sizes::ByteSize get_byte_size() const noexcept { return { capacity * sizeof(T) }; }
 
     /// @brief Returns the object at index 'index' of the Vector.
-    /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size).
     constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;
 
     /// @brief Returns a reference to the object at index 'index' of the Vector.
-    /// Precondition: index < size
     /// @param index The index of the object
     /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size).
     constexpr T& operator[](size_t index) noexcept;
 
     /// @brief Push an object at the end of the Vector by copying
@@ -398,13 +425,13 @@ namespace colt
       noexcept(std::is_nothrow_constructible_v<T, Args...>);    
 
     /// @brief Pops an item from the back of the Vector.
-    /// Precondition: is_not_empty()
+    /// @pre is_not_empty() (colt_vector_is_not_empty).
     constexpr void pop_back()
       noexcept(std::is_nothrow_destructible_v<T>);    
 
     /// @brief Pops N item from the back of the Vector.
-    /// Precondition: N <= get_size()
     /// @param N The number of item to pop from the back
+    /// @pre N <= get_size() (colt_vector_contains_N_item).
     constexpr void pop_back_n(size_t N)
       noexcept(std::is_nothrow_destructible_v<T>);    
 
@@ -414,21 +441,21 @@ namespace colt
       noexcept(std::is_nothrow_destructible_v<T>);    
 
     /// @brief Returns the first item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The first item in the Vector.
+    /// @pre is_not_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_front() const noexcept;    
     /// @brief Returns the first item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The first item in the Vector.
+    /// @pre is_not_empty() (colt_vector_is_not_empty).
     constexpr T& get_front() noexcept;    
 
     /// @brief Returns the last item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The last item in the Vector.
+    /// @pre is_not_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_back() const noexcept;    
     /// @brief Returns the last item in the Vector.
-    /// Precondition: !is_empty()
     /// @return The last item in the Vector.
+    /// @pre is_not_empty() (colt_vector_is_not_empty).
     constexpr T& get_back() noexcept;    
 
     /// @brief Reserves 'by_more' capacity.
@@ -452,28 +479,22 @@ namespace colt
     /// @return ContiguousView over the whole Vector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { get_current_ptr(), size }; }  
 
+    /// @brief Check if two SmallVectors are equal
+    /// @param a The first SmallVector
+    /// @param b The second SmallVector
+    /// @return True if equal
     friend constexpr bool operator==(const SmallVector& a, const SmallVector& b) noexcept
-    {
-      if (a.get_size() != b.get_size())
-        return false;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return false;
-      }
-      return true;
+    {      
+      return a.to_view() == b.to_view();
     }
 
+    /// @brief Check if two SmallVectors are not equal
+    /// @param a The first SmallVector
+    /// @param b The second SmallVector
+    /// @return True if not equal
     friend constexpr bool operator!=(const SmallVector& a, const SmallVector& b) noexcept
     {
-      if (a.get_size() != b.get_size())
-        return true;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return true;
-      }
-      return false;
+      return a.to_view() != b.to_view();
     }
   };
 
@@ -505,20 +526,28 @@ namespace colt
     constexpr T* get_ptr() noexcept { return std::launder(reinterpret_cast<T*>(buffer)); }
 
   public:
+    /// @brief Default constructor
     constexpr StaticVector() noexcept {}
 
+    /// @brief Copy constructor
+    /// @param to_copy The StaticVector to copy
     constexpr StaticVector(const StaticVector& to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>);
-
+    
+    /// @brief Move constructor
+    /// @param to_move The StaticVector to copy
     constexpr StaticVector(StaticVector&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>);
 
+    /// @brief Move assignment operator
+    /// @param to_move The StaticVector to move
+    /// @return Self
     constexpr StaticVector& operator=(StaticVector&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>
         && std::is_nothrow_destructible_v<T>);
 
     /// @brief Copy assignment operator
-    /// @param to_copy The SmallVector whose data to copy
+    /// @param to_copy The StaticVector whose data to copy
     /// @return Self
     constexpr StaticVector& operator=(const StaticVector& to_copy)
       noexcept(std::is_nothrow_destructible_v<T>
@@ -528,89 +557,166 @@ namespace colt
     ~StaticVector()
       noexcept(std::is_nothrow_destructible_v<T>);
 
+    /// @brief Returns an iterator to the beginning of the StaticVector
+    /// @return iterator to the beginning
     constexpr ContiguousIterator<T> begin() noexcept { return get_ptr(); }
+    /// @brief Returns an iterator to the end of the StaticVector
+    /// @return iterator to the end
     constexpr ContiguousIterator<T> end() noexcept { return get_ptr() + size; }
 
+    /// @brief Returns a const iterator to the beginning of the StaticVector
+    /// @return Const iterator to the beginning
     constexpr ContiguousIterator<const T> begin() const noexcept { return get_ptr(); }
+    /// @brief Returns a const iterator to the end of the StaticVector
+    /// @return Const iterator to the end
     constexpr ContiguousIterator<const T> end() const noexcept { return get_ptr() + size; }
 
     /// @brief Returns a colt iterator over the view
     /// @return Iterator over the whole view
     constexpr iter::ContiguousView<const T> to_iter() const noexcept { return { get_ptr(), size }; }
 
+    /// @brief Returns a pointer to the beginning of the data
+    /// @return Const pointer to the beginning of the data
     constexpr const T* get_data() const noexcept { return get_ptr(); }
+    /// @brief Returns a pointer to the beginning of the data
+    /// @return Pointer to the beginning of the data
     constexpr T* get_data() noexcept { return get_ptr(); }
 
+    /// @brief Check if the StaticVector does not contain any object.
+    /// Same as: get_size() == 0
+    /// @return True if the StaticVector is empty
     constexpr bool is_empty() const noexcept { return size == 0; }
+    /// @brief Check if the StaticVector contains any object.
+    /// Same as: get_size() != 0
+    /// @return True if the StaticVector is not empty
     constexpr bool is_not_empty() const noexcept { return size != 0; }
 
+    /// @brief Check if the StaticVector is full
+    /// @return True if the StaticVector is full
     constexpr bool is_full() const noexcept { return size == max_size; }
+    /// @brief Check if the StaticVector can still contain objects
+    /// @return True if the StaticVector can still contain objects
     constexpr bool is_not_full() const noexcept { return size == max_size; }
 
+    /// @brief Returns the count of active objects in the StaticVector
+    /// @return The count of objects in the StaticVector
     constexpr size_t get_size() const noexcept { return size; }
+    /// @brief Returns the maximum count of active objects
+    /// @return 'max_size', the maximum count of active objects
     constexpr size_t get_capacity() const noexcept { return max_size; }
 
+    /// @brief Returns the byte size of the internal buffer
+    /// @return ByteSize of the internal buffer
     constexpr sizes::ByteSize get_byte_size() const noexcept { return { max_size * sizeof(T) }; }
 
+    /// @brief Returns the object at index 'index' of the StaticVector.
+    /// @param index The index of the object
+    /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size)
     constexpr traits::copy_if_trivial_t<const T&> operator[](size_t index) const noexcept;
+    /// @brief Returns a reference to the object at index 'index' of the StaticVector.
+    /// @param index The index of the object
+    /// @return The object at index 'index'
+    /// @pre index < get_size() (colt_vector_index_smaller_size).
     constexpr T& operator[](size_t index) noexcept;
 
+    /// @brief Push an object at the end of the StaticVector by copying
+    /// @param to_copy The object to copy at the end of the StaticVector
+    /// @return True if push_back was successful, false if full
     constexpr bool push_back(traits::copy_if_trivial_t<const T&> to_copy)
       noexcept(std::is_nothrow_copy_constructible_v<T>);
 
     template<typename T_ = T, typename = std::enable_if_t<!std::is_trivial_v<T_>>>
+    /// @brief Push an object at the end of the StaticVector by moving
+    /// @tparam T_ SFINAE helper
+    /// @tparam  SFINAE helper
+    /// @param to_move The object to move at the end of the StaticVector
+    /// @return True if push_back was successful, false if full
     constexpr bool push_back(T&& to_move)
       noexcept(std::is_nothrow_move_constructible_v<T>);
 
     template<typename... Args>
+    /// @brief Emplace an object at the end of the StaticVector
+    /// @tparam ...Args The parameter pack
+    /// @param  InPlaceT tag
+    /// @param ...args The argument pack to forward to the constructor
+    /// @return True if push_back was successful, false if full
     constexpr bool push_back(traits::InPlaceT, Args&&... args)
       noexcept(std::is_nothrow_constructible_v<T, Args...>);
 
+    /// @brief Pops an item from the back of the StaticVector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr void pop_back() noexcept(std::is_nothrow_destructible_v<T>);
+    /// @brief Pops N item from the back of the StaticVector.
+    /// @param N The number of item to pop from the back
+    /// @pre N <= get_size() (colt_vector_contains_N_item)
     constexpr void pop_back_n(size_t N) noexcept(std::is_nothrow_destructible_v<T>);
 
+    /// @brief Removes all the active items from the StaticVector.
     constexpr void clear()
       noexcept(std::is_nothrow_destructible_v<T>);
 
+    /// @brief Returns the first item in the StaticVector.
+    /// @return The first item in the StaticVector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_front() const noexcept;
+    /// @brief Returns the first item in the StaticVector.
+    /// @return The first item in the StaticVector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr T& get_front() noexcept;
 
+    /// @brief Returns the last item in the StaticVector.
+    /// @return The last item in the StaticVector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr traits::copy_if_trivial_t<const T&> get_back() const noexcept;
+    /// @brief Returns the last item in the StaticVector.
+    /// @return The last item in the StaticVector.
+    /// @pre !is_empty() (colt_vector_is_not_empty).
     constexpr T& get_back() noexcept;
 
+    /// @brief Obtains a view over the whole StaticVector
+    /// @return View over the StaticVector
     constexpr ContiguousView<T> to_view() const noexcept { return { get_ptr(), size }; }
+    /// @brief Obtains a view over the 'range' of the StaticVector.
+    /// @param range The range to obtain from the StaticVector
+    /// @return View over 'range' of the StaticVector
     constexpr ContiguousView<T> to_view(Range range) const noexcept;
 
+    /// @brief Converts a StaticVector to a view implicitly
+    /// @return ContiguousView over the whole StaticVector
     constexpr explicit operator ContiguousView<T>() const noexcept { return { get_ptr(), size }; }
 
+    /// @brief Check if two StaticVectors are equal
+    /// @param a The first StaticVector
+    /// @param b The Second StaticVector
+    /// @return True if both StaticVectors are equal
     friend constexpr bool operator==(const StaticVector& a, const StaticVector& b) noexcept
     {
-      if (a.get_size() != b.get_size())
-        return false;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return false;
-      }
-      return true;
+      return a.to_view() == b.to_view();
     }
 
+    /// @brief Check if two StaticVectors are not equal
+    /// @param a The first StaticVector
+    /// @param b The Second StaticVector
+    /// @return True if both StaticVectors are not equal
     friend constexpr bool operator!=(const StaticVector& a, const StaticVector& b) noexcept
     {
-      if (a.get_size() != b.get_size())
-        return true;
-      for (size_t i = 0; i < a.get_size(); i++)
-      {
-        if (a[i] != b[i])
-          return true;
-      }
-      return false;
+      return a.to_view() != b.to_view();
     }
   };
 
   template<typename T>
   constexpr Vector<T>::Vector(size_t reserve) noexcept
-    : blk(memory::allocate({ reserve * sizeof(T) })), size(0) {}
+    : blk(memory::allocate({ reserve * sizeof(T) })) {}
+
+  template<typename T>
+  template<typename ...Args>
+  constexpr Vector<T>::Vector(size_t fill_size, traits::InPlaceT, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<T, Args ...>)
+    : blk(memory::allocate({ fill_size * sizeof(T) })), size(fill_size)
+  {
+    algo::contiguous_construct(blk.get_ptr(), size, std::forward<Args>(args)...);
+  }
 
   template<typename T>
   constexpr Vector<T>::Vector(std::initializer_list<T> list)
@@ -639,27 +745,29 @@ namespace colt
   constexpr Vector<T>& Vector<T>::operator=(const Vector& to_copy)
     noexcept(std::is_nothrow_copy_constructible_v<T>)
   {
-    assert(&to_copy != this && "Self assignment is prohibited!");
+    if (&to_copy == this)
+      return *this;
 
     clear();
     for (size_t i = 0; i < to_copy.size; i++)
-      push_back(to_copy[i]);
+      this->push_back(to_copy[i]);
 
     return *this;
   }
 
   template<typename T>
   constexpr Vector<T>::Vector(Vector&& to_move) noexcept
-    : blk(exchange(to_move.blk, { nullptr, 0 })), size(exchange(to_move.size, 0)) {}
+    : blk(colt::exchange(to_move.blk, { nullptr, 0 })), size(colt::exchange(to_move.size, 0)) {}
 
   template<typename T>
   constexpr Vector<T>& Vector<T>::operator=(Vector&& to_move) noexcept
   {
-    assert(&to_move != this && "Self assignment is prohibited!");
+    if (&to_move == this)
+      return *this;
 
     //Swap members
-    swap(to_move.blk, blk);
-    swap(to_move.size, size);
+    colt::swap(to_move.blk, blk);
+    colt::swap(to_move.size, size);
 
     return *this;
   }
@@ -676,14 +784,14 @@ namespace colt
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::operator[](size_t index) const noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return blk.get_ptr()[index];
   }
 
   template<typename T>
   constexpr T& Vector<T>::operator[](size_t index) noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return blk.get_ptr()[index];
   }
 
@@ -714,7 +822,7 @@ namespace colt
   constexpr void Vector<T>::pop_back()
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     --size;
     blk.get_ptr()[size].~T();
   }
@@ -723,7 +831,7 @@ namespace colt
   constexpr void Vector<T>::pop_back_n(size_t N)
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(N <= size && "Vector does not contain enough items!");
+    CHECK_REQUIREMENT(colt_vector_contains_N_item);
     for (size_t i = size - N; i < size; i++)
       blk.get_ptr()[i].~T();
     size -= N;
@@ -740,28 +848,28 @@ namespace colt
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::get_front() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *blk.get_ptr();
   }
 
   template<typename T>
   constexpr T& Vector<T>::get_front() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *blk.get_ptr();
   }
 
   template<typename T>
   constexpr traits::copy_if_trivial_t<const T&> Vector<T>::get_back() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return blk.get_ptr()[size - 1];
   }
 
   template<typename T>
   constexpr T& Vector<T>::get_back() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return blk.get_ptr()[size - 1];
   }
 
@@ -769,28 +877,20 @@ namespace colt
   constexpr ContiguousView<T> Vector<T>::to_view(Range range) const noexcept
   {
     size_t begin = range.get_begin_offset();
-    assert(begin < size && "Invalid begin offset for Range!");
+    if (begin >= size)
+      return {};
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);
     return { get_data() + begin, end - begin };
-  }
-  
-  template<typename T>
-  template<typename ...Args>
-  constexpr Vector<T>::Vector(size_t fill_size, traits::InPlaceT, Args&&... args)
-    noexcept(std::is_nothrow_constructible_v<T, Args ...>)
-    : blk(memory::allocate({ fill_size * sizeof(T) })), size(fill_size)
-  {
-    algo::contiguous_construct(blk.get_ptr(), size, std::forward<Args>(args)...);
-  }
+  }  
   
   template<typename T>
   template<typename T_, typename>
   constexpr void Vector<T>::push_back(T&& to_move)
     noexcept(std::is_nothrow_move_constructible_v<T>)
   {
-    if (size == blk.get_size())
-      reserve(blk.get_size() + 4);
+    if (size == get_capacity())
+      reserve(get_capacity() + 16);
     new(blk.get_ptr() + size) T(std::move(to_move));
     ++size;
   }
@@ -800,8 +900,8 @@ namespace colt
   constexpr void Vector<T>::push_back(traits::InPlaceT, Args&&... args)
     noexcept(std::is_nothrow_constructible_v<T, Args ...>)
   {
-    if (size == blk.get_size())
-      reserve(blk.get_size() + 4);
+    if (size == get_capacity())
+      reserve(get_capacity() + 16);
     new(blk.get_ptr() + size) T(std::forward<Args>(args)...);
     ++size;
   }
@@ -811,8 +911,24 @@ namespace colt
     : capacity(reserve_size <= buff_count ? buff_count : reserve_size)
   {
     //make the allocation pointer active
-    if (capacity == buff_count)
-      ptr = reinterpret_cast<T*>(memory::allocate({ buff_count * sizeof(T) }).get_ptr());
+    if (!is_stack_allocated())
+      ptr = reinterpret_cast<T*>(memory::allocate({ capacity * sizeof(T) }).get_ptr());
+  }
+
+  template<typename T, size_t buff_count>
+  constexpr SmallVector<T, buff_count>::SmallVector(std::initializer_list<T> list)
+    noexcept(std::is_nothrow_copy_constructible_v<T>)
+    : capacity(std::size(list) <= buff_count ? buff_count : std::size(list)), size(std::size(list))
+  {
+    if (!is_stack_allocated())
+    {
+      ptr = reinterpret_cast<T*>(memory::allocate({ capacity * sizeof(T) }).get_ptr());
+      algo::contiguous_copy(list.begin(), ptr, size);
+    }
+    else
+    {
+      algo::contiguous_copy(list.begin(), get_stack_ptr(), size);
+    }
   }
 
   template<typename T, size_t buff_count>
@@ -838,18 +954,13 @@ namespace colt
   constexpr SmallVector<T, buff_count>::SmallVector(SmallVector&& to_move)
     noexcept(std::is_nothrow_destructible_v<T>
       && std::is_nothrow_move_constructible_v<T>)
-    : capacity(to_move.capacity), size(to_move.size)
+    : capacity(colt::exchange(to_move.capacity, buff_count))
+    , size(colt::exchange(to_move.size, 0))
   {
     if (!is_stack_allocated())
-    {
-      ptr = exchange(to_move.ptr, nullptr);
-    }
+      ptr = colt::exchange(to_move.ptr, nullptr);
     else
-    {
-      T* const to = get_stack_ptr();
-      T* const from = to_move.get_stack_ptr();
-      algo::contiguous_move(from, to, size);
-    }
+      algo::contiguous_destructive_move(to_move.get_stack_ptr(), get_stack_ptr(), size);
   }
 
   template<typename T, size_t buff_count>
@@ -857,25 +968,24 @@ namespace colt
     noexcept(std::is_nothrow_destructible_v<T>
       && std::is_nothrow_move_constructible_v<T>)
   {
-    assert(&to_move != this && "Self assignment is prohibited!");
+    if (&to_move == this)
+      return *this;
+    
     clear();
     if (!is_stack_allocated())
-    {
-      if (ptr)
-        memory::deallocate({ ptr, capacity * sizeof(T) });
-    }
+      memory::deallocate({ ptr, capacity * sizeof(T) });
     
     if (to_move.is_stack_allocated())
     {
       capacity = buff_count;
-      algo::contiguous_move(to_move.get_stack_ptr(), get_stack_ptr(), to_move.size);
+      algo::contiguous_destructive_move(to_move.get_stack_ptr(), get_stack_ptr(), to_move.size);
     }
     else
     {
-      capacity = to_move.capacity;
-      ptr = exchange(to_move.ptr, nullptr);
+      capacity = colt::exchange(to_move.capacity, buff_count);
+      ptr = colt::exchange(to_move.ptr, nullptr);
     }
-    size = to_move.size;
+    size = colt::exchange(to_move.size, 0);
   }
 
   template<typename T, size_t buff_count>
@@ -883,26 +993,26 @@ namespace colt
     noexcept(std::is_nothrow_destructible_v<T>
       && std::is_nothrow_copy_constructible_v<T>)
   {
-    assert(&to_copy != this && "Self assignment is prohibited!");
+    if (&to_copy == this)
+      return *this;
+    
     clear();
-
-    if (capacity >= to_copy.capacity)
+    if (capacity >= to_copy.capacity) //no need to allocate
     {
       algo::contiguous_copy(to_copy.get_current_ptr(), get_current_ptr(), to_copy.size);
+      size = to_copy.size;
     }
     else //not stack allocated
     {
       if (!is_stack_allocated())
-      {
-        if (ptr)
-          memory::deallocate({ ptr, capacity * sizeof(T) });
-      }
-      memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * (capacity + to_copy.capacity) });
+        memory::deallocate({ ptr, capacity * sizeof(T) });
+      
+      memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * to_copy.capacity });
       capacity = blk.get_size();
       ptr = blk.get_ptr();
       algo::contiguous_copy(to_copy.ptr, ptr, to_copy.size);
+      size = to_copy.size;
     }
-    size = to_copy.size;
   }
 
   template<typename T, size_t buff_count>
@@ -910,21 +1020,20 @@ namespace colt
   {
     clear();
     if (!is_stack_allocated())
-      if (ptr)
-        memory::deallocate({ ptr, capacity * sizeof(T) });
+      memory::deallocate({ ptr, capacity * sizeof(T) });
   }
 
   template<typename T, size_t buff_count>
   constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::operator[](size_t index) const noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return get_current_ptr()[index];
   }
 
   template<typename T, size_t buff_count>
   constexpr T& SmallVector<T, buff_count>::operator[](size_t index) noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return get_current_ptr()[index];
   }
 
@@ -942,7 +1051,7 @@ namespace colt
   constexpr void SmallVector<T, buff_count>::pop_back()
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     --size;
     get_current_ptr()[size].~T();
   }
@@ -951,7 +1060,7 @@ namespace colt
   constexpr void SmallVector<T, buff_count>::pop_back_n(size_t N)
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(N <= size && "Vector does not contain enough items!");
+    CHECK_REQUIREMENT(colt_vector_contains_N_item);
     T* const ptr_d = get_current_ptr();
     algo::contiguous_destruct(ptr_d + (size -= N), N);
   }
@@ -968,28 +1077,28 @@ namespace colt
   template<typename T, size_t buff_count>
   constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::get_front() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *get_current_ptr();
   }
 
   template<typename T, size_t buff_count>
   constexpr T& SmallVector<T, buff_count>::get_front() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *get_current_ptr();
   }
 
   template<typename T, size_t buff_count>
   constexpr traits::copy_if_trivial_t<const T&> SmallVector<T, buff_count>::get_back() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return get_current_ptr()[size - 1];
   }
 
   template<typename T, size_t buff_count>
   constexpr T& SmallVector<T, buff_count>::get_back() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return get_current_ptr()[size - 1];
   }
 
@@ -1013,7 +1122,8 @@ namespace colt
   constexpr ContiguousView<T> SmallVector<T, buff_count>::to_view(Range range) const noexcept
   {
     size_t begin = range.get_begin_offset();
-    assert(begin < size && "Invalid begin offset for Range!");
+    if (begin >= size)
+      return {};
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);
     return { get_current_ptr() + begin, end - begin};
@@ -1035,6 +1145,22 @@ namespace colt
     return ptr;
   }
   
+  template<typename T, size_t buff_count>
+  template<typename ...Args>
+  constexpr SmallVector<T, buff_count>::SmallVector(size_t fill_size, traits::InPlaceT, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<T, Args ...>)
+    : capacity(fill_size > buff_count ? fill_size : buff_count), size(fill_size)
+  {
+    if (is_stack_allocated())
+      algo::contiguous_construct(get_stack_ptr(), size, std::forward<Args>(args)...);
+    else
+    {
+      memory::TypedBlock<T> blk = memory::allocate({ sizeof(T) * capacity });
+      ptr = blk.get_ptr();
+      algo::contiguous_construct(ptr, size, std::forward<Args>(args)...);
+    }
+  }
+
   template<typename T, size_t buff_count>
   template<typename T_, typename>
   constexpr void SmallVector<T, buff_count>::push_back(T&& to_move)
@@ -1068,7 +1194,7 @@ namespace colt
   template<typename T, size_t max_size>
   constexpr StaticVector<T, max_size>::StaticVector(StaticVector&& to_move)
     noexcept(std::is_nothrow_move_constructible_v<T>)
-    : size(exchange(to_move.size, 0))
+    : size(colt::exchange(to_move.size, 0))
   {
     algo::contiguous_destructive_move(to_move.get_ptr(), get_ptr(), size);
   }
@@ -1078,10 +1204,11 @@ namespace colt
     noexcept(std::is_nothrow_move_constructible_v<T>
       && std::is_nothrow_destructible_v<T>)
   {
-    assert(&to_move != this && "Self assignment is prohibited!");
+    if (&to_move == this)
+      return *this;
 
     clear();
-    size = exchange(to_move.size, 0);
+    size = colt::exchange(to_move.size, 0);
     algo::contiguous_destructive_move(to_move.get_ptr(), get_ptr(), size);
 
     return *this;
@@ -1092,7 +1219,8 @@ namespace colt
     noexcept(std::is_nothrow_destructible_v<T>
       && std::is_nothrow_copy_constructible_v<T>)
   {
-    assert(&to_copy != this && "Self assignment is prohibited!");
+    if (&to_copy == this)
+      return *this;
 
     clear();
     size = to_copy.size;
@@ -1111,14 +1239,14 @@ namespace colt
   template<typename T, size_t max_size>
   constexpr traits::copy_if_trivial_t<const T&> StaticVector<T, max_size>::operator[](size_t index) const noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return get_ptr()[index];
   }
 
   template<typename T, size_t max_size>
   constexpr T& StaticVector<T, max_size>::operator[](size_t index) noexcept
   {
-    assert(index < size && "Invalid index!");
+    CHECK_REQUIREMENT(colt_vector_index_smaller_size);
     return get_ptr()[index];
   }
 
@@ -1136,7 +1264,7 @@ namespace colt
   constexpr void StaticVector<T, max_size>::pop_back()
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     --size;
     get_ptr()[size].~T();
   }
@@ -1145,7 +1273,7 @@ namespace colt
   constexpr void StaticVector<T, max_size>::pop_back_n(size_t N)
     noexcept(std::is_nothrow_destructible_v<T>)
   {
-    assert(N <= size && "Vector does not contain enough items!");
+    CHECK_REQUIREMENT(colt_vector_contains_N_item);
     T* const ptr_d = get_ptr();
     algo::contiguous_destruct(ptr_d + (size -= N), N);
   }
@@ -1160,28 +1288,28 @@ namespace colt
   template<typename T, size_t max_size>
   constexpr traits::copy_if_trivial_t<const T&> StaticVector<T, max_size>::get_front() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *get_ptr();
   }
 
   template<typename T, size_t max_size>
   constexpr T& StaticVector<T, max_size>::get_front() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return *get_ptr();
   }
 
   template<typename T, size_t max_size>
   constexpr traits::copy_if_trivial_t<const T&> StaticVector<T, max_size>::get_back() const noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return get_ptr()[size - 1];
   }
 
   template<typename T, size_t max_size>
   constexpr T& StaticVector<T, max_size>::get_back() noexcept
   {
-    assert(!is_empty() && "Vector was empty!");
+    CHECK_REQUIREMENT(colt_vector_is_not_empty);
     return get_ptr()[size - 1];
   }
 
@@ -1189,7 +1317,8 @@ namespace colt
   constexpr ContiguousView<T> StaticVector<T, max_size>::to_view(Range range) const noexcept
   {
     size_t begin = range.get_begin_offset();
-    assert(begin < size && "Invalid begin offset for Range!");
+    if (begin >= size)
+      return {};
     size_t end = range.get_end_offset();
     end = (end > size ? size : end);
     return { get_ptr() + begin, end - begin };
@@ -1208,7 +1337,8 @@ namespace colt
 
   template<typename T, size_t max_size>
   template<typename ...Args>
-  constexpr bool StaticVector<T, max_size>::push_back(traits::InPlaceT, Args && ...args) noexcept(std::is_nothrow_constructible_v<T, Args ...>)
+  constexpr bool StaticVector<T, max_size>::push_back(traits::InPlaceT, Args&&... args)
+    noexcept(std::is_nothrow_constructible_v<T, Args...>)
   {
     if (size == max_size)
       return false;
@@ -1217,8 +1347,13 @@ namespace colt
   }
 
   template<typename T>
+  /// @brief Hash overload for Vector
+  /// @tparam T The type of the Vector
   struct hash<Vector<T>>
   {
+    /// @brief Hashing operator
+    /// @param view The view to hash
+    /// @return Hash
     constexpr size_t operator()(const Vector<T>& view) const noexcept
     {
       return GetHash(view.to_view());
@@ -1226,17 +1361,27 @@ namespace colt
   };
 
   template<typename T>
+  /// @brief Hash overload for StaticVector
+  /// @tparam T The type of the StaticVector
   struct hash<SmallVector<T>>
   {
-    constexpr size_t operator()(const SmallVector<T>& view) const noexcept
+    /// @brief Hashing operator
+    /// @param view The view to hash
+    /// @return Hash
+    constexpr size_t operator()(const StaticVector<T>& view) const noexcept
     {
       return GetHash(view.to_view());
     }
   };
 
   template<typename T, size_t sz>
+  /// @brief Hash overload for StaticVector
+  /// @tparam T The type of the StaticVector
   struct hash<StaticVector<T, sz>>
   {
+    /// @brief Hashing operator
+    /// @param view The view to hash
+    /// @return Hash
     constexpr size_t operator()(const StaticVector<T, sz>& view) const noexcept
     {
       return GetHash(view.to_view());
@@ -1247,6 +1392,7 @@ namespace colt
   template<typename T>
   static std::ostream& operator<<(std::ostream& os, const Vector<T>& var)
   {
+    static_assert(traits::is_coutable_v<T>, "Type of Vector should implement operator<<(std::ostream&)!");
     os << ContiguousView<T>(var);
     return os;
   }
@@ -1254,6 +1400,15 @@ namespace colt
   template<typename T, size_t buff>
   static std::ostream& operator<<(std::ostream& os, const SmallVector<T, buff>& var)
   {
+    static_assert(traits::is_coutable_v<T>, "Type of SmallVector should implement operator<<(std::ostream&)!");
+    os << ContiguousView<T>(var);
+    return os;
+  }
+
+  template<typename T, size_t buff>
+  static std::ostream& operator<<(std::ostream& os, const StaticVector<T, buff>& var)
+  {
+    static_assert(traits::is_coutable_v<T>, "Type of StaticVector should implement operator<<(std::ostream&)!");
     os << ContiguousView<T>(var);
     return os;
   }
