@@ -258,7 +258,7 @@ namespace colt {
   }
 
   template<typename T>
-  constexpr bool operator==(const ContiguousView<T>& a, const ContiguousView<T>& b) noexcept
+  constexpr bool operator!=(const ContiguousView<T>& a, const ContiguousView<T>& b) noexcept
   {
     return !(a == b);
   }

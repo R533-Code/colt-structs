@@ -1360,15 +1360,15 @@ namespace colt
     }
   };
 
-  template<typename T>
+  template<typename T, size_t sz>
   /// @brief Hash overload for StaticVector
   /// @tparam T The type of the StaticVector
-  struct hash<SmallVector<T>>
+  struct hash<SmallVector<T, sz>>
   {
     /// @brief Hashing operator
     /// @param view The view to hash
     /// @return Hash
-    constexpr size_t operator()(const StaticVector<T>& view) const noexcept
+    constexpr size_t operator()(const SmallVector<T, sz>& view) const noexcept
     {
       return GetHash(view.to_view());
     }
