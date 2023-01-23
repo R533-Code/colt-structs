@@ -17,6 +17,21 @@ namespace colt
         ++ret;
       return ret;
     }
+
+    static constexpr int strncmp(const char* s1, const char* s2, size_t n) noexcept
+    {
+      while (n && *s1 && (*s1 == *s2))
+      {
+        ++s1;
+        ++s2;
+        --n;
+      }
+      if (n == 0)
+        return 0;
+      else
+        return (static_cast<unsigned char>(*s1)
+          - static_cast<unsigned char>(*s2));
+    }
   }
 
   template<typename CharT = char>
@@ -114,6 +129,18 @@ namespace colt
     constexpr friend bool operator!=(const StringViewOf& strv1, const StringViewOf& strv2) noexcept
     {
       return !(strv1 == strv2);
+    }
+
+    constexpr friend bool operator<(const StringViewOf& strv1, const StringViewOf& strv2) noexcept
+    {
+      return details::strncmp(strv1.get_data(), strv2.get_data(),
+        strv1.get_size() < strv2.get_size() ? strv1.get_size() : strv2.get_size()) < 0;
+    }
+
+    constexpr friend bool operator>(const StringViewOf& strv1, const StringViewOf& strv2) noexcept
+    {
+      return details::strncmp(strv1.get_data(), strv2.get_data(),
+        strv1.get_size() < strv2.get_size() ? strv1.get_size() : strv2.get_size()) > 0;
     }
   };
 
