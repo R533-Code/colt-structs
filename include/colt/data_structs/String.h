@@ -451,7 +451,7 @@ namespace colt
 
     while (View::is_not_empty())
       if (isSpace(*(View::begin() + View::get_size() - 1)))
-        View::pop_front();
+        View::pop_back();
       else
         break;
   }
